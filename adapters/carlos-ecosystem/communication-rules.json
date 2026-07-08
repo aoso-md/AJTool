@@ -1,0 +1,25 @@
+{
+  "version": "0.1.0",
+  "rules": [
+    {
+      "producer": "collect_quality_measurements",
+      "event": "MEASUREMENTS_CAPTURED",
+      "consumer": "calculate-cpk-ppk",
+      "resultEvents": ["CAPABILITY_ANALYSIS_COMPLETED", "CAPABILITY_BELOW_TARGET"]
+    },
+    {
+      "producer": "manage_device_registry",
+      "event": "MSA_STUDY_REQUESTED",
+      "consumer": "run-msa-analysis",
+      "resultEvents": ["MSA_ANALYSIS_COMPLETED", "MSA_VALIDATED", "MSA_NOT_ACCEPTABLE"]
+    },
+    {
+      "producer": "manage_device_registry",
+      "event": "NEW_DEVICE_REGISTERED",
+      "consumer": "run-msa-analysis",
+      "condition": "Only when observations are included; otherwise return warning with no analysis events.",
+      "resultEvents": ["MSA_ANALYSIS_COMPLETED", "MSA_VALIDATED", "MSA_NOT_ACCEPTABLE"]
+    }
+  ]
+}
+

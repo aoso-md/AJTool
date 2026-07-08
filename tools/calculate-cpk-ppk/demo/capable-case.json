@@ -1,0 +1,16 @@
+{
+  "type": "MEASUREMENTS_CAPTURED",
+  "source": "collect_quality_measurements",
+  "occurredAt": "2026-07-08T15:00:00.000Z",
+  "payload": {
+    "measurementSetId": "MS-CPK-001",
+    "partNumber": "PN-9001",
+    "characteristic": "shaft diameter",
+    "measurements": [10.01, 10.02, 9.99, 10.0, 10.01, 9.98, 10.02, 10.0],
+    "lsl": 9.9,
+    "usl": 10.1,
+    "target": 10.0,
+    "minimumCpk": 1.33
+  }
+}
+

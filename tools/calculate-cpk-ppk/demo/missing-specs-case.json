@@ -1,0 +1,13 @@
+{
+  "type": "MEASUREMENTS_CAPTURED",
+  "source": "collect_quality_measurements",
+  "occurredAt": "2026-07-08T15:10:00.000Z",
+  "payload": {
+    "measurementSetId": "MS-CPK-003",
+    "partNumber": "PN-9003",
+    "characteristic": "bore depth",
+    "measurements": [2.1, 2.12, 2.09, 2.11],
+    "target": 2.1
+  }
+}
+

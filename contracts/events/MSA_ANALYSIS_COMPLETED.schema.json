@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "MSA_ANALYSIS_COMPLETED",
+  "title": "MSA_ANALYSIS_COMPLETED",
+  "type": "object",
+  "required": ["type", "payload"],
+  "properties": {
+    "type": { "const": "MSA_ANALYSIS_COMPLETED" },
+    "source": { "type": "string" },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "required": ["studyId", "deviceId", "gageRRPercent", "repeatability", "reproducibility", "ndc", "verdict"],
+      "properties": {
+        "studyId": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "gageRRPercent": { "type": "number" },
+        "repeatability": { "type": "number" },
+        "reproducibility": { "type": "number" },
+        "ndc": { "type": "integer" },
+        "verdict": { "enum": ["acceptable", "not-acceptable"] },
+        "recommendation": { "type": "string" }
+      }
+    }
+  }
+}
+

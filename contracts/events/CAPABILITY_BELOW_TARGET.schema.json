@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CAPABILITY_BELOW_TARGET",
+  "title": "CAPABILITY_BELOW_TARGET",
+  "type": "object",
+  "required": ["type", "payload"],
+  "properties": {
+    "type": { "const": "CAPABILITY_BELOW_TARGET" },
+    "source": { "type": "string" },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "required": ["measurementSetId", "cpk", "minimumCpk", "recommendation"],
+      "properties": {
+        "measurementSetId": { "type": "string" },
+        "cpk": { "type": "number" },
+        "minimumCpk": { "type": "number" },
+        "recommendation": { "type": "string" }
+      }
+    }
+  }
+}
+

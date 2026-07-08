@@ -1,0 +1,11 @@
+{
+  "type": "NEW_DEVICE_REGISTERED",
+  "source": "manage_device_registry",
+  "occurredAt": "2026-07-08T16:10:00.000Z",
+  "payload": {
+    "deviceId": "CAL-300",
+    "deviceName": "Digital Caliper 300",
+    "calibrationStatus": "new"
+  }
+}
+

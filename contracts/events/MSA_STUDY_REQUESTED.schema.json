@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "MSA_STUDY_REQUESTED",
+  "title": "MSA_STUDY_REQUESTED",
+  "type": "object",
+  "required": ["type", "payload"],
+  "properties": {
+    "type": { "const": "MSA_STUDY_REQUESTED" },
+    "source": { "type": "string" },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "required": ["studyId", "deviceId", "observations"],
+      "properties": {
+        "studyId": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "partNumber": { "type": "string" },
+        "observations": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["partId", "operatorId", "trial", "value"],
+            "properties": {
+              "partId": { "type": "string" },
+              "operatorId": { "type": "string" },
+              "trial": { "type": "integer" },
+              "value": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

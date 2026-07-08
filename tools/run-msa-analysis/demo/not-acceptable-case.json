@@ -1,0 +1,21 @@
+{
+  "type": "MSA_STUDY_REQUESTED",
+  "source": "manage_device_registry",
+  "occurredAt": "2026-07-08T16:05:00.000Z",
+  "payload": {
+    "studyId": "MSA-002",
+    "deviceId": "CAL-200",
+    "partNumber": "PN-9002",
+    "observations": [
+      { "partId": "P1", "operatorId": "A", "trial": 1, "value": 5.01 },
+      { "partId": "P1", "operatorId": "A", "trial": 2, "value": 5.12 },
+      { "partId": "P1", "operatorId": "B", "trial": 1, "value": 4.95 },
+      { "partId": "P1", "operatorId": "B", "trial": 2, "value": 5.09 },
+      { "partId": "P2", "operatorId": "A", "trial": 1, "value": 5.05 },
+      { "partId": "P2", "operatorId": "A", "trial": 2, "value": 4.93 },
+      { "partId": "P2", "operatorId": "B", "trial": 1, "value": 5.14 },
+      { "partId": "P2", "operatorId": "B", "trial": 2, "value": 4.91 }
+    ]
+  }
+}
+

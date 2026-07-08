@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "MEASUREMENTS_CAPTURED",
+  "title": "MEASUREMENTS_CAPTURED",
+  "type": "object",
+  "required": ["type", "payload"],
+  "properties": {
+    "type": { "const": "MEASUREMENTS_CAPTURED" },
+    "source": { "type": "string" },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "required": ["measurementSetId", "measurements", "lsl", "usl", "target"],
+      "properties": {
+        "measurementSetId": { "type": "string" },
+        "partNumber": { "type": "string" },
+        "characteristic": { "type": "string" },
+        "measurements": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "number" }
+        },
+        "lsl": { "type": "number" },
+        "usl": { "type": "number" },
+        "target": { "type": "number" },
+        "minimumCpk": { "type": "number", "default": 1.33 }
+      }
+    }
+  }
+}
+

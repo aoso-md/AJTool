@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CAPABILITY_ANALYSIS_COMPLETED",
+  "title": "CAPABILITY_ANALYSIS_COMPLETED",
+  "type": "object",
+  "required": ["type", "payload"],
+  "properties": {
+    "type": { "const": "CAPABILITY_ANALYSIS_COMPLETED" },
+    "source": { "type": "string" },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "required": ["measurementSetId", "cp", "cpk", "mean", "standardDeviation", "sampleSize", "verdict"],
+      "properties": {
+        "measurementSetId": { "type": "string" },
+        "cp": { "type": "number" },
+        "cpk": { "type": "number" },
+        "mean": { "type": "number" },
+        "standardDeviation": { "type": "number" },
+        "sampleSize": { "type": "integer" },
+        "verdict": { "enum": ["capable", "below-target"] },
+        "recommendation": { "type": "string" }
+      }
+    }
+  }
+}
+

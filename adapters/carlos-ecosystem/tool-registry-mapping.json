@@ -1,0 +1,22 @@
+{
+  "version": "0.1.0",
+  "tools": [
+    {
+      "id": "calculate-cpk-ppk",
+      "displayName": "Calculate Cpk/Ppk",
+      "entrypoint": "tools/calculate-cpk-ppk/src/handler.js",
+      "inputEvents": ["MEASUREMENTS_CAPTURED"],
+      "outputEvents": ["CAPABILITY_ANALYSIS_COMPLETED", "CAPABILITY_BELOW_TARGET"],
+      "interface": "tools/calculate-cpk-ppk/interface/README.md"
+    },
+    {
+      "id": "run-msa-analysis",
+      "displayName": "Run MSA Analysis",
+      "entrypoint": "tools/run-msa-analysis/src/handler.js",
+      "inputEvents": ["MSA_STUDY_REQUESTED", "NEW_DEVICE_REGISTERED"],
+      "outputEvents": ["MSA_ANALYSIS_COMPLETED", "MSA_VALIDATED", "MSA_NOT_ACCEPTABLE"],
+      "interface": "tools/run-msa-analysis/interface/README.md"
+    }
+  ]
+}
+
