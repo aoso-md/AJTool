@@ -1,0 +1,82 @@
+{
+  "note": "Readable source of the run-msa-analysis demo scenarios. The same objects are embedded in app.js (SCENARIOS) so index.html works from file:// without fetch. Keep both in sync, and keep payloads in sync with tools/run-msa-analysis/demo/*.json. Results are NOT stored here on purpose: the UI computes them live with the handler logic ported from tools/run-msa-analysis/src/handler.js.",
+  "scenarios": [
+    {
+      "id": "msa-acceptable",
+      "tool": "run-msa-analysis",
+      "expect": "SUCCESS",
+      "name": { "en": "Acceptable MSA study", "es": "Estudio MSA aceptable" },
+      "desc": {
+        "en": "Formal study, low Gage R&R. Emits MSA_VALIDATED.",
+        "es": "Estudio formal, Gage R&R bajo. Emite MSA_VALIDATED."
+      },
+      "event": {
+        "type": "MSA_STUDY_REQUESTED",
+        "source": "metrology_input_form",
+        "payload": {
+          "studyId": "MSA-001",
+          "deviceId": "CAL-100",
+          "partNumber": "PN-9001",
+          "observations": [
+            { "partId": "P1", "operatorId": "A", "trial": 1, "value": 10.01 },
+            { "partId": "P1", "operatorId": "A", "trial": 2, "value": 10.011 },
+            { "partId": "P1", "operatorId": "B", "trial": 1, "value": 10.012 },
+            { "partId": "P1", "operatorId": "B", "trial": 2, "value": 10.013 },
+            { "partId": "P2", "operatorId": "A", "trial": 1, "value": 10.2 },
+            { "partId": "P2", "operatorId": "A", "trial": 2, "value": 10.201 },
+            { "partId": "P2", "operatorId": "B", "trial": 1, "value": 10.202 },
+            { "partId": "P2", "operatorId": "B", "trial": 2, "value": 10.203 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "msa-not-acceptable",
+      "tool": "run-msa-analysis",
+      "expect": "CRITICAL",
+      "name": { "en": "MSA not acceptable", "es": "MSA no aceptable" },
+      "desc": {
+        "en": "Noisy repeated readings. Emits MSA_NOT_ACCEPTABLE.",
+        "es": "Lecturas repetidas ruidosas. Emite MSA_NOT_ACCEPTABLE."
+      },
+      "event": {
+        "type": "MSA_STUDY_REQUESTED",
+        "source": "calibration_registry",
+        "payload": {
+          "studyId": "MSA-002",
+          "deviceId": "CAL-200",
+          "partNumber": "PN-9002",
+          "observations": [
+            { "partId": "P1", "operatorId": "A", "trial": 1, "value": 5.01 },
+            { "partId": "P1", "operatorId": "A", "trial": 2, "value": 5.12 },
+            { "partId": "P1", "operatorId": "B", "trial": 1, "value": 4.95 },
+            { "partId": "P1", "operatorId": "B", "trial": 2, "value": 5.09 },
+            { "partId": "P2", "operatorId": "A", "trial": 1, "value": 5.05 },
+            { "partId": "P2", "operatorId": "A", "trial": 2, "value": 4.93 },
+            { "partId": "P2", "operatorId": "B", "trial": 1, "value": 5.14 },
+            { "partId": "P2", "operatorId": "B", "trial": 2, "value": 4.91 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "msa-incomplete-device",
+      "tool": "run-msa-analysis",
+      "expect": "WARNING",
+      "name": { "en": "Incomplete device registration", "es": "Registro de equipo incompleto" },
+      "desc": {
+        "en": "NEW_DEVICE_REGISTERED without observations. Warning, no analysis event.",
+        "es": "NEW_DEVICE_REGISTERED sin observations. Warning, sin evento de análisis."
+      },
+      "event": {
+        "type": "NEW_DEVICE_REGISTERED",
+        "source": "manage_device_registry",
+        "payload": {
+          "deviceId": "CAL-300",
+          "deviceName": "Digital Caliper 300",
+          "calibrationStatus": "new"
+        }
+      }
+    }
+  ]
+}

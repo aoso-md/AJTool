@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quality Tools Workspace — Operations Console</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ============================= COMMAND BAR ============================= -->
+  <header class="cmdbar">
+    <div class="brand">
+      <h1>Quality Tools Workspace</h1>
+      <span class="thesis">Separate ownership, unified contracts.</span>
+    </div>
+    <div class="cmd-sep"></div>
+    <span class="syschip"><span class="dot warn"></span>Event Bus <span class="badge mock">MOCK</span></span>
+    <span class="syschip"><span class="dot ok"></span>PostgreSQL <span class="badge demo">DEMO DATA</span> <span id="pgCount" style="color:var(--muted)">event_ledger · 0</span></span>
+    <div class="cmd-sep"></div>
+    <div class="seg" id="modeSeg">
+      <button id="modeExternal" class="on" data-i18n="modeExternal">External Tool Event</button>
+      <button id="modeManual" data-i18n="modeManual">Manual Input</button>
+      <button id="modeRaw" data-i18n="modeRaw">Raw JSON Event</button>
+    </div>
+    <span class="corr-chip" id="corrChip">corr: —</span>
+    <span class="run-chip" id="runChip">IDLE</span>
+    <button class="btn connect" id="btnConnect" data-i18n="btnConnect">⇄  Connect a Tool</button>
+    <div class="spacer"></div>
+    <div class="seg">
+      <button id="langEn" class="on">EN</button>
+      <button id="langEs">ES</button>
+    </div>
+    <button class="icon-btn" id="themeBtn" title="Light / Dark">◐</button>
+  </header>
+
+  <!-- ============================= MAIN ============================= -->
+  <div class="main">
+
+    <!-- ----------- LEFT · TOOL REGISTRY ----------- -->
+    <aside class="panel left">
+      <div class="ph"><span data-i18n="toolRegistry">Tool Registry</span><span style="font-family:var(--mono);letter-spacing:0">2</span></div>
+      <div id="registry"></div>
+      <div class="ph"><span data-i18n="legend">Badge Legend</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 4px">
+        <span class="badge success">COMPATIBLE</span>
+        <span class="badge verror">MISSING DATA</span>
+        <span class="badge critical">NOT CONSUMABLE</span>
+        <span class="badge confirm">NEEDS CARLOS CONFIRMATION</span>
+        <span class="badge implemented">IMPLEMENTED</span>
+        <span class="badge demo">DEMO DATA</span>
+        <span class="badge mock">MOCK</span>
+        <span class="badge future">FUTURE ADAPTER</span>
+      </div>
+    </aside>
+
+    <!-- ----------- CENTER · EXECUTION CANVAS ----------- -->
+    <section class="canvas" id="canvas">
+
+      <!-- quick nav -->
+      <nav class="quicknav" id="quicknav">
+        <button data-jump="stageInput" data-i18n="navInput">1 · Input</button>
+        <button data-jump="stageContract" data-i18n="navContract">2 · Contract</button>
+        <button data-jump="stageExec" data-i18n="navExec">3 · Execution</button>
+        <button data-jump="stageOutput" data-i18n="navOutput">4 · Output</button>
+        <button data-jump="dashGrid" data-i18n="navDash">Dashboards</button>
+        <button data-jump="marliPanel" data-i18n="navMarli">MARLI</button>
+      </nav>
+
+      <!-- flow ribbon -->
+      <div class="stage">
+        <div class="stage-head">
+          <span class="stage-title" data-i18n="flowTitle">Event Flow</span>
+          <span class="stage-sub" id="flowSub"></span>
+          <span class="badge implemented" data-i18n="bLogicReal">HANDLER LOGIC · IMPLEMENTED</span>
+        </div>
+        <div class="stage-body">
+          <div class="ribbon" id="ribbon"></div>
+        </div>
+      </div>
+
+      <!-- STAGE 1 · INPUT -->
+      <div class="stage" id="stageInput">
+        <div class="stage-head">
+          <span class="stage-num">1</span>
+          <div>
+            <div class="stage-title" data-i18n="s1Title">Input — where the event comes from</div>
+            <div class="stage-sub" data-i18n="s1Sub">Any upstream tool, a raw JSON event, or a manual form. Same contract, same pipeline.</div>
+          </div>
+        </div>
+        <div class="stage-body">
+
+          <!-- external tool event mode -->
+          <div id="externalInput">
+            <div class="editor-label"><span data-i18n="loadExampleLabel">Load Example Event</span></div>
+            <div class="scen-grid" id="extExamples"></div>
+
+            <div class="ext-form">
+              <div class="fgrid">
+                <div class="fld"><label data-i18n="fTargetTool">Target Tool</label>
+                  <select id="ext_target">
+                    <option value="cpk">calculate-cpk-ppk</option>
+                    <option value="msa">run-msa-analysis</option>
+                  </select></div>
+                <div class="fld"><label data-i18n="fEventType">Event Type</label>
+                  <select id="ext_eventType">
+                    <option value="MEASUREMENTS_CAPTURED">MEASUREMENTS_CAPTURED</option>
+                    <option value="MSA_STUDY_REQUESTED">MSA_STUDY_REQUESTED</option>
+                    <option value="NEW_DEVICE_REGISTERED">NEW_DEVICE_REGISTERED</option>
+                    <option value="NONCONFORMANCE_CREATED">NONCONFORMANCE_CREATED</option>
+                  </select></div>
+                <div class="fld"><label data-i18n="fSource">Source Tool</label><select id="ext_source"></select></div>
+                <div class="fld"><label data-i18n="fOwner">Owner / Team</label><input id="ext_owner" placeholder="optional"></div>
+                <div class="fld"><label>Correlation ID</label><input id="ext_corr" placeholder="auto"><div class="hint" data-i18n="hCorr">Leave empty to auto-generate.</div></div>
+              </div>
+              <div class="editor-wrap" style="margin-top:14px">
+                <div class="editor-label"><span data-i18n="payloadLabel">Payload JSON</span><span class="badge demo">DEMO DATA</span></div>
+                <textarea class="editor" id="extPayload" spellcheck="false"></textarea>
+                <div class="editor-hint" id="extPayloadHint" data-i18n="editorHint">Edit any field — the compatibility check below updates live.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- manual input mode -->
+          <div id="manualInput" class="hidden">
+            <div class="mtabs">
+              <button class="mtab on" data-mtab="cpk">calculate-cpk-ppk</button>
+              <button class="mtab" data-mtab="msa">run-msa-analysis · <span data-i18n="formalStudy">Formal MSA Study</span></button>
+              <button class="mtab" data-mtab="dev">run-msa-analysis · <span data-i18n="deviceCompat">Device Registration</span></button>
+            </div>
+
+            <form class="mform show" id="formCpk" onsubmit="return false">
+              <div class="mform-title" data-i18n="manualCpkTitle">Manual Input — build MEASUREMENTS_CAPTURED</div>
+              <div class="fgrid">
+                <div class="fld"><label data-i18n="fSetId">Measurement Set ID</label><input id="c_setId" value="MS-MANUAL-001"></div>
+                <div class="fld"><label data-i18n="fPart">Part Number</label><input id="c_part" value="PN-9001"></div>
+                <div class="fld"><label data-i18n="fChar">Characteristic</label><input id="c_char" value="shaft diameter"></div>
+                <div class="fld full"><label data-i18n="fMeas">Measurements</label>
+                  <textarea id="c_meas">10.01, 10.02, 9.99, 10.00, 10.01, 9.98, 10.02, 10.00</textarea>
+                  <div class="hint" data-i18n="hMeas">Comma-separated numeric values (min. 2).</div></div>
+                <div class="fld"><label>LSL</label><input id="c_lsl" value="9.9"></div>
+                <div class="fld"><label>USL</label><input id="c_usl" value="10.1"></div>
+                <div class="fld"><label data-i18n="fTarget">Target</label><input id="c_target" value="10.0"></div>
+                <div class="fld"><label data-i18n="fMinCpk">Minimum Cpk</label><input id="c_minCpk" value="1.33"></div>
+                <div class="fld"><label data-i18n="fSource">Source Tool</label>
+                  <select id="c_source">
+                    <option>manual_quality_input</option>
+                    <option>collect_quality_measurements</option>
+                    <option>csv_import</option>
+                    <option>mes_connector (mock)</option>
+                  </select></div>
+                <div class="fld"><label>Correlation ID</label><input id="c_corr" placeholder="auto"><div class="hint" data-i18n="hCorr">Leave empty to auto-generate.</div></div>
+              </div>
+            </form>
+
+            <form class="mform" id="formMsa" onsubmit="return false">
+              <div class="mform-title" data-i18n="manualMsaTitle">Manual Input — build MSA_STUDY_REQUESTED</div>
+              <div class="fgrid">
+                <div class="fld"><label>Study ID</label><input id="m_study" value="MSA-MANUAL-001"></div>
+                <div class="fld"><label>Device ID</label><input id="m_device" value="CAL-100"></div>
+                <div class="fld"><label data-i18n="fPart">Part Number</label><input id="m_part" value="PN-9001"></div>
+                <div class="fld"><label data-i18n="fTolerance">Tolerance</label><input id="m_tolerance" placeholder="optional"><div class="hint" data-i18n="hTolerance">Optional — informational only, not yet enforced by the real handler.</div></div>
+                <div class="fld full"><label data-i18n="fObs">Observations JSON</label>
+                  <textarea id="m_obs" style="min-height:130px">[
+  { "partId": "P1", "operatorId": "A", "trial": 1, "value": 10.01 },
+  { "partId": "P1", "operatorId": "A", "trial": 2, "value": 10.011 },
+  { "partId": "P1", "operatorId": "B", "trial": 1, "value": 10.012 },
+  { "partId": "P1", "operatorId": "B", "trial": 2, "value": 10.013 },
+  { "partId": "P2", "operatorId": "A", "trial": 1, "value": 10.2 },
+  { "partId": "P2", "operatorId": "A", "trial": 2, "value": 10.201 },
+  { "partId": "P2", "operatorId": "B", "trial": 1, "value": 10.202 },
+  { "partId": "P2", "operatorId": "B", "trial": 2, "value": 10.203 }
+]</textarea>
+                  <div class="hint" data-i18n="hObs">Array of { partId, operatorId, trial, value } — same shape the real handler consumes.</div></div>
+                <div class="fld"><label data-i18n="fSource">Source Tool</label>
+                  <select id="m_source">
+                    <option>manual_msa_input</option>
+                    <option>metrology_input_form</option>
+                    <option>calibration_registry</option>
+                    <option>manage_device_registry</option>
+                  </select></div>
+                <div class="fld"><label>Correlation ID</label><input id="m_corr" placeholder="auto"></div>
+              </div>
+            </form>
+
+            <form class="mform" id="formDev" onsubmit="return false">
+              <div class="mform-title" data-i18n="manualDevTitle">Manual Input — build NEW_DEVICE_REGISTERED</div>
+              <div class="fgrid">
+                <div class="fld"><label>Device ID</label><input id="d_device" value="CAL-300"></div>
+                <div class="fld"><label data-i18n="fDevType">Device Type</label><input id="d_type" value="digital caliper"></div>
+                <div class="fld"><label data-i18n="fCalStatus">Calibration Status</label>
+                  <select id="d_cal"><option>new</option><option>calibrated</option><option>due</option><option>expired</option></select></div>
+                <div class="fld"><label data-i18n="fRegBy">Registered By</label><input id="d_by" value="a.martinez"></div>
+                <div class="fld"><label data-i18n="fRegDate">Registration Date</label><input id="d_date" value="2026-07-09"></div>
+                <div class="fld"><label data-i18n="fSource">Source Tool</label>
+                  <select id="d_source"><option>manage_device_registry</option><option>calibration_registry</option></select></div>
+                <div class="fld"><label>Correlation ID</label><input id="d_corr" placeholder="auto"></div>
+              </div>
+              <div class="editor-hint" style="margin-top:10px" data-i18n="devNote">No observations on this path — the handler will answer with a warning and recommend MSA_STUDY_REQUESTED. That is correct behavior, not an error.</div>
+            </form>
+          </div>
+
+          <!-- raw JSON event mode -->
+          <div id="rawInput" class="hidden">
+            <div class="editor-label"><span data-i18n="loadExampleLabel">Load Example Event</span></div>
+            <div class="scen-grid" id="scenGrid"></div>
+            <div class="editor-wrap">
+              <div class="editor-label"><span data-i18n="rawEditorLabel">Full event envelope · editable JSON</span><span class="badge demo">DEMO DATA</span></div>
+              <textarea class="editor" id="eventEditor" spellcheck="false"></textarea>
+              <div class="editor-hint" id="editorHint" data-i18n="editorHint">Edit any field — the compatibility check below updates live.</div>
+            </div>
+            <div class="raw-actions">
+              <button class="btn quiet" id="btnValidate" data-i18n="btnValidate">Validate Event</button>
+              <button class="btn quiet" id="btnResetPayload" data-i18n="btnResetPayload">Reset Payload</button>
+              <select id="rawExampleSelect"></select>
+              <button class="btn quiet" id="btnLoadExample" data-i18n="btnLoadExample">Load Example</button>
+              <span class="exec-note" id="rawValidateMsg"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAGE 2 · CONTRACT -->
+      <div class="stage" id="stageContract">
+        <div class="stage-head">
+          <span class="stage-num">2</span>
+          <div>
+            <div class="stage-title" data-i18n="s2Title">Compatibility Check — is this event consumable?</div>
+            <div class="stage-sub" data-i18n="s2Sub">Selected event vs. the target tool's contract. This is the boundary between tools.</div>
+          </div>
+          <span class="badge implemented">IMPLEMENTED</span>
+        </div>
+        <div class="stage-body">
+          <div class="compat-summary" id="compatSummary"></div>
+          <div class="contract-cols">
+            <div>
+              <div class="editor-label"><span data-i18n="reqData">Required fields</span></div>
+              <div class="clist" id="contractList"><div class="insp-empty" data-i18n="emptyContract">Load an example, fill a form, or paste an event.</div></div>
+              <div class="editor-label" style="margin-top:16px"><span data-i18n="missingFieldsLabel">Missing fields</span></div>
+              <div class="clist" id="missingList"></div>
+            </div>
+            <div class="logic-box" id="logicBox"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAGE 3 · EXECUTION -->
+      <div class="stage" id="stageExec">
+        <div class="stage-head">
+          <span class="stage-num">3</span>
+          <div>
+            <div class="stage-title" data-i18n="s3Title">Execution — the handler runs</div>
+            <div class="stage-sub" data-i18n="s3Sub">Same logic as tools/&lt;tool&gt;/src/handler.js, ported 1:1 into this console.</div>
+          </div>
+          <span class="badge implemented">IMPLEMENTED</span>
+        </div>
+        <div class="stage-body">
+          <div class="exec-actions">
+            <button class="btn primary" id="btnRun" data-i18n="btnRun">▶&nbsp; Run Scenario</button>
+            <button class="btn quiet" id="btnReset" data-i18n="btnReset">Reset</button>
+            <span class="exec-note" id="execNote"></span>
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+
+      <!-- STAGE 4 · OUTPUT -->
+      <div class="stage" id="stageOutput">
+        <div class="stage-head">
+          <span class="stage-num">4</span>
+          <div>
+            <div class="stage-title" data-i18n="s4Title">Output — where the result goes</div>
+            <div class="stage-sub" data-i18n="s4Sub">Emitted events, and the downstream tools that could consume them.</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <div class="out-grid">
+            <div class="result-card" id="resultCard">
+              <div class="empty-note" data-i18n="emptyResult">No execution yet. Run a scenario to see the handler result here.</div>
+            </div>
+            <div>
+              <div class="editor-label"><span data-i18n="emittedRouting">Emitted events → downstream routing</span></div>
+              <div class="emit-list" id="emitList"><div class="empty-note" data-i18n="emptyEmit">Nothing emitted yet.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOL DASHBOARDS -->
+      <div class="dash-grid" id="dashGrid">
+        <div class="dash dimmed" id="dashCpk">
+          <div class="dash-head"><span class="dash-title">calculate-cpk-ppk</span><span class="badge implemented">IMPLEMENTED</span><span class="badge neutral" id="cpkState" data-i18n="awaiting">AWAITING RUN</span></div>
+          <div class="dash-body"><div class="metric-grid" id="cpkMetrics"></div></div>
+          <div class="dash-emits" id="cpkEmits"></div>
+          <div class="dash-rec" id="cpkRec" data-i18n="noRun">No analysis executed in this session.</div>
+        </div>
+        <div class="dash dimmed" id="dashMsa">
+          <div class="dash-head"><span class="dash-title">run-msa-analysis</span><span class="badge implemented">IMPLEMENTED</span><span class="badge neutral" id="msaState" data-i18n="awaiting">AWAITING RUN</span></div>
+          <div class="dash-body"><div class="metric-grid" id="msaMetrics"></div></div>
+          <div class="dash-emits" id="msaEmits"></div>
+          <div class="dash-rec" id="msaRec" data-i18n="noRun">No analysis executed in this session.</div>
+        </div>
+      </div>
+
+      <!-- MARLI FUTURE ADAPTER -->
+      <div class="marli" id="marliPanel">
+        <div class="marli-head">
+          <span class="marli-title">MARLI Adapter</span>
+          <span class="badge future" data-i18n="marliBadge">FUTURE ADAPTER — NOT IMPLEMENTED IN CURRENT TOOL CODE</span>
+        </div>
+        <div class="marli-chain">
+          <span class="mnode" data-i18n="m1">Technical Event</span><span class="marr">→</span>
+          <span class="mnode" data-i18n="m2">Skill Gap</span><span class="marr">→</span>
+          <span class="mnode" data-i18n="m3">Microtraining</span><span class="marr">→</span>
+          <span class="mnode" data-i18n="m4">Evaluation</span><span class="marr">→</span>
+          <span class="mnode" data-i18n="m5">Supervisor Review</span><span class="marr">→</span>
+          <span class="mnode" data-i18n="m6">Readiness</span><span class="marr">→</span>
+          <span class="mnode" data-i18n="m7">Evidence</span>
+        </div>
+        <div class="marli-note" data-i18n="marliNote">Planned consumer of CAPABILITY_BELOW_TARGET and MSA_NOT_ACCEPTABLE. No code exists for this adapter today.</div>
+      </div>
+    </section>
+
+    <!-- ----------- RIGHT · INSPECTOR ----------- -->
+    <aside class="panel right">
+      <div class="ph"><span data-i18n="inspector">Inspector</span><span style="font-family:var(--mono);letter-spacing:0;color:var(--info)" id="inspCorr"></span></div>
+      <div class="insp-sec"><h4 data-i18n="hIncoming">Incoming Event</h4><div id="iEvent" class="insp-empty" data-i18n="emptyInsp">Run a scenario to inspect the pipeline.</div></div>
+      <div class="insp-sec"><h4 data-i18n="hPayload">Payload</h4><div id="iPayload" class="insp-empty">—</div></div>
+      <div class="insp-sec"><h4 data-i18n="hRequired">Required Data</h4><div id="iRequired" class="insp-empty">—</div></div>
+      <div class="insp-sec"><h4 data-i18n="hMissing">Missing Data</h4><div id="iMissing" class="insp-empty">—</div></div>
+      <div class="insp-sec"><h4 data-i18n="hResult">Handler Result</h4><div id="iResult" class="insp-empty">—</div></div>
+      <div class="insp-sec"><h4 data-i18n="hEmitted">Emitted Events</h4><div id="iEmitted" class="insp-empty">—</div></div>
+      <div class="insp-sec"><h4><span data-i18n="hJson">Technical JSON</span></h4><div id="iJson" class="insp-empty">—</div></div>
+      <div class="insp-sec"><h4 data-i18n="hEvidence">Contract Evidence</h4><div id="iEvidence" class="insp-empty">—</div></div>
+    </aside>
+  </div>
+
+  <!-- ============================= LEDGER ============================= -->
+  <footer class="ledger">
+    <div class="ledger-head">
+      <span class="ledger-title" data-i18n="ledgerTitle">Event Ledger</span>
+      <span class="badge demo" data-i18n="ledgerBadge">DEMO LEDGER — POSTGRESQL-READY STRUCTURE</span>
+      <span class="ledger-conn">table: <b>event_ledger</b> · <span data-i18n="ledgerNote">in-memory demo data, schema ready for PostgreSQL</span></span>
+      <div class="spacer"></div>
+      <span class="ledger-conn">SELECT * FROM event_ledger ORDER BY id DESC;</span>
+    </div>
+    <div class="ledger-scroll">
+      <table class="pg">
+        <thead><tr>
+          <th>id</th><th>timestamp</th><th>correlationId</th><th>causationId</th><th>sourceTool</th>
+          <th>eventType</th><th>targetTool</th><th>status</th><th>emittedEvents</th><th>downstreamConsumers</th>
+        </tr></thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+    </div>
+  </footer>
+  <!-- ============================= CONNECT A TOOL ============================= -->
+  <div class="modal-overlay hidden" id="connectOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="connectTitle">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="connectTitle" data-i18n="connectTitle">Connect a Tool</div>
+          <div class="modal-sub" data-i18n="connectSub">Any producer — a real MES, a manual form, a future system, or Carlos' own tools — connects the same way: emit an event shaped like the contract below. No direct coupling, ever.</div>
+        </div>
+        <button class="icon-btn" id="connectClose" title="Close">✕</button>
+      </div>
+      <div class="ctabs" id="connectTabs"></div>
+      <div class="modal-body" id="connectBody"></div>
+    </div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "note": "Readable source of the calculate-cpk-ppk demo scenarios. The same objects are embedded in app.js (SCENARIOS) so index.html works from file:// without fetch. Keep both in sync, and keep payloads in sync with tools/calculate-cpk-ppk/demo/*.json. Results are NOT stored here on purpose: the UI computes them live with the handler logic ported from tools/calculate-cpk-ppk/src/handler.js.",
+  "scenarios": [
+    {
+      "id": "cpk-capable",
+      "tool": "calculate-cpk-ppk",
+      "expect": "SUCCESS",
+      "name": { "en": "Capable process", "es": "Proceso capaz" },
+      "desc": {
+        "en": "Healthy shaft diameter data. Emits CAPABILITY_ANALYSIS_COMPLETED.",
+        "es": "Datos sanos de diámetro de eje. Emite CAPABILITY_ANALYSIS_COMPLETED."
+      },
+      "event": {
+        "type": "MEASUREMENTS_CAPTURED",
+        "source": "collect_quality_measurements",
+        "payload": {
+          "measurementSetId": "MS-CPK-001",
+          "partNumber": "PN-9001",
+          "characteristic": "shaft diameter",
+          "measurements": [10.01, 10.02, 9.99, 10.0, 10.01, 9.98, 10.02, 10.0],
+          "lsl": 9.9,
+          "usl": 10.1,
+          "target": 10.0,
+          "minimumCpk": 1.33
+        }
+      }
+    },
+    {
+      "id": "cpk-below-target",
+      "tool": "calculate-cpk-ppk",
+      "expect": "CRITICAL",
+      "name": { "en": "Below target", "es": "Bajo target" },
+      "desc": {
+        "en": "Wide slot-width variation. Also emits CAPABILITY_BELOW_TARGET.",
+        "es": "Variación amplia de ancho de ranura. Emite además CAPABILITY_BELOW_TARGET."
+      },
+      "event": {
+        "type": "MEASUREMENTS_CAPTURED",
+        "source": "csv_import",
+        "payload": {
+          "measurementSetId": "MS-CPK-002",
+          "partNumber": "PN-9002",
+          "characteristic": "slot width",
+          "measurements": [5.01, 5.08, 4.95, 5.12, 4.91, 5.06, 4.98, 5.1],
+          "lsl": 4.9,
+          "usl": 5.1,
+          "target": 5.0,
+          "minimumCpk": 1.33
+        }
+      }
+    },
+    {
+      "id": "cpk-missing-specs",
+      "tool": "calculate-cpk-ppk",
+      "expect": "VALIDATION ERROR",
+      "name": { "en": "Missing specs", "es": "Specs faltantes" },
+      "desc": {
+        "en": "No LSL/USL. The handler stops at the contract — no invented result.",
+        "es": "Sin LSL/USL. El handler se detiene en el contrato — no inventa resultado."
+      },
+      "event": {
+        "type": "MEASUREMENTS_CAPTURED",
+        "source": "manual_quality_input",
+        "payload": {
+          "measurementSetId": "MS-CPK-003",
+          "partNumber": "PN-9003",
+          "characteristic": "bore depth",
+          "measurements": [2.1, 2.12, 2.09, 2.11],
+          "target": 2.1
+        }
+      }
+    }
+  ]
+}
