@@ -114,6 +114,7 @@ body {
 .badge.future    { background: var(--future-soft);   color: var(--future); outline: 1px dashed var(--future); outline-offset: -1px; }
 .badge.confirm   { background: var(--bg-soft);       color: var(--muted); outline: 1px dashed var(--border-strong); outline-offset: -1px; }
 .badge.neutral   { background: var(--bg-soft);       color: var(--muted); }
+.badge.proposed  { background: var(--bg-soft);       color: var(--muted); outline: 1px dashed var(--border-strong); outline-offset: -1px; }
 
 .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 .dot.ok { background: var(--success); }
@@ -201,6 +202,8 @@ body {
 .evchip.consumes { background: var(--info-soft); color: var(--info); }
 .evchip.produces { background: var(--success-soft); color: var(--success); }
 .evchip.alert    { background: var(--critical-soft); color: var(--critical); }
+.evchip.proposed { background: var(--bg-soft); color: var(--muted); border: 1px dashed var(--border-strong); }
+.evchip.proposed small { color: var(--faint); font-weight: 400; }
 .peers { display: flex; flex-wrap: wrap; gap: 5px; }
 .peer {
   font-family: var(--mono); font-size: 10.5px; color: var(--text-soft);
@@ -250,6 +253,17 @@ body {
 .rnode.warn { border-color: var(--warning); background: var(--warning-soft); }
 .rarr { flex: 0 0 auto; padding: 0 5px; color: var(--faint); transition: color 0.3s ease; font-size: 13px; }
 .rarr.lit { color: var(--accent); }
+
+/* ------------------------- official contract panel ------------------------- */
+.official-flow-row { margin-bottom: 14px; }
+.official-flow-row:last-child { margin-bottom: 0; }
+.official-flow-label {
+  display: block; font-size: 10px; font-weight: 700; letter-spacing: 1.1px;
+  text-transform: uppercase; color: var(--success); margin-bottom: 6px;
+}
+.official-flow-row .ribbon { padding: 0 2px 4px; }
+.official-flow-row .rnode { border-color: var(--success); background: var(--success-soft); flex: 0 1 auto; min-width: auto; padding: 8px 12px; }
+.official-flow-row .rnode .rv { color: var(--text); font-weight: 650; }
 
 /* ------------------------- input stage ------------------------- */
 .input-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }

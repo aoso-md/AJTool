@@ -1,0 +1,13 @@
+{
+  "name": "quality-tools-bus-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local/deployed event bus proxy for the Quality Tools Workspace. Zero dependencies.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

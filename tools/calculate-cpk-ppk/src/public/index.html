@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>calculate_cpk_ppk</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161d2c; --panel2:#0d1117; --border:#2a3346;
+    --text:#e5e7eb; --muted:#9aa4b2; --accent:#38bdf8; --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:Arial,Helvetica,sans-serif; margin:0; padding:24px;}
+  .wrap{max-width:920px; margin:0 auto;}
+  h1{font-size:20px; margin:0 0 4px;}
+  .sub{color:var(--muted); font-size:13px; margin:0 0 20px;}
+  .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:bold; margin-left:8px;}
+  .badge.ok{background:#0d2a1a; color:var(--ok); border:1px solid var(--ok);}
+  .badge.bad{background:#2a1010; color:var(--bad); border:1px solid var(--bad);}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:16px;}
+  .card h2{font-size:14px; margin:0 0 12px; color:var(--accent);}
+  label{display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;}
+  input[type=text], input[type=number], textarea{
+    width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit;
+  }
+  textarea{min-height:70px; font-family:monospace; font-size:12px;}
+  .row{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px;}
+  .actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;}
+  button{background:var(--accent); color:#0b1220; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:bold; cursor:pointer;}
+  button.secondary{background:transparent; color:var(--accent); border:1px solid var(--accent);}
+  button:hover{opacity:.85;}
+  .keyrow{display:flex; gap:10px; align-items:center;}
+  .keyrow input{flex:1;}
+  .chk{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); white-space:nowrap;}
+  #result{display:none;}
+  .verdict{font-size:18px; font-weight:bold; padding:10px 14px; border-radius:8px; margin-bottom:12px;}
+  .verdict.capable{background:#0d2a1a; color:var(--ok); border:1px solid var(--ok);}
+  .verdict.below-target{background:#2a1010; color:var(--bad); border:1px solid var(--bad);}
+  .verdict.error{background:#2a1010; color:var(--bad); border:1px solid var(--bad);}
+  .metrics{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px;}
+  .metric{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px;}
+  .metric .l{font-size:10px; color:var(--muted); text-transform:uppercase;}
+  .metric .v{font-size:16px; font-weight:bold; margin-top:2px;}
+  .reco{font-size:13px; color:var(--text); background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px; margin-bottom:12px;}
+  pre{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:11px; overflow:auto; max-height:300px;}
+  .foot{color:var(--muted); font-size:11px; margin-top:24px; text-align:center;}
+  .err{color:var(--bad); font-size:12px; margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>calculate_cpk_ppk <span id="statusBadge" class="badge">checando...</span></h1>
+  <p class="sub">Cpk/Ppk — análisis de capacidad de proceso. Input oficial: <b>MEASUREMENTS_CAPTURED</b> → Output oficial: <b>CAPABILITY_BELOW_TARGET</b></p>
+
+  <div class="card">
+    <h2>Acceso</h2>
+    <div class="keyrow">
+      <input type="text" id="apiKey" placeholder="x-api-key (te lo dio Angel/Carlos)">
+      <label class="chk"><input type="checkbox" id="saveKey"> guardar en este navegador</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Datos de entrada</h2>
+    <div class="row3">
+      <div><label>Measurement Set ID</label><input type="text" id="measurementSetId" placeholder="p.ej. MS-2026-014"></div>
+      <div><label>Part Number</label><input type="text" id="partNumber" placeholder="p.ej. PN-9001"></div>
+      <div><label>Característica</label><input type="text" id="characteristic" placeholder="p.ej. diámetro de flecha"></div>
+      <div><label>LSL</label><input type="number" step="any" id="lsl" placeholder="límite inferior"></div>
+      <div><label>USL</label><input type="number" step="any" id="usl" placeholder="límite superior"></div>
+      <div><label>Target</label><input type="number" step="any" id="target" placeholder="valor nominal"></div>
+      <div><label>Minimum Cpk (opcional)</label><input type="number" step="any" id="minimumCpk" placeholder="1.33 por defecto"></div>
+    </div>
+    <label>Mediciones (separadas por coma)</label>
+    <textarea id="measurements" placeholder="p.ej. 10.01, 10.02, 9.99, 10.00, 10.01, 9.98"></textarea>
+
+    <div class="actions">
+      <button onclick="runIt()">▶ Ejecutar</button>
+    </div>
+    <div id="err" class="err"></div>
+  </div>
+
+  <div class="card" id="result">
+    <h2>Resultado</h2>
+    <div id="verdictBox"></div>
+    <div id="metricsBox" class="metrics"></div>
+    <div id="recoBox" class="reco"></div>
+    <details><summary style="cursor:pointer; color:var(--muted); font-size:12px;">Ver JSON técnico</summary>
+      <pre id="rawJson"></pre>
+    </details>
+  </div>
+
+  <p class="foot">POST /events · GET /health · Docker: docker/calculate_cpk_ppk.Dockerfile</p>
+</div>
+
+<script>
+  const KEY_STORAGE = "cpk_ppk_api_key";
+  const saved = localStorage.getItem(KEY_STORAGE);
+  if (saved) { document.getElementById("apiKey").value = saved; document.getElementById("saveKey").checked = true; }
+
+  fetch("/health").then(r => r.json()).then(h => {
+    const b = document.getElementById("statusBadge");
+    b.textContent = h.ok ? "en línea" : "con problemas";
+    b.className = "badge " + (h.ok ? "ok" : "bad");
+  }).catch(() => {
+    const b = document.getElementById("statusBadge");
+    b.textContent = "sin respuesta"; b.className = "badge bad";
+  });
+
+  async function runIt() {
+    const errBox = document.getElementById("err");
+    errBox.textContent = "";
+    const key = document.getElementById("apiKey").value.trim();
+    if (document.getElementById("saveKey").checked && key) localStorage.setItem(KEY_STORAGE, key);
+    if (!document.getElementById("saveKey").checked) localStorage.removeItem(KEY_STORAGE);
+
+    const measurements = document.getElementById("measurements").value
+      .split(",").map(s => s.trim()).filter(Boolean).map(Number);
+
+    const num = (id) => { const v = document.getElementById(id).value; return v === "" ? undefined : Number(v); };
+
+    const event = {
+      type: "MEASUREMENTS_CAPTURED",
+      source: "calculate-cpk-ppk-frontend",
+      occurredAt: new Date().toISOString(),
+      payload: {
+        measurementSetId: document.getElementById("measurementSetId").value,
+        partNumber: document.getElementById("partNumber").value,
+        characteristic: document.getElementById("characteristic").value,
+        measurements: measurements,
+        lsl: num("lsl"), usl: num("usl"), target: num("target"), minimumCpk: num("minimumCpk")
+      }
+    };
+
+    let res, body;
+    try {
+      res = await fetch("/events", {
+        method: "POST",
+        headers: Object.assign({ "Content-Type": "application/json" }, key ? { "x-api-key": key } : {}),
+        body: JSON.stringify(event)
+      });
+      body = await res.json();
+    } catch (e) {
+      errBox.textContent = "No se pudo conectar: " + e.message;
+      return;
+    }
+
+    if (res.status === 401) { errBox.textContent = "Falta el x-api-key o está mal (401)."; return; }
+
+    document.getElementById("result").style.display = "block";
+    document.getElementById("rawJson").textContent = JSON.stringify(body, null, 2);
+
+    const verdictBox = document.getElementById("verdictBox");
+    const metricsBox = document.getElementById("metricsBox");
+    const recoBox = document.getElementById("recoBox");
+
+    if (!body.ok || !body.result) {
+      verdictBox.innerHTML = '<div class="verdict error">' + (body.message || "Error de validación") + '</div>';
+      metricsBox.innerHTML = "";
+      recoBox.textContent = (body.details || []).join(" · ") || body.recommendation || "";
+      return;
+    }
+
+    const r = body.result;
+    const isCapable = r.verdict === "capable";
+    verdictBox.innerHTML = '<div class="verdict ' + (isCapable ? "capable" : "below-target") + '">' +
+      (isCapable ? "✓ CAPABLE" : "✗ BELOW TARGET") + '</div>';
+    metricsBox.innerHTML = [
+      ["Cp", r.cp], ["Cpk", r.cpk], ["Mean", r.mean], ["Std Dev", r.standardDeviation],
+      ["Sample Size", r.sampleSize], ["Min Cpk", r.minimumCpk]
+    ].map(([l,v]) => '<div class="metric"><div class="l">'+l+'</div><div class="v">'+v+'</div></div>').join("");
+    recoBox.textContent = r.recommendation || body.recommendation || "";
+  }
+</script>
+</body>
+</html>

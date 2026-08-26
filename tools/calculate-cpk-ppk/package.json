@@ -1,0 +1,14 @@
+{
+  "name": "calculate-cpk-ppk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cpk/Ppk process capability tool — HTTP service and CLI, zero dependencies.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "cli": "node src/handler.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

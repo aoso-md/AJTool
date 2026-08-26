@@ -61,11 +61,12 @@ function validatePayload(payload) {
   return details.length ? validationError("Capability analysis cannot run with missing or invalid specs.", details) : null;
 }
 
-function buildEvent(type, payload) {
+function buildEvent(type, payload, official) {
   return {
     type,
     source: "calculate-cpk-ppk",
     occurredAt: new Date().toISOString(),
+    official: !!official,
     payload
   };
 }
@@ -111,14 +112,18 @@ function handle(event) {
     recommendation
   };
 
-  const emittedEvents = [buildEvent("CAPABILITY_ANALYSIS_COMPLETED", result)];
+  /* CAPABILITY_ANALYSIS_COMPLETED is not part of Carlos' confirmed contract yet —
+     emitted as a proposed/internal event only (official: false). The only official
+     output event is CAPABILITY_BELOW_TARGET, confirmed by Carlos:
+     MEASUREMENTS_CAPTURED -> CAPABILITY_BELOW_TARGET. */
+  const emittedEvents = [buildEvent("CAPABILITY_ANALYSIS_COMPLETED", result, false)];
   if (belowTarget) {
     emittedEvents.push(buildEvent("CAPABILITY_BELOW_TARGET", {
       measurementSetId: result.measurementSetId,
       cpk: result.cpk,
       minimumCpk,
       recommendation
-    }));
+    }, true));
   }
 
   return {

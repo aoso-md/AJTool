@@ -1,12 +1,18 @@
 "use strict";
 
 /* =====================================================================
-   Quality Tools Workspace — Operations Console v0.3
+   Quality Tools Workspace — Operations Console v0.4
    ---------------------------------------------------------------------
+   OFFICIAL CONTRACT (confirmed by Carlos — see docs/OFFICIAL-CARLOS-CONTRACT.md):
+     calculate_cpk_ppk : MEASUREMENTS_CAPTURED -> CAPABILITY_BELOW_TARGET
+     run_msa_analysis  : NEW_DEVICE_REGISTERED -> MSA_VALIDATED
+   Every other event type (CAPABILITY_ANALYSIS_COMPLETED, MSA_STUDY_REQUESTED,
+   MSA_ANALYSIS_COMPLETED, MSA_NOT_ACCEPTABLE) is PROPOSED / NOT OFFICIAL —
+   kept for local use and labeled as such everywhere it appears in this UI.
    REAL (implemented):
      - Handler logic ported 1:1 from tools/calculate-cpk-ppk/src/handler.js
        and tools/run-msa-analysis/src/handler.js (same validation, same math,
-       same emitted events).
+       same emitted events, same official/proposed flags).
      - Live contract checking while you edit the input JSON or forms.
      - Correlation / causation ID generation and propagation.
    DEMO DATA:
@@ -15,6 +21,11 @@
        PostgreSQL-ready but no database is connected.
    MOCK:
      - Event bus transport (in-process function call).
+   NOT CONNECTED:
+     - The real IsoTools API (verified manually via PowerShell — see
+       docs/OFFICIAL-CARLOS-CONTRACT.md). No API key lives in this frontend
+       or anywhere in this repository. Production path when wired up:
+       POST /events, GET /events/subscriptions/:toolId, GET /events/chain/:correlationId.
    FUTURE ADAPTER:
      - MARLI. Not implemented in current tool code.
    ===================================================================== */
@@ -44,7 +55,7 @@ const I18N = {
     cmpYes: "Yes", cmpNo: "No",
     cmpCompatible: "COMPATIBLE", cmpMissingData: "MISSING DATA", cmpNotConsumable: "NOT CONSUMABLE", cmpNeedsConfirm: "NEEDS CARLOS CONFIRMATION",
     notConsumableMsg: "Event not directly consumable by selected tool. Adapter or mapping needed.",
-    deviceCompatWarn: "Device registration is compatible as a trigger, but formal MSA requires MSA_STUDY_REQUESTED with repeated observations.",
+    deviceCompatWarn: "NEW_DEVICE_REGISTERED is the official input (confirmed by Carlos), but without repeated observations the handler cannot compute Gage R&R — it answers with a warning instead of inventing a result. MSA_STUDY_REQUESTED remains available as a proposed / not official local-only path.",
     s3Title: "Execution — the handler runs",
     s3Sub: "Same logic as tools/<tool>/src/handler.js, ported 1:1 into this console.",
     btnRunExternal: "▶ Run Tool", btnRunManual: "▶ Run Manual Input", btnRunRaw: "▶ Run Tool", btnReset: "Reset",
@@ -61,10 +72,10 @@ const I18N = {
     ledgerTitle: "Event Ledger",
     ledgerBadge: "DEMO LEDGER — POSTGRESQL-READY STRUCTURE",
     ledgerNote: "in-memory demo data, schema ready for PostgreSQL",
-    formalStudy: "Formal MSA Study", deviceCompat: "Device Registration",
-    manualCpkTitle: "Manual Input — build MEASUREMENTS_CAPTURED",
-    manualMsaTitle: "Manual Input — build MSA_STUDY_REQUESTED",
-    manualDevTitle: "Manual Input — build NEW_DEVICE_REGISTERED",
+    formalStudy: "MSA Study (proposed)", deviceCompat: "Device Registration (official)",
+    manualCpkTitle: "Manual Input — build MEASUREMENTS_CAPTURED (official)",
+    manualMsaTitle: "Manual Input — build MSA_STUDY_REQUESTED (proposed / not official)",
+    manualDevTitle: "Manual Input — build NEW_DEVICE_REGISTERED (official)",
     fSetId: "Measurement Set ID", fPart: "Part Number", fChar: "Characteristic",
     fMeas: "Measurements", hMeas: "Comma-separated numeric values (min. 2).",
     fTarget: "Target", fMinCpk: "Minimum Cpk", fSource: "Source Tool", fTolerance: "Tolerance",
@@ -75,7 +86,7 @@ const I18N = {
     fDevType: "Device Type", fCalStatus: "Calibration Status", fRegBy: "Registered By", fRegDate: "Registration Date",
     devNote: "No observations on this path — the handler will answer with a warning and recommend MSA_STUDY_REQUESTED. That is correct behavior, not an error.",
     marliBadge: "FUTURE ADAPTER — NOT IMPLEMENTED IN CURRENT TOOL CODE",
-    marliNote: "Planned consumer of CAPABILITY_BELOW_TARGET and MSA_NOT_ACCEPTABLE. No code exists for this adapter today.",
+    marliNote: "Planned consumer of the official CAPABILITY_BELOW_TARGET event, and of MSA_NOT_ACCEPTABLE (proposed / not official). No code exists for this adapter today.",
     m1: "Technical Event", m2: "Skill Gap", m3: "Microtraining", m4: "Evaluation",
     m5: "Supervisor Review", m6: "Readiness", m7: "Evidence",
     bLogicReal: "HANDLER LOGIC · IMPLEMENTED",
@@ -111,7 +122,20 @@ const I18N = {
       ["mk", "event bus transport: in-process call — MOCK"],
       ["mk", "ledger persistence: in-memory, PostgreSQL-ready columns — DEMO DATA"],
       ["mk", "downstream consumers: names from adapters/carlos-ecosystem — NEEDS CARLOS CONFIRMATION"]
-    ]
+    ],
+    officialTitle: "Official Contract — Confirmed by Carlos",
+    officialBadge: "OFFICIAL", proposedBadge: "PROPOSED / NOT OFFICIAL",
+    flow1Label: "Flow 1 — Capability", flow2Label: "Flow 2 — MSA",
+    officialNotes: [
+      "Official contract confirmed by Carlos.",
+      "This workspace is a local simulation only — it is not connected to the real API.",
+      "The real IsoTools API was verified manually via PowerShell (/health, /ready, /catalog/tools, /events, /events/subscriptions/:toolId, /events/chain/:correlationId).",
+      "Production path: POST /events, then GET /events/subscriptions/:toolId and GET /events/chain/:correlationId. No direct tool-to-tool calls.",
+      "The API key must never live in the frontend or anywhere in this repository."
+    ],
+    officialIdLabel: "Official broker ID", localIdLabel: "Local folder / display name",
+    alsoAccepts: "Also accepts (proposed / not official)", alsoEmits: "Also emits (proposed / not official)",
+    officialInput: "Official input", officialOutput: "Official output"
   },
   es: {
     modeExternal: "Evento de Tool Externa", modeManual: "Entrada Manual", modeRaw: "Evento JSON Crudo",
@@ -136,7 +160,7 @@ const I18N = {
     cmpYes: "Sí", cmpNo: "No",
     cmpCompatible: "COMPATIBLE", cmpMissingData: "MISSING DATA", cmpNotConsumable: "NOT CONSUMABLE", cmpNeedsConfirm: "NEEDS CARLOS CONFIRMATION",
     notConsumableMsg: "Este evento no es consumible directamente por la tool seleccionada. Se necesita un adapter o mapping.",
-    deviceCompatWarn: "El registro de equipo es compatible como trigger, pero un MSA formal requiere MSA_STUDY_REQUESTED con observations repetidas.",
+    deviceCompatWarn: "NEW_DEVICE_REGISTERED es el input oficial (confirmado por Carlos), pero sin observations repetidas el handler no puede calcular Gage R&R — responde con un warning en vez de inventar un resultado. MSA_STUDY_REQUESTED sigue disponible como vía propuesta / no oficial, solo local.",
     s3Title: "Ejecución — corre el handler",
     s3Sub: "La misma lógica de tools/<tool>/src/handler.js, portada 1:1 a esta consola.",
     btnRunExternal: "▶ Ejecutar Tool", btnRunManual: "▶ Ejecutar Entrada Manual", btnRunRaw: "▶ Ejecutar Tool", btnReset: "Reiniciar",
@@ -153,10 +177,10 @@ const I18N = {
     ledgerTitle: "Ledger de Eventos",
     ledgerBadge: "LEDGER DEMO — ESTRUCTURA LISTA PARA POSTGRESQL",
     ledgerNote: "datos demo en memoria, esquema listo para PostgreSQL",
-    formalStudy: "Estudio MSA Formal", deviceCompat: "Registro de Equipo",
-    manualCpkTitle: "Entrada Manual — arma MEASUREMENTS_CAPTURED",
-    manualMsaTitle: "Entrada Manual — arma MSA_STUDY_REQUESTED",
-    manualDevTitle: "Entrada Manual — arma NEW_DEVICE_REGISTERED",
+    formalStudy: "Estudio MSA (propuesto)", deviceCompat: "Registro de Equipo (oficial)",
+    manualCpkTitle: "Entrada Manual — arma MEASUREMENTS_CAPTURED (oficial)",
+    manualMsaTitle: "Entrada Manual — arma MSA_STUDY_REQUESTED (propuesto / no oficial)",
+    manualDevTitle: "Entrada Manual — arma NEW_DEVICE_REGISTERED (oficial)",
     fSetId: "ID de Set de Medición", fPart: "Número de Parte", fChar: "Característica",
     fMeas: "Mediciones", hMeas: "Valores numéricos separados por coma (mín. 2).",
     fTarget: "Target", fMinCpk: "Cpk Mínimo", fSource: "Tool de Origen", fTolerance: "Tolerancia",
@@ -167,7 +191,7 @@ const I18N = {
     fDevType: "Tipo de Equipo", fCalStatus: "Estado de Calibración", fRegBy: "Registrado Por", fRegDate: "Fecha de Registro",
     devNote: "Esta vía no trae observations — el handler responderá con warning y recomendará MSA_STUDY_REQUESTED. Es el comportamiento correcto, no un error.",
     marliBadge: "ADAPTADOR FUTURO — NO IMPLEMENTADO EN EL CÓDIGO ACTUAL",
-    marliNote: "Consumidor planeado de CAPABILITY_BELOW_TARGET y MSA_NOT_ACCEPTABLE. Hoy no existe código para este adaptador.",
+    marliNote: "Consumidor planeado del evento oficial CAPABILITY_BELOW_TARGET, y de MSA_NOT_ACCEPTABLE (propuesto / no oficial). Hoy no existe código para este adaptador.",
     m1: "Evento Técnico", m2: "Brecha de Habilidad", m3: "Microcapacitación", m4: "Evaluación",
     m5: "Revisión del Supervisor", m6: "Readiness", m7: "Evidencia",
     bLogicReal: "LÓGICA DEL HANDLER · IMPLEMENTED",
@@ -203,7 +227,20 @@ const I18N = {
       ["mk", "transporte del bus: llamada in-process — MOCK"],
       ["mk", "persistencia del ledger: en memoria, columnas listas para PostgreSQL — DEMO DATA"],
       ["mk", "consumidores downstream: nombres de adapters/carlos-ecosystem — NEEDS CARLOS CONFIRMATION"]
-    ]
+    ],
+    officialTitle: "Contrato Oficial — Confirmado por Carlos",
+    officialBadge: "OFICIAL", proposedBadge: "PROPUESTO / NO OFICIAL",
+    flow1Label: "Flujo 1 — Capacidad", flow2Label: "Flujo 2 — MSA",
+    officialNotes: [
+      "Contrato oficial confirmado por Carlos.",
+      "Este workspace es solo una simulación local — no está conectado a la API real.",
+      "La API real de IsoTools se verificó manualmente vía PowerShell (/health, /ready, /catalog/tools, /events, /events/subscriptions/:toolId, /events/chain/:correlationId).",
+      "Camino de producción: POST /events, luego GET /events/subscriptions/:toolId y GET /events/chain/:correlationId. Sin llamadas directas tool-a-tool.",
+      "La API key nunca debe vivir en el frontend ni en ninguna parte de este repositorio."
+    ],
+    officialIdLabel: "ID oficial del broker", localIdLabel: "Nombre local de carpeta / display",
+    alsoAccepts: "También acepta (propuesto / no oficial)", alsoEmits: "También emite (propuesto / no oficial)",
+    officialInput: "Input oficial", officialOutput: "Output oficial"
   }
 };
 let LANG = "en";
@@ -224,8 +261,8 @@ function sampleStdDev(values, average) {
   const variance = values.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / (values.length - 1);
   return Math.sqrt(variance);
 }
-function buildEvent(type, source, payload) {
-  return { type, source, occurredAt: new Date().toISOString(), payload };
+function buildEvent(type, source, payload, official) {
+  return { type, source, occurredAt: new Date().toISOString(), official: !!official, payload };
 }
 
 /* ---- calculate-cpk-ppk ---- */
@@ -282,11 +319,13 @@ function cpkHandle(event) {
     standardDeviation: round(standardDeviation), sampleSize: measurements.length,
     minimumCpk, verdict: belowTarget ? "below-target" : "capable", recommendation
   };
-  const emittedEvents = [buildEvent("CAPABILITY_ANALYSIS_COMPLETED", "calculate-cpk-ppk", result)];
+  /* Only CAPABILITY_BELOW_TARGET is official (confirmed by Carlos: MEASUREMENTS_CAPTURED ->
+     CAPABILITY_BELOW_TARGET). CAPABILITY_ANALYSIS_COMPLETED is proposed/local only. */
+  const emittedEvents = [buildEvent("CAPABILITY_ANALYSIS_COMPLETED", "calculate-cpk-ppk", result, false)];
   if (belowTarget) {
     emittedEvents.push(buildEvent("CAPABILITY_BELOW_TARGET", "calculate-cpk-ppk", {
       measurementSetId: result.measurementSetId, cpk: result.cpk, minimumCpk, recommendation
-    }));
+    }, true));
   }
   return { ok: true, status: "completed", result, emittedEvents, recommendation };
 }
@@ -383,39 +422,61 @@ function msaHandle(event) {
   const validation = msaValidatePayload(normalized.payload);
   if (validation) return validation;
   const result = msaAnalyze(normalized.payload);
-  const emittedEvents = [buildEvent("MSA_ANALYSIS_COMPLETED", "run-msa-analysis", result)];
-  emittedEvents.push(buildEvent(result.verdict === "acceptable" ? "MSA_VALIDATED" : "MSA_NOT_ACCEPTABLE", "run-msa-analysis", {
+  /* Only MSA_VALIDATED is official (confirmed by Carlos: NEW_DEVICE_REGISTERED -> MSA_VALIDATED).
+     MSA_ANALYSIS_COMPLETED and MSA_NOT_ACCEPTABLE are proposed/local only. */
+  const emittedEvents = [buildEvent("MSA_ANALYSIS_COMPLETED", "run-msa-analysis", result, false)];
+  const msaAcceptable = result.verdict === "acceptable";
+  emittedEvents.push(buildEvent(msaAcceptable ? "MSA_VALIDATED" : "MSA_NOT_ACCEPTABLE", "run-msa-analysis", {
     studyId: result.studyId, deviceId: result.deviceId,
     gageRRPercent: result.gageRRPercent, ndc: result.ndc, recommendation: result.recommendation
-  }));
+  }, msaAcceptable));
   return { ok: true, status: "completed", compatibilityPath: normalized.compatibilityPath, result, emittedEvents, recommendation: result.recommendation };
 }
 /* ================== end of ported handlers ================== */
 
 /* ============================ registry data ============================ */
+/* consumes: [eventType, official] · produces: [eventType, chipClass, official]
+   Official = confirmed by Carlos. Everything else is proposed/future/not official —
+   kept for local use, never presented as an official broker contract. */
 const TOOLS = [
   {
-    name: "calculate-cpk-ppk", handler: cpkHandle, key: "cpk",
-    consumes: ["MEASUREMENTS_CAPTURED"],
-    produces: [["CAPABILITY_ANALYSIS_COMPLETED", "produces"], ["CAPABILITY_BELOW_TARGET", "alert"]],
+    name: "calculate-cpk-ppk", officialId: "calculate_cpk_ppk", handler: cpkHandle, key: "cpk",
+    consumes: [["MEASUREMENTS_CAPTURED", true]],
+    produces: [["CAPABILITY_BELOW_TARGET", "alert", true], ["CAPABILITY_ANALYSIS_COMPLETED", "produces", false]],
     upstream: [["collect_quality_measurements", ""], ["manual_quality_input", ""], ["csv_import", ""], ["mes_connector", "mock"]],
     downstream: [["manage_product_specs", "confirm"], ["audit_report", "confirm"], ["calculate_control_charts", "confirm"], ["marli_adapter", "future"]],
     src: "tools/calculate-cpk-ppk/src/handler.js"
   },
   {
-    name: "run-msa-analysis", handler: msaHandle, key: "msa",
-    consumes: ["MSA_STUDY_REQUESTED", "NEW_DEVICE_REGISTERED"],
-    produces: [["MSA_ANALYSIS_COMPLETED", "produces"], ["MSA_VALIDATED", "produces"], ["MSA_NOT_ACCEPTABLE", "alert"]],
+    name: "run-msa-analysis", officialId: "run_msa_analysis", handler: msaHandle, key: "msa",
+    consumes: [["NEW_DEVICE_REGISTERED", true], ["MSA_STUDY_REQUESTED", false]],
+    produces: [["MSA_VALIDATED", "produces", true], ["MSA_ANALYSIS_COMPLETED", "produces", false], ["MSA_NOT_ACCEPTABLE", "alert", false]],
     upstream: [["manage_device_registry", ""], ["metrology_input_form", ""], ["calibration_registry", ""], ["manual_msa_input", ""]],
     downstream: [["calculate_control_charts", "confirm"], ["manage_nonconformances", "confirm"], ["audit_report", "confirm"], ["marli_adapter", "future"]],
     src: "tools/run-msa-analysis/src/handler.js"
   }
 ];
+/* Every event type this workspace has a contract for still routes to exactly one tool,
+   official or not — MSA_STUDY_REQUESTED keeps working locally, just never labeled official. */
 const EVENT_TO_TOOL = {
   MEASUREMENTS_CAPTURED: TOOLS[0],
   MSA_STUDY_REQUESTED: TOOLS[1],
   NEW_DEVICE_REGISTERED: TOOLS[1]
 };
+function isOfficialInputType(type) {
+  for (const tool of TOOLS) {
+    const match = tool.consumes.find((c) => c[0] === type);
+    if (match) return match[1];
+  }
+  return false;
+}
+function isOfficialOutputType(type) {
+  for (const tool of TOOLS) {
+    const match = tool.produces.find((p) => p[0] === type);
+    if (match) return match[2];
+  }
+  return false;
+}
 const ROUTING = {
   CAPABILITY_ANALYSIS_COMPLETED: [["manage_product_specs", "confirm"], ["audit_report", "confirm"]],
   CAPABILITY_BELOW_TARGET: [["calculate_control_charts", "confirm"], ["marli_adapter", "future"]],
@@ -458,8 +519,8 @@ const SCENARIOS = [
   },
   {
     id: "msa-acceptable", tool: "run-msa-analysis", targetKey: "msa", expect: "SUCCESS",
-    name: { en: "Load metrology_input_form → MSA_STUDY_REQUESTED", es: "Cargar metrology_input_form → MSA_STUDY_REQUESTED" },
-    desc: { en: "Formal study, low Gage R&R. Emits MSA_VALIDATED.", es: "Estudio formal, Gage R&R bajo. Emite MSA_VALIDATED." },
+    name: { en: "Load metrology_input_form → MSA_STUDY_REQUESTED (proposed)", es: "Cargar metrology_input_form → MSA_STUDY_REQUESTED (propuesto)" },
+    desc: { en: "MSA_STUDY_REQUESTED is a proposed / not official input — kept for local use. Low Gage R&R, emits the official MSA_VALIDATED.", es: "MSA_STUDY_REQUESTED es un input propuesto / no oficial — se mantiene para uso local. Gage R&R bajo, emite el oficial MSA_VALIDATED." },
     owner: "", event: { type: "MSA_STUDY_REQUESTED", source: "metrology_input_form",
       payload: { studyId: "MSA-001", deviceId: "CAL-100", partNumber: "PN-9001",
         observations: [
@@ -475,8 +536,8 @@ const SCENARIOS = [
   },
   {
     id: "msa-not-acceptable", tool: "run-msa-analysis", targetKey: "msa", expect: "CRITICAL",
-    name: { en: "Load calibration_registry → MSA_STUDY_REQUESTED not acceptable", es: "Cargar calibration_registry → MSA_STUDY_REQUESTED no aceptable" },
-    desc: { en: "Noisy repeated readings. Emits MSA_NOT_ACCEPTABLE.", es: "Lecturas repetidas ruidosas. Emite MSA_NOT_ACCEPTABLE." },
+    name: { en: "Load calibration_registry → MSA_STUDY_REQUESTED (proposed) not acceptable", es: "Cargar calibration_registry → MSA_STUDY_REQUESTED (propuesto) no aceptable" },
+    desc: { en: "MSA_STUDY_REQUESTED is a proposed / not official input. Noisy repeated readings, emits MSA_NOT_ACCEPTABLE (also proposed / not official).", es: "MSA_STUDY_REQUESTED es un input propuesto / no oficial. Lecturas repetidas ruidosas, emite MSA_NOT_ACCEPTABLE (también propuesto / no oficial)." },
     owner: "", event: { type: "MSA_STUDY_REQUESTED", source: "calibration_registry",
       payload: { studyId: "MSA-002", deviceId: "CAL-200", partNumber: "PN-9002",
         observations: [
@@ -492,8 +553,8 @@ const SCENARIOS = [
   },
   {
     id: "msa-incomplete-device", tool: "run-msa-analysis", targetKey: "msa", expect: "WARNING",
-    name: { en: "Load manage_device_registry → NEW_DEVICE_REGISTERED", es: "Cargar manage_device_registry → NEW_DEVICE_REGISTERED" },
-    desc: { en: "NEW_DEVICE_REGISTERED without observations. Warning, no analysis event.", es: "NEW_DEVICE_REGISTERED sin observations. Warning, sin evento de análisis." },
+    name: { en: "Load manage_device_registry → NEW_DEVICE_REGISTERED (official)", es: "Cargar manage_device_registry → NEW_DEVICE_REGISTERED (oficial)" },
+    desc: { en: "NEW_DEVICE_REGISTERED is the official input (confirmed by Carlos). Without observations the handler warns instead of computing MSA.", es: "NEW_DEVICE_REGISTERED es el input oficial (confirmado por Carlos). Sin observations el handler avisa en vez de calcular MSA." },
     owner: "", event: { type: "NEW_DEVICE_REGISTERED", source: "manage_device_registry",
       payload: { deviceId: "CAL-300", deviceName: "Digital Caliper 300", calibrationStatus: "new" } }
   },
@@ -526,8 +587,8 @@ let activeManualTab = "cpk"; /* cpk | msa | dev */
    not modified by this workspace). Examples are real SCENARIOS fixtures, not invented. */
 const CONNECT_GUIDES = [
   {
-    id: "measurements", eventType: "MEASUREMENTS_CAPTURED", tool: "calculate-cpk-ppk",
-    tab: { en: "Measurements → Cpk/Ppk", es: "Mediciones → Cpk/Ppk" },
+    id: "measurements", eventType: "MEASUREMENTS_CAPTURED", tool: "calculate-cpk-ppk", official: true,
+    tab: { en: "Measurements → Cpk/Ppk (official)", es: "Mediciones → Cpk/Ppk (oficial)" },
     schema: "contracts/events/MEASUREMENTS_CAPTURED.schema.json",
     fields: [
       ["measurementSetId", "string", { en: "Your own ID for this measurement batch.", es: "Tu propio ID para este lote de mediciones." }],
@@ -556,8 +617,8 @@ const CONNECT_GUIDES = [
     }
   },
   {
-    id: "msa-study", eventType: "MSA_STUDY_REQUESTED", tool: "run-msa-analysis",
-    tab: { en: "MSA Study → run-msa-analysis", es: "Estudio MSA → run-msa-analysis" },
+    id: "msa-study", eventType: "MSA_STUDY_REQUESTED", tool: "run-msa-analysis", official: false,
+    tab: { en: "MSA Study → run-msa-analysis (proposed)", es: "Estudio MSA → run-msa-analysis (propuesto)" },
     schema: "contracts/events/MSA_STUDY_REQUESTED.schema.json",
     fields: [
       ["studyId", "string", { en: "Your own ID for this MSA study.", es: "Tu propio ID para este estudio MSA." }],
@@ -570,46 +631,46 @@ const CONNECT_GUIDES = [
     example: SCENARIOS[3].event,
     steps: {
       en: [
+        "PROPOSED / NOT OFFICIAL: Carlos confirmed run_msa_analysis' official input is NEW_DEVICE_REGISTERED (right tab), not this event. This path is kept for local use only.",
         "Build an event: { type: \"MSA_STUDY_REQUESTED\", source: \"&lt;your-tool-name&gt;\", payload: { ...fields above } }.",
-        "This is the formal path — use it whenever you already have repeated part/operator/trial observations.",
+        "Use it whenever you already have repeated part/operator/trial observations, even though it is not the official broker input yet.",
         "Paste this JSON into the Raw JSON Event editor and click Run to see Gage R&R, repeatability, reproducibility, and ndc computed live.",
-        "The handler validates studyId, deviceId, and every observation row before computing anything.",
-        "Result: MSA_ANALYSIS_COMPLETED always, plus MSA_VALIDATED or MSA_NOT_ACCEPTABLE depending on the numbers."
+        "Result: MSA_ANALYSIS_COMPLETED (proposed) always, plus the official MSA_VALIDATED or the proposed MSA_NOT_ACCEPTABLE depending on the numbers."
       ],
       es: [
+        "PROPUESTO / NO OFICIAL: Carlos confirmó que el input oficial de run_msa_analysis es NEW_DEVICE_REGISTERED (tab derecha), no este evento. Esta vía se mantiene solo para uso local.",
         "Arma un evento: { type: \"MSA_STUDY_REQUESTED\", source: \"&lt;tu-tool&gt;\", payload: { ...campos de arriba } }.",
-        "Esta es la vía formal — úsala cuando ya tengas observaciones repetidas por parte/operador/trial.",
+        "Úsala cuando ya tengas observaciones repetidas por parte/operador/trial, aunque todavía no sea el input oficial del broker.",
         "Pega este JSON en el editor de Evento JSON Crudo y dale Ejecutar para ver Gage R&R, repetibilidad, reproducibilidad y ndc en vivo.",
-        "El handler valida studyId, deviceId y cada fila de observations antes de calcular nada.",
-        "Resultado: siempre MSA_ANALYSIS_COMPLETED, más MSA_VALIDATED o MSA_NOT_ACCEPTABLE según los números."
+        "Resultado: siempre MSA_ANALYSIS_COMPLETED (propuesto), más el oficial MSA_VALIDATED o el propuesto MSA_NOT_ACCEPTABLE según los números."
       ]
     }
   },
   {
-    id: "device", eventType: "NEW_DEVICE_REGISTERED", tool: "run-msa-analysis",
-    tab: { en: "Device Registration (compatibility)", es: "Registro de Equipo (compatibilidad)" },
-    schema: "no dedicated schema — compatibility path only, see tools/run-msa-analysis/src/handler.js",
+    id: "device", eventType: "NEW_DEVICE_REGISTERED", tool: "run-msa-analysis", official: true,
+    tab: { en: "Device Registration → run_msa_analysis (official)", es: "Registro de Equipo → run_msa_analysis (oficial)" },
+    schema: "no dedicated schema yet — official input confirmed by Carlos, see tools/run-msa-analysis/src/handler.js",
     fields: [
       ["deviceId", "string", { en: "Device / gage being registered.", es: "Equipo / gage que se registra." }],
       ["deviceType", "string · optional", { en: "e.g. digital caliper, micrometer.", es: "p. ej. calibrador digital, micrómetro." }],
       ["calibrationStatus", "string · optional", { en: "new / calibrated / due / expired.", es: "new / calibrated / due / expired." }],
-      ["observations", "absent on this path", { en: "This event never carries observations — that is the whole point of the compatibility path.", es: "Este evento nunca trae observations — ese es el punto de la vía de compatibilidad." }]
+      ["observations", "object[] · optional", { en: "Include repeated readings here to get a full MSA result instead of a warning.", es: "Incluye lecturas repetidas aquí para obtener un resultado MSA completo en vez de un warning." }]
     ],
     example: SCENARIOS[5].event,
     steps: {
       en: [
-        "This is a compatibility path, not a formal MSA request — it exists because manage_device_registry emits NEW_DEVICE_REGISTERED without observations.",
-        "Paste this JSON into the Raw JSON Event editor and click Run: you will see a WARNING, not an analysis result.",
-        "The handler never fakes a Gage R&R from a device registration alone — that would be an invented result.",
-        "Its recommendation is always the same: emit a proper MSA_STUDY_REQUESTED (left tab) once observations exist.",
-        "NEEDS CARLOS CONFIRMATION: no tool in his catalog is yet registered as the producer of MSA_STUDY_REQUESTED."
+        "OFFICIAL: Carlos confirmed the contract NEW_DEVICE_REGISTERED -> MSA_VALIDATED. This is the primary input path for run_msa_analysis.",
+        "Build an event: { type: \"NEW_DEVICE_REGISTERED\", source: \"&lt;your-tool-name&gt;\", payload: { ...fields above } }.",
+        "Paste this JSON into the Raw JSON Event editor and click Run. Without observations you will see a WARNING, not an invented analysis result.",
+        "Add an observations[] array (same shape as the MSA Study tab) to get a full Gage R&R result and, when acceptable, the official MSA_VALIDATED event.",
+        "MSA_STUDY_REQUESTED (left tab) remains available as a proposed / not official local-only alternative."
       ],
       es: [
-        "Esta es una vía de compatibilidad, no una solicitud MSA formal — existe porque manage_device_registry emite NEW_DEVICE_REGISTERED sin observations.",
-        "Pega este JSON en el editor de Evento JSON Crudo y dale Ejecutar: verás un WARNING, no un resultado de análisis.",
-        "El handler nunca inventa un Gage R&R solo a partir de un registro de equipo — sería un resultado inventado.",
-        "Su recomendación es siempre la misma: emitir un MSA_STUDY_REQUESTED formal (tab izquierda) una vez que existan observations.",
-        "NEEDS CARLOS CONFIRMATION: ningún tool de su catálogo está registrado todavía como productor de MSA_STUDY_REQUESTED."
+        "OFICIAL: Carlos confirmó el contrato NEW_DEVICE_REGISTERED -> MSA_VALIDATED. Esta es la vía de input principal de run_msa_analysis.",
+        "Arma un evento: { type: \"NEW_DEVICE_REGISTERED\", source: \"&lt;tu-tool&gt;\", payload: { ...campos de arriba } }.",
+        "Pega este JSON en el editor de Evento JSON Crudo y dale Ejecutar. Sin observations verás un WARNING, no un resultado inventado.",
+        "Agrega un array observations[] (misma forma que en la tab de Estudio MSA) para obtener un resultado Gage R&R completo y, si es aceptable, el evento oficial MSA_VALIDATED.",
+        "MSA_STUDY_REQUESTED (tab izquierda) sigue disponible como alternativa propuesta / no oficial, solo local."
       ]
     }
   }
@@ -629,11 +690,12 @@ function computeCompatibility(event, targetKey) {
   const type = event && event.type;
   const p = (event && event.payload) || {};
   const target = TOOLS.find((tl) => tl.key === targetKey) || null;
-  if (!type) return { status: "missing", items: [], target, known: false, note: "" };
+  if (!type) return { status: "missing", items: [], target, known: false, official: false, note: "" };
   const known = Object.prototype.hasOwnProperty.call(EVENT_TO_TOOL, type);
-  if (!known) return { status: "unconfirmed", items: [], target, known: false, note: t("notConsumableMsg") };
-  if (!target || target.consumes.indexOf(type) < 0) {
-    return { status: "not-consumable", items: [], target, known: true, note: t("notConsumableMsg") };
+  if (!known) return { status: "unconfirmed", items: [], target, known: false, official: false, note: t("notConsumableMsg") };
+  const official = isOfficialInputType(type);
+  if (!target || !target.consumes.some((c) => c[0] === type)) {
+    return { status: "not-consumable", items: [], target, known: true, official, note: t("notConsumableMsg") };
   }
   const items = [];
   const req = (field, ok, detail, optional) => items.push({ field, ok, detail: detail || "", optional: !!optional });
@@ -662,7 +724,83 @@ function computeCompatibility(event, targetKey) {
   }
   const blocking = items.filter((i) => !i.optional);
   const status = blocking.every((i) => i.ok) ? "compatible" : "missing";
-  return { status, items, target, known: true, note };
+  return { status, items, target, known: true, official, note };
+}
+
+/* ============================ bus proxy (optional, real) ============================
+   If bus-proxy/server.js is running locally (see bus-proxy/README.md), this workspace
+   talks to it for a real POST /events + GET /events/subscriptions/:toolId +
+   GET /events/chain/:correlationId — the exact contract Carlos' platform expects.
+   If it is not running, every call below fails silently (short timeout, caught) and
+   the UI's own local computation and in-memory ledger keep working exactly as
+   before. Nothing about the demo depends on this proxy being up. */
+/* Default points at the deployed Railway proxy. Click the "Event Bus" chip
+   in the command bar (or run the localStorage line below in the browser
+   console) to point this workspace at a different proxy without editing
+   this file:
+     localStorage.setItem('qtw-bus-url', 'https://your-app.up.railway.app'); location.reload();
+*/
+let BUS_PROXY_URL = "https://railway-init-production-0674.up.railway.app";
+try {
+  const savedBusUrl = localStorage.getItem("qtw-bus-url");
+  if (savedBusUrl) BUS_PROXY_URL = savedBusUrl.replace(/\/+$/, "");
+} catch (e) { /* ignore */ }
+let busMode = "unknown"; /* unknown | none | LOCAL | CONNECTED */
+
+async function fetchWithTimeout(url, options, ms) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms || 1200);
+  try {
+    return await fetch(url, Object.assign({}, options || {}, { signal: controller.signal }));
+  } finally {
+    clearTimeout(timer);
+  }
+}
+function paintBusChip() {
+  const dot = document.getElementById("busDot");
+  const badge = document.getElementById("busBadge");
+  if (!dot || !badge) return;
+  if (busMode === "CONNECTED") {
+    dot.className = "dot ok"; badge.className = "badge success"; badge.textContent = "LIVE";
+  } else if (busMode === "LOCAL") {
+    dot.className = "dot ok"; badge.className = "badge demo"; badge.textContent = "LIVE (LOCAL PROXY)";
+  } else {
+    dot.className = "dot warn"; badge.className = "badge mock"; badge.textContent = "MOCK";
+  }
+}
+async function checkBusProxy() {
+  try {
+    const res = await fetchWithTimeout(BUS_PROXY_URL + "/health", {}, 1200);
+    if (!res.ok) throw new Error("bad status");
+    const body = await res.json();
+    busMode = body.mode === "CONNECTED" ? "CONNECTED" : "LOCAL";
+  } catch (e) {
+    busMode = "none";
+  }
+  paintBusChip();
+}
+function promptBusUrl() {
+  const next = window.prompt(
+    "Pega la URL pública de tu bus proxy (por ejemplo, la de Railway).\nDéjalo vacío y dale OK para volver a localhost.",
+    BUS_PROXY_URL
+  );
+  if (next === null) return; /* cancelled */
+  const clean = next.trim().replace(/\/+$/, "") || "http://localhost:8787";
+  BUS_PROXY_URL = clean;
+  try { localStorage.setItem("qtw-bus-url", clean); } catch (e) { /* ignore */ }
+  busMode = "unknown";
+  paintBusChip();
+  checkBusProxy();
+}
+function publishToBus(event, corr, causationId) {
+  /* Best-effort, fire-and-forget. Never awaited by the run engine, never throws
+     into it, never changes what the UI shows — this only proves, alongside it,
+     that a real bus-shaped process received the same event. */
+  fetchWithTimeout(BUS_PROXY_URL + "/events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({}, event, { correlationId: corr, causationId: causationId || null }))
+  }, 1500).then(() => { if (busMode === "unknown" || busMode === "none") checkBusProxy(); }).catch(() => {});
 }
 
 /* ============================ ledger ============================ */
@@ -676,15 +814,15 @@ function seedLedger() {
   ledgerRows = [
     { id: 1001, ts: "2026-07-09 07:12:44.201", corr: "corr-qtw-0001", cause: "evt-a41c02", src: "collect_quality_measurements",
       ev: "MEASUREMENTS_CAPTURED", tgt: "calculate-cpk-ppk", st: "SUCCESS",
-      em: "CAPABILITY_ANALYSIS_COMPLETED", dc: "manage_product_specs, audit_report" },
+      em: "CAPABILITY_ANALYSIS_COMPLETED (proposed)", dc: "manage_product_specs, audit_report" },
     { id: 1002, ts: "2026-07-09 07:31:02.977", corr: "corr-qtw-0002", cause: "evt-b7f2d9", src: "manage_device_registry",
       ev: "NEW_DEVICE_REGISTERED", tgt: "run-msa-analysis", st: "WARNING", em: "—", dc: "—" },
     { id: 1003, ts: "2026-07-09 08:04:18.530", corr: "corr-qtw-0003", cause: "evt-c9a1e4", src: "metrology_input_form",
-      ev: "MSA_STUDY_REQUESTED", tgt: "run-msa-analysis", st: "SUCCESS",
-      em: "MSA_ANALYSIS_COMPLETED, MSA_VALIDATED", dc: "calculate_control_charts, audit_report" },
+      ev: "MSA_STUDY_REQUESTED (proposed)", tgt: "run-msa-analysis", st: "SUCCESS",
+      em: "MSA_ANALYSIS_COMPLETED (proposed), MSA_VALIDATED", dc: "calculate_control_charts, audit_report" },
     { id: 1004, ts: "2026-07-09 08:22:51.114", corr: "corr-qtw-0004", cause: "evt-d2c477", src: "csv_import",
       ev: "MEASUREMENTS_CAPTURED", tgt: "calculate-cpk-ppk", st: "CRITICAL",
-      em: "CAPABILITY_ANALYSIS_COMPLETED, CAPABILITY_BELOW_TARGET", dc: "manage_product_specs, audit_report, calculate_control_charts" }
+      em: "CAPABILITY_ANALYSIS_COMPLETED (proposed), CAPABILITY_BELOW_TARGET", dc: "manage_product_specs, audit_report, calculate_control_charts" }
   ];
   renderLedger();
 }
@@ -705,19 +843,30 @@ function renderLedger() {
 /* ============================ rendering: registry ============================ */
 function renderRegistry() {
   const activeTool = currentTool();
-  document.getElementById("registry").innerHTML = TOOLS.map((tool) =>
-    "<div class=\"toolcard" + (activeTool && activeTool.name === tool.name ? " active" : "") + "\">" +
-    "<div class=\"tc-head\"><span class=\"dot ok\"></span><span class=\"tc-name\">" + tool.name + "</span>" +
+  document.getElementById("registry").innerHTML = TOOLS.map((tool) => {
+    const officialConsumes = tool.consumes.filter((c) => c[1]);
+    const proposedConsumes = tool.consumes.filter((c) => !c[1]);
+    const officialProduces = tool.produces.filter((p) => p[2]);
+    const proposedProduces = tool.produces.filter((p) => !p[2]);
+    return "<div class=\"toolcard" + (activeTool && activeTool.name === tool.name ? " active" : "") + "\">" +
+    "<div class=\"tc-head\"><span class=\"dot ok\"></span><span class=\"tc-name\">" + tool.officialId + "</span>" +
     "<span class=\"badge implemented\">IMPLEMENTED</span></div>" +
-    "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("consumes") + "</div>" +
-    tool.consumes.map((e) => "<span class=\"evchip consumes\">" + e + "</span>").join("") + "</div>" +
-    "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("produces") + "</div>" +
-    tool.produces.map((e) => "<span class=\"evchip " + e[1] + "\">" + e[0] + "</span>").join("") + "</div>" +
+    "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("localIdLabel") + "</div>" +
+    "<span class=\"peer\">" + tool.name + "</span></div>" +
+    "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("consumes") + " · " + t("officialInput") + "</div>" +
+    officialConsumes.map((e) => "<span class=\"evchip consumes\">" + e[0] + "</span>").join("") + "</div>" +
+    (proposedConsumes.length ? "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("alsoAccepts") + "</div>" +
+      proposedConsumes.map((e) => "<span class=\"evchip proposed\">" + e[0] + "</span>").join("") + "</div>" : "") +
+    "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("produces") + " · " + t("officialOutput") + "</div>" +
+    officialProduces.map((e) => "<span class=\"evchip " + e[1] + "\">" + e[0] + "</span>").join("") + "</div>" +
+    (proposedProduces.length ? "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("alsoEmits") + "</div>" +
+      proposedProduces.map((e) => "<span class=\"evchip proposed\">" + e[0] + "</span>").join("") + "</div>" : "") +
     "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("upstream") + "</div><div class=\"peers\">" +
     tool.upstream.map((u) => "<span class=\"peer " + u[1] + "\">" + u[0] + (u[1] === "mock" ? " · MOCK" : "") + "</span>").join("") + "</div></div>" +
     "<div class=\"tc-sec\"><div class=\"tc-label\">" + t("downstream") + "</div><div class=\"peers\">" +
     tool.downstream.map((d) => "<span class=\"peer " + d[1] + "\">" + d[0] + (d[1] === "future" ? " ⌛" : "") + "</span>").join("") + "</div></div>" +
-    "<div class=\"tc-foot\">" + tool.src + "</div></div>").join("");
+    "<div class=\"tc-foot\">" + tool.src + "</div></div>";
+  }).join("");
 }
 
 /* ============================ connect-a-tool modal ============================ */
@@ -737,6 +886,8 @@ function renderConnectBody() {
     "<span class=\"cg-desc\">" + f[2][LANG] + "</span></div>").join("");
   const stepsHtml = g.steps[LANG].map((s) => "<li>" + s + "</li>").join("");
   body.innerHTML =
+    "<div style=\"margin-bottom:10px\"><span class=\"badge " + (g.official ? "success" : "proposed") + "\">" +
+    (g.official ? t("officialBadge") : t("proposedBadge")) + "</span></div>" +
     "<div class=\"kv\" style=\"margin-bottom:16px\">" +
     "<span class=\"k\">" + t("cgTarget") + "</span><span class=\"v hl\">" + g.tool + "</span>" +
     "<span class=\"k\">" + t("cgSchema") + "</span><span class=\"v\">" + g.schema + "</span></div>" +
@@ -827,6 +978,29 @@ function gaugeMetricHtml(k, vDisplay, value, max, threshold, bad, thresholdLabel
     "<div class=\"gauge-mark\" data-label=\"" + thresholdLabel + "\" style=\"left:" + tpct + "%\"></div></div></div>";
 }
 
+/* ============================ rendering: official contract panel ============================ */
+/* Static reference for the two flows Carlos confirmed. Not tied to the live
+   Input/Output stages below — this is the fixed contract, always the same
+   regardless of what is currently loaded in the editor. */
+function officialFlowHtml(nodes) {
+  return nodes.map((v, i) => (i > 0 ? "<span class=\"rarr\">→</span>" : "") +
+    "<div class=\"rnode\"><div class=\"rv\">" + v + "</div></div>").join("");
+}
+function renderOfficialPanel() {
+  const producer = t("ribbon")[0];
+  const consumer = t("ribbon")[7];
+  const flow1 = officialFlowHtml([producer, "MEASUREMENTS_CAPTURED", "calculate_cpk_ppk", "CAPABILITY_BELOW_TARGET", consumer]);
+  const flow2 = officialFlowHtml([producer, "NEW_DEVICE_REGISTERED", "run_msa_analysis", "MSA_VALIDATED", consumer]);
+  const flowsEl = document.getElementById("officialFlows");
+  if (flowsEl) {
+    flowsEl.innerHTML =
+      "<div class=\"official-flow-row\"><span class=\"official-flow-label\">" + t("flow1Label") + "</span><div class=\"ribbon\">" + flow1 + "</div></div>" +
+      "<div class=\"official-flow-row\"><span class=\"official-flow-label\">" + t("flow2Label") + "</span><div class=\"ribbon\">" + flow2 + "</div></div>";
+  }
+  const notesEl = document.getElementById("officialNotes");
+  if (notesEl) notesEl.innerHTML = t("officialNotes").map((n) => "<li>" + esc(n) + "</li>").join("");
+}
+
 /* ============================ rendering: ribbon ============================ */
 /* Event Flow language — section E of the brief: Producer Tool → Published Event →
    Event Broker / Ledger → Consuming Tool → Contract Validation → Handler Execution →
@@ -891,13 +1065,16 @@ function renderCompatibility(event, targetKey) {
   const check = computeCompatibility(event, targetKey);
   const badge = COMPAT_BADGE[check.status];
   const consumable = check.status === "compatible" || check.status === "missing";
+  const officialSubBadge = consumable
+    ? "<span class=\"badge " + (check.official ? "success" : "proposed") + "\">" + (check.official ? t("officialBadge") : t("proposedBadge")) + "</span>"
+    : "";
   summary.innerHTML =
     "<div class=\"kv\">" +
     "<span class=\"k\">" + t("cmpSelectedEvent") + "</span><span class=\"v hl\">" + esc(event.type) + "</span>" +
     "<span class=\"k\">" + t("cmpTargetTool") + "</span><span class=\"v\">" + (check.target ? check.target.name : "—") + "</span>" +
     "<span class=\"k\">" + t("cmpConsumable") + "</span><span class=\"v\">" + (consumable ? t("cmpYes") : t("cmpNo")) + "</span>" +
     "</div>" +
-    "<div class=\"compat-verdict\"><span class=\"badge " + badge[0] + "\">" + t(badge[1]) + "</span>" +
+    "<div class=\"compat-verdict\"><span class=\"badge " + badge[0] + "\">" + t(badge[1]) + "</span>" + officialSubBadge +
     (check.note ? "<span class=\"compat-note\">" + esc(check.note) + "</span>" : "") + "</div>";
   if (!check.items.length) {
     list.innerHTML = "<div class=\"insp-empty\">" + (consumable ? t("emptyContract") : t("notConsumableMsg")) + "</div>";
@@ -1121,11 +1298,20 @@ function paintInspector(ctx) {
     "<div style=\"margin-bottom:8px\"><span class=\"badge " + ctx.statusCls + "\">" + ctx.statusLabel + "</span></div>" +
     (o.result ? kvHtml(o.result) : "<div class=\"kv\"><span class=\"k\">message</span><span class=\"v\">" + esc(o.message || "") + "</span></div>");
   document.getElementById("iEmitted").innerHTML = o.emittedEvents.length
-    ? o.emittedEvents.map((e) => "<div style=\"padding:3px 0\"><span class=\"evchip " + (e.type.indexOf("BELOW") >= 0 || e.type.indexOf("NOT_") >= 0 ? "alert" : "produces") + "\">" + e.type + "</span></div>").join("")
+    ? o.emittedEvents.map((e) => "<div style=\"padding:3px 0\">" + emitChipHtml(e) + "</div>").join("")
     : "<span class=\"insp-empty\">— (" + (o.status === "warning" ? "warning path" : "validation-error") + ": no analysis event)</span>";
   document.getElementById("iJson").innerHTML = jsonHtml(o);
   document.getElementById("iEvidence").innerHTML = "<div class=\"evidence\">" +
     t("evidence").map((l) => "<span class=\"" + (l[0] === "ok" ? "ok" : "") + "\">" + (l[0] === "ok" ? "✓" : "◦") + "</span> " + esc(l[1]) + "<br>").join("") + "</div>";
+}
+
+/* emitted-event chip: official events use produces/alert styling; anything not
+   confirmed by Carlos (official === false) is always styled + labeled "proposed",
+   never presented as if it were an official broker event. */
+function emitChipHtml(e) {
+  const cls = e.official ? (e.type.indexOf("BELOW") >= 0 ? "alert" : "produces") : "proposed";
+  const suffix = e.official ? "" : " <small>(" + t("proposedBadge") + ")</small>";
+  return "<span class=\"evchip " + cls + "\">" + e.type + suffix + "</span>";
 }
 
 /* ============================ output stage ============================ */
@@ -1201,7 +1387,7 @@ function paintEmitted(outcome) {
       "<span class=\"peer " + r[1] + "\">" + r[0] + "</span>" +
       "<span class=\"badge " + (r[1] === "future" ? "future" : "confirm") + "\">" + (r[1] === "future" ? "FUTURE ADAPTER" : "NEEDS CARLOS CONFIRMATION") + "</span>"
     ).join("<span class=\"earrow\">·</span>");
-    return "<div class=\"emit-row\"><span class=\"evchip " + (e.type.indexOf("BELOW") >= 0 || e.type.indexOf("NOT_") >= 0 ? "alert" : "produces") + "\">" + e.type + "</span>" +
+    return "<div class=\"emit-row\">" + emitChipHtml(e) +
       "<span class=\"earrow\">→</span>" + (routes || "<span class=\"empty-note\">—</span>") + "</div>";
   }).join("");
 }
@@ -1217,7 +1403,7 @@ function paintDashboards(outcome, toolKey, vi) {
   state.textContent = vi.chipLabel;
   rec.innerHTML = "<b>" + (LANG === "en" ? "Recommendation:" : "Recomendación:") + "</b> " + esc(outcome.recommendation);
   emits.innerHTML = outcome.emittedEvents.length
-    ? outcome.emittedEvents.map((e) => "<span class=\"evchip " + (e.type.indexOf("BELOW") >= 0 || e.type.indexOf("NOT_") >= 0 ? "alert" : "produces") + "\">" + e.type + "</span>").join("")
+    ? outcome.emittedEvents.map((e) => emitChipHtml(e)).join("")
     : "<span class=\"insp-empty\">" + (LANG === "en" ? "no events emitted" : "sin eventos emitidos") + "</span>";
   if (outcome.status !== "completed") {
     grid.innerHTML = metricHtml(t("verdict"), vi.label, "critical");
@@ -1269,6 +1455,13 @@ async function run() {
     ? { ok: false, status: compat.status, message: compat.note || t("notConsumableMsg"), details: [], emittedEvents: [],
         recommendation: compat.status === "unconfirmed" ? t("cmpNeedsConfirm") : t("notConsumableMsg") }
     : tool.handler(event);
+  /* Best-effort publish to the real bus proxy (bus-proxy/server.js), if running.
+     Fire-and-forget: see publishToBus above. Publishes the incoming event as the
+     root of the chain, then every emitted event caused by it. */
+  publishToBus(event, corr, null);
+  if (!blocked) {
+    outcome.emittedEvents.forEach((e) => publishToBus({ type: e.type, source: e.source, payload: e.payload }, corr, eventId));
+  }
   const vi = verdictInfo(outcome, tool.key);
   const failed = blocked || outcome.status === "validation-error";
   const warned = !blocked && outcome.status === "warning";
@@ -1327,7 +1520,7 @@ async function run() {
     id: nextLedgerId++, ts, corr, cause: eventId,
     src: event.source || "manual", ev: event.type, tgt: tool.name,
     st: stLabel,
-    em: outcome.emittedEvents.map((e) => e.type).join(", ") || "—",
+    em: outcome.emittedEvents.map((e) => e.type + (e.official ? "" : " (proposed)")).join(", ") || "—",
     dc: consumers.join(", ") || "—"
   });
 
@@ -1339,6 +1532,7 @@ async function run() {
     statusCls: vi.chip, statusLabel: vi.chipLabel
   });
   setRunChip(vi.chip, vi.chipLabel);
+  checkBusProxy();
 
   running = false;
   document.getElementById("btnRun").disabled = false;
@@ -1448,6 +1642,7 @@ function applyLang() {
   renderScenarios();
   renderExtExamples();
   renderRawExampleSelect();
+  renderOfficialPanel();
   renderRibbon();
   renderTimeline();
   refreshFromInput();
@@ -1534,6 +1729,7 @@ try {
   if (saved) applyTheme(saved);
 } catch (e) { /* ignore */ }
 
+renderOfficialPanel();
 renderRibbon();
 renderTimeline();
 renderScenarios();
@@ -1544,5 +1740,9 @@ seedLedger();
 loadScenarioIntoEditor();
 loadExtExample(SCENARIOS[0].id);
 setMode("external");
+checkBusProxy();
+setInterval(checkBusProxy, 4000); /* picks up bus-proxy/server.js if started mid-session */
+const busChipEl = document.getElementById("busChip");
+if (busChipEl) busChipEl.onclick = promptBusUrl;
 setRunChip("", t("runIdle"));
 initQuicknav();

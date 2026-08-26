@@ -15,11 +15,12 @@ function sampleStandardDeviation(values) {
   return Math.sqrt(variance);
 }
 
-function buildEvent(type, payload) {
+function buildEvent(type, payload, official) {
   return {
     type,
     source: "run-msa-analysis",
     occurredAt: new Date().toISOString(),
+    official: !!official,
     payload
   };
 }
@@ -161,14 +162,19 @@ function handle(event) {
   if (validation) return validation;
 
   const result = analyze(normalized.payload);
-  const emittedEvents = [buildEvent("MSA_ANALYSIS_COMPLETED", result)];
-  emittedEvents.push(buildEvent(result.verdict === "acceptable" ? "MSA_VALIDATED" : "MSA_NOT_ACCEPTABLE", {
+  /* MSA_ANALYSIS_COMPLETED and MSA_NOT_ACCEPTABLE are not part of Carlos' confirmed
+     contract yet — emitted as proposed/internal events only (official: false). The
+     only official output event is MSA_VALIDATED, confirmed by Carlos:
+     NEW_DEVICE_REGISTERED -> MSA_VALIDATED. */
+  const emittedEvents = [buildEvent("MSA_ANALYSIS_COMPLETED", result, false)];
+  const acceptable = result.verdict === "acceptable";
+  emittedEvents.push(buildEvent(acceptable ? "MSA_VALIDATED" : "MSA_NOT_ACCEPTABLE", {
     studyId: result.studyId,
     deviceId: result.deviceId,
     gageRRPercent: result.gageRRPercent,
     ndc: result.ndc,
     recommendation: result.recommendation
-  }));
+  }, acceptable));
 
   return {
     ok: true,

@@ -16,7 +16,7 @@
       <span class="thesis">Separate ownership, unified contracts.</span>
     </div>
     <div class="cmd-sep"></div>
-    <span class="syschip"><span class="dot warn"></span>Event Bus <span class="badge mock">MOCK</span></span>
+    <span class="syschip" id="busChip" style="cursor:pointer" title="Clic para pegar la URL de tu bus (Railway, etc.)"><span class="dot warn" id="busDot"></span>Event Bus <span class="badge mock" id="busBadge">MOCK</span> <span style="color:var(--muted);font-size:10px">(clic para configurar)</span></span>
     <span class="syschip"><span class="dot ok"></span>PostgreSQL <span class="badge demo">DEMO DATA</span> <span id="pgCount" style="color:var(--muted)">event_ledger · 0</span></span>
     <div class="cmd-sep"></div>
     <div class="seg" id="modeSeg">
@@ -77,6 +77,20 @@
         </div>
         <div class="stage-body">
           <div class="ribbon" id="ribbon"></div>
+        </div>
+      </div>
+
+      <!-- OFFICIAL CONTRACT — CONFIRMED BY CARLOS -->
+      <div class="stage" id="officialContract">
+        <div class="stage-head">
+          <div>
+            <span class="stage-title" data-i18n="officialTitle">Official Contract — Confirmed by Carlos</span>
+          </div>
+          <span class="badge success" data-i18n="officialBadge">OFFICIAL</span>
+        </div>
+        <div class="stage-body">
+          <div id="officialFlows"></div>
+          <ul class="cg-steps" id="officialNotes" style="margin-top:14px"></ul>
         </div>
       </div>
 

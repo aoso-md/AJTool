@@ -125,12 +125,42 @@ tool-to-tool call anywhere in this diagram or in the code that drives it.
 5. **(2:15)** Switch to **Manual Input**, change one measurement, run. Same pipeline, same ledger — input can come from any tool or from a person. Switch to **Raw JSON Event**, paste any envelope, hit **Validate Event** before running it.
 6. **(2:45)** Point at MARLI, dashed: future consumer, not implemented, and the UI says so. Close with the thesis: two tools, one shared contract boundary, no direct coupling.
 
-## How this later connects to a real Event Bus and PostgreSQL
+## Event Bus — now a real local proxy, not just a plan
 
-- **Event Bus**: replace the in-process `tool.handler(event)` call in `app.js` (`run()`) with a publish to the bus defined in `adapters/carlos-ecosystem/communication-rules.json`. The event shape already matches `contracts/events/*.schema.json`.
-- **PostgreSQL**: replace `appendLedger()` with an `INSERT` into a table with the exact columns the UI already renders. The seed rows show the target schema.
-- **New producers (like Demian's tool)**: once Carlos confirms an event contract for a new event type, add it to `EVENT_TO_TOOL`/`TOOLS[].consumes` and the required-field list in `computeCompatibility()` — the External Tool Event form, compatibility check, and ledger all pick it up automatically.
-- Nothing else changes: contracts, handlers, and routing stay as they are. That is the point of *separate ownership, unified contracts*.
+`bus-proxy/server.js` (see `bus-proxy/README.md`) is a real, standalone Node
+process implementing `POST /events`, `GET /events/subscriptions/:toolId`,
+`GET /events/chain/:correlationId`, and `GET /health` — the exact contract
+Carlos' platform expects. `app.js` checks it on load and every 4s
+(`checkBusProxy()`), and best-effort publishes every incoming + emitted
+event to it during `run()` (`publishToBus()` — fire-and-forget, never blocks
+or breaks the UI if the proxy isn't running). The **Event Bus** pill in the
+command bar reflects the real, current state: `MOCK` (proxy not running),
+`LIVE (LOCAL PROXY)` (proxy running, in-memory only), or `LIVE` (proxy
+running and forwarding to the real IsoTools API).
+
+The proxy runs in-memory by default (`LOCAL` mode) — nothing invented, no
+fake "connected" state. It only forwards to the real IsoTools API, with the
+required `x-api-key` header attached server-side, once
+`ISOTOOLS_API_BASE_URL` and `ISOTOOLS_API_KEY` are set in `bus-proxy/.env`
+(gitignored, never committed) — see `bus-proxy/README.md` for exact steps.
+The key never lives in this frontend or anywhere tracked in this repo.
+
+## PostgreSQL
+
+Still not connected. Replace `appendLedger()` in `app.js` with an `INSERT`
+into a table with the exact columns the UI already renders (the seed rows
+show the target schema), or point `bus-proxy/server.js`'s in-memory ledger
+at a real Postgres instance — either works, since both already use the
+same column shape.
+
+## New producers (like Demian's tool)
+
+Once Carlos confirms an event contract for a new event type, add it to
+`EVENT_TO_TOOL`/`TOOLS[].consumes` and the required-field list in
+`computeCompatibility()` — the External Tool Event form, compatibility
+check, and ledger all pick it up automatically. Nothing else changes:
+contracts, handlers, and routing stay as they are. That is the point of
+*separate ownership, unified contracts*.
 
 ## Files
 
