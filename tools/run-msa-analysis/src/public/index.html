@@ -5,64 +5,131 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>run_msa_analysis</title>
 <style>
-  :root{
-    --bg:#0f1420; --panel:#161d2c; --panel2:#0d1117; --border:#2a3346;
-    --text:#e5e7eb; --muted:#9aa4b2; --accent:#f59e0b; --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b;
-  }
-  *{box-sizing:border-box;}
-  body{background:var(--bg); color:var(--text); font-family:Arial,Helvetica,sans-serif; margin:0; padding:24px;}
-  .wrap{max-width:960px; margin:0 auto;}
-  h1{font-size:20px; margin:0 0 4px;}
-  .sub{color:var(--muted); font-size:13px; margin:0 0 20px;}
-  .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:bold; margin-left:8px;}
-  .badge.ok{background:#0d2a1a; color:var(--ok); border:1px solid var(--ok);}
-  .badge.bad{background:#2a1010; color:var(--bad); border:1px solid var(--bad);}
-  .card{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:16px;}
-  .card h2{font-size:14px; margin:0 0 12px; color:var(--accent);}
-  label{display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;}
-  input[type=text], input[type=number], select{
-    width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--text);
-    border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit;
-  }
-  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
-  .row4{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px;}
-  .actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;}
-  button{background:var(--accent); color:#0b1220; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:bold; cursor:pointer;}
-  button.secondary{background:transparent; color:var(--accent); border:1px solid var(--accent);}
-  button.small{padding:5px 10px; font-size:12px;}
-  button:hover{opacity:.85;}
-  .keyrow{display:flex; gap:10px; align-items:center;}
-  .keyrow input{flex:1;}
-  .chk{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); white-space:nowrap;}
-  table{width:100%; border-collapse:collapse; margin-top:8px;}
-  th{text-align:left; font-size:11px; color:var(--muted); text-transform:uppercase; padding:4px 6px;}
-  td{padding:3px 6px;}
-  td input{padding:6px 8px; font-size:12px;}
-  #result{display:none;}
-  .verdict{font-size:18px; font-weight:bold; padding:10px 14px; border-radius:8px; margin-bottom:12px;}
-  .verdict.acceptable{background:#0d2a1a; color:var(--ok); border:1px solid var(--ok);}
-  .verdict.not-acceptable{background:#2a1010; color:var(--bad); border:1px solid var(--bad);}
-  .verdict.error{background:#2a1010; color:var(--bad); border:1px solid var(--bad);}
-  .verdict.warning{background:#2a2010; color:var(--warn); border:1px solid var(--warn);}
-  .metrics{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px;}
-  .metric{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px;}
-  .metric .l{font-size:10px; color:var(--muted); text-transform:uppercase;}
-  .metric .v{font-size:16px; font-weight:bold; margin-top:2px;}
-  .reco{font-size:13px; color:var(--text); background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px; margin-bottom:12px;}
-  pre{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:11px; overflow:auto; max-height:300px;}
-  .foot{color:var(--muted); font-size:11px; margin-top:24px; text-align:center;}
-  .err{color:var(--bad); font-size:12px; margin-top:8px;}
+/* =====================================================================
+   Same design language as workspace/ui/styles.css:
+   warm light (Claude-style) + Apple-clean spacing.
+   ===================================================================== */
+:root {
+  --bg: #faf9f5; --bg-soft: #f4f1ea; --panel: #ffffff; --panel-soft: #fcfbf8;
+  --border: #e7e2d8; --border-strong: #d8d2c4;
+  --text: #26231d; --text-soft: #57524a; --muted: #8a8375; --faint: #b3ac9d;
+  --accent: #c96442; --accent-soft: #f7e8e1; --accent-text: #a34e30;
+  --success: #2e7d5b; --success-soft: #e4f1ea;
+  --warning: #a3782a; --warning-soft: #f7eeda;
+  --critical: #b3402e; --critical-soft: #f9e6e2;
+  --info: #4a7ba6; --info-soft: #e7eff6;
+  --shadow-sm: 0 1px 2px rgba(38,35,29,.05);
+  --shadow-md: 0 1px 3px rgba(38,35,29,.05), 0 8px 24px rgba(38,35,29,.06);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, sans-serif;
+  --mono: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, ui-monospace, monospace;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+  font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 920px; margin: 0 auto; padding: 32px 24px 60px; }
+
+.hdr { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.hdr h1 { font-family: var(--serif); font-size: 24px; font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+.sub { color: var(--muted); font-size: 13px; margin: 6px 0 26px; }
+.sub b { color: var(--text-soft); font-weight: 650; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.6px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+}
+.badge.ok { background: var(--success-soft); color: var(--success); }
+.badge.bad { background: var(--critical-soft); color: var(--critical); }
+
+.card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+  padding: 20px 22px; margin-bottom: 18px;
+}
+.card h2 { font-family: var(--serif); font-size: 15px; font-weight: 650; margin: 0 0 14px; color: var(--text); }
+
+label {
+  display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.9px;
+  text-transform: uppercase; color: var(--muted); margin: 12px 0 6px;
+}
+input[type=text], input[type=number], select {
+  width: 100%; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-family: var(--mono); font-size: 12.5px;
+  padding: 10px 13px; outline: none; transition: border-color .18s ease, box-shadow .18s ease;
+}
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.row4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 16px; }
+@media (max-width: 640px) { .row4 { grid-template-columns: 1fr 1fr; } }
+
+.keyrow { display: flex; gap: 10px; align-items: center; }
+.keyrow input { flex: 1; }
+.chk { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th {
+  text-align: left; font-size: 9.5px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: var(--faint); padding: 4px 8px;
+}
+td { padding: 4px 8px; }
+td input { padding: 8px 10px; font-size: 12px; }
+
+.actions { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+.btn {
+  border: 0; border-radius: 999px; cursor: pointer;
+  font-family: var(--sans); font-size: 13.5px; font-weight: 650;
+  padding: 11px 24px; transition: all .18s ease;
+}
+.btn.primary { background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
+.btn.primary:hover { filter: brightness(1.08); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.btn.quiet { background: var(--panel); color: var(--text-soft); border: 1px solid var(--border); }
+.btn.quiet:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.btn.small { padding: 6px 14px; font-size: 12px; }
+.err { color: var(--critical); font-size: 12px; margin-top: 10px; font-weight: 600; }
+
+#result { display: none; }
+.verdict-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.verdict-big { font-family: var(--serif); font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
+.verdict-big.success { color: var(--success); }
+.verdict-big.critical { color: var(--critical); }
+.verdict-big.warning { color: var(--warning); }
+
+.metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+@media (max-width: 640px) { .metric-grid { grid-template-columns: 1fr 1fr; } }
+.metric { background: var(--panel-soft); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
+.metric .mk { font-size: 9.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--faint); }
+.metric .mv { font-family: var(--mono); font-size: 18px; font-weight: 700; margin-top: 3px; color: var(--text); }
+
+.recommendation {
+  font-size: 13px; line-height: 1.6; color: var(--text-soft);
+  border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; margin-bottom: 4px;
+}
+details summary { cursor: pointer; color: var(--muted); font-size: 11.5px; margin-top: 12px; }
+pre.json {
+  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px;
+  padding: 13px 15px; font-family: var(--mono); font-size: 11px; line-height: 1.6;
+  color: var(--text-soft); overflow: auto; max-height: 300px; margin-top: 10px;
+}
+.foot { color: var(--faint); font-size: 11px; margin-top: 30px; text-align: center; font-family: var(--mono); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>run_msa_analysis <span id="statusBadge" class="badge">checando...</span></h1>
-  <p class="sub">MSA / Gage R&amp;R — análisis del sistema de medición. Input oficial: <b>NEW_DEVICE_REGISTERED</b> → Output oficial: <b>MSA_VALIDATED</b></p>
+  <div class="hdr">
+    <h1>run_msa_analysis</h1>
+    <span id="statusBadge" class="badge">checando…</span>
+  </div>
+  <p class="sub">MSA / Gage R&amp;R — análisis del sistema de medición · Input oficial <b>NEW_DEVICE_REGISTERED</b> → Output oficial <b>MSA_VALIDATED</b></p>
 
   <div class="card">
     <h2>Acceso</h2>
     <div class="keyrow">
-      <input type="text" id="apiKey" placeholder="x-api-key (te lo dio Angel/Carlos)">
+      <input type="text" id="apiKey" placeholder="x-api-key">
       <label class="chk"><input type="checkbox" id="saveKey"> guardar en este navegador</label>
     </div>
   </div>
@@ -82,29 +149,27 @@
     </div>
 
     <label>Observaciones</label>
-    <table id="obsTable">
+    <table>
       <thead><tr><th>Part ID</th><th>Operator ID</th><th>Trial</th><th>Value</th><th></th></tr></thead>
       <tbody id="obsBody"></tbody>
     </table>
-    <button class="secondary small" onclick="addRow()">+ agregar fila</button>
+    <button class="btn quiet small" onclick="addRow()">+ agregar fila</button>
 
     <div class="actions">
-      <button onclick="runIt()">▶ Ejecutar</button>
+      <button class="btn primary" onclick="runIt()">▶ Ejecutar</button>
     </div>
     <div id="err" class="err"></div>
   </div>
 
   <div class="card" id="result">
     <h2>Resultado</h2>
-    <div id="verdictBox"></div>
-    <div id="metricsBox" class="metrics"></div>
-    <div id="recoBox" class="reco"></div>
-    <details><summary style="cursor:pointer; color:var(--muted); font-size:12px;">Ver JSON técnico</summary>
-      <pre id="rawJson"></pre>
-    </details>
+    <div class="verdict-row" id="verdictBox"></div>
+    <div class="metric-grid" id="metricsBox"></div>
+    <div class="recommendation" id="recoBox"></div>
+    <details><summary>Ver JSON técnico</summary><pre class="json" id="rawJson"></pre></details>
   </div>
 
-  <p class="foot">POST /events · GET /health · Docker: docker/run_msa_analysis.Dockerfile</p>
+  <p class="foot">POST /events · GET /health · docker/run_msa_analysis.Dockerfile</p>
 </div>
 
 <script>
@@ -129,13 +194,9 @@
       '<td><input type="text" class="c-op" placeholder="p.ej. A" value="'+(operatorId ?? "")+'"></td>' +
       '<td><input type="number" class="c-trial" placeholder="1" value="'+(trial ?? "")+'"></td>' +
       '<td><input type="number" step="any" class="c-val" placeholder="medición" value="'+(value ?? "")+'"></td>' +
-      '<td><button class="secondary small" onclick="this.closest(\'tr\').remove()">✕</button></td>';
+      '<td><button class="btn quiet small" onclick="this.closest(\'tr\').remove()">✕</button></td>';
     tbody.appendChild(tr);
   }
-
-  function clearRows() { document.getElementById("obsBody").innerHTML = ""; }
-
-  // Empieza con unas filas en blanco listas para capturar — sin datos de demo.
   for (let i = 0; i < 4; i++) addRow();
 
   async function runIt() {
@@ -169,10 +230,7 @@
         body: JSON.stringify(event)
       });
       body = await res.json();
-    } catch (e) {
-      errBox.textContent = "No se pudo conectar: " + e.message;
-      return;
-    }
+    } catch (e) { errBox.textContent = "No se pudo conectar: " + e.message; return; }
 
     if (res.status === 401) { errBox.textContent = "Falta el x-api-key o está mal (401)."; return; }
 
@@ -184,8 +242,8 @@
     const recoBox = document.getElementById("recoBox");
 
     if (!body.ok || !body.result) {
-      const cls = body.status === "warning" ? "warning" : "error";
-      verdictBox.innerHTML = '<div class="verdict '+cls+'">' + (body.message || "Error") + '</div>';
+      const cls = body.status === "warning" ? "warning" : "critical";
+      verdictBox.innerHTML = '<span class="verdict-big '+cls+'">' + (body.message || "Error") + '</span>';
       metricsBox.innerHTML = "";
       recoBox.textContent = (body.details || []).join(" · ") || body.recommendation || "";
       return;
@@ -193,12 +251,12 @@
 
     const r = body.result;
     const isAcceptable = r.verdict === "acceptable";
-    verdictBox.innerHTML = '<div class="verdict ' + (isAcceptable ? "acceptable" : "not-acceptable") + '">' +
-      (isAcceptable ? "✓ ACCEPTABLE" : "✗ NOT ACCEPTABLE") + '</div>';
+    verdictBox.innerHTML = '<span class="verdict-big ' + (isAcceptable ? "success" : "critical") + '">' +
+      (isAcceptable ? "✓ Acceptable" : "✗ Not Acceptable") + '</span>';
     metricsBox.innerHTML = [
       ["Gage R&R %", r.gageRRPercent], ["Repeatability", r.repeatability],
       ["Reproducibility", r.reproducibility], ["NDC", r.ndc]
-    ].map(([l,v]) => '<div class="metric"><div class="l">'+l+'</div><div class="v">'+v+'</div></div>').join("");
+    ].map(([l,v]) => '<div class="metric"><div class="mk">'+l+'</div><div class="mv">'+v+'</div></div>').join("");
     recoBox.textContent = r.recommendation || body.recommendation || "";
   }
 </script>
