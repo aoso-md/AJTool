@@ -1,0 +1,20 @@
+# Keep the build context small and reproducible. The Dockerfiles copy
+# only the folders they need, but excluding these keeps the context
+# upload fast and guarantees no local secret or stray node_modules can
+# be baked into a published image.
+
+.git
+.github
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+workspace
+obsidian
+docs
+test
+db
+*.docx
+*.pptx
+*.pdf
+README.md

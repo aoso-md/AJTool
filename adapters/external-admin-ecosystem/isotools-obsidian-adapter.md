@@ -12,5 +12,5 @@ Publish quality-tool outputs into IsoTools/Obsidian notes while keeping this rep
 
 ## Boundaries
 
-This repo should generate markdown payloads or adapter instructions only. Writing directly into the IsoTools vault requires Carlos' approval and should happen in a separate integration step.
+This repo should generate markdown payloads or adapter instructions only. Writing directly into the IsoTools vault requires [EXTERNAL_ADMIN]' approval and should happen in a separate integration step.
 

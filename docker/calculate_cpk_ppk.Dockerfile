@@ -1,11 +1,13 @@
 # calculate_cpk_ppk — Cpk/Ppk process capability analysis
-# Zero npm dependencies (pure Node). Build context must be the repo root:
+# One dependency (pg, only used if DATABASE_URL is set). Build context
+# must be the repo root:
 #   docker build -f docker/calculate_cpk_ppk.Dockerfile -t calculate_cpk_ppk .
 #
 # Runs tools/calculate-cpk-ppk/src/server.js — an HTTP wrapper around the
 # same handler logic (same validation, same math, same emitted events):
 #   GET  /health
 #   POST /events   (body = full event envelope, see tools/calculate-cpk-ppk/demo/*.json)
+#   GET  /reports  (recent invocations — only populated if DATABASE_URL is set)
 #
 # Run:
 #   docker run --rm -p 8081:8081 calculate_cpk_ppk
@@ -20,6 +22,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY tools/calculate-cpk-ppk/package.json ./package.json
+RUN npm install --omit=dev
 COPY tools/calculate-cpk-ppk/src ./src
 COPY tools/calculate-cpk-ppk/demo ./demo
 # src/public/index.html (the frontend served at GET /) is included

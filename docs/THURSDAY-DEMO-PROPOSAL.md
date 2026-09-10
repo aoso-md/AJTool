@@ -16,5 +16,5 @@
 
 ## Demo Point
 
-The two tools are independent but connectable through event contracts. This matches Carlos' tool-to-tool communication pattern without modifying Carlos' repos.
+The two tools are independent but connectable through event contracts. This matches [EXTERNAL_ADMIN]' tool-to-tool communication pattern without modifying [EXTERNAL_ADMIN]' repos.
 

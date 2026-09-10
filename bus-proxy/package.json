@@ -2,10 +2,13 @@
   "name": "quality-tools-bus-proxy",
   "version": "0.1.0",
   "private": true,
-  "description": "Local/deployed event bus proxy for the Quality Tools Workspace. Zero dependencies.",
+  "description": "Local/deployed event bus proxy for the Quality Tools Workspace. Optional Postgres persistence via DATABASE_URL.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
   },
   "engines": {
     "node": ">=18"

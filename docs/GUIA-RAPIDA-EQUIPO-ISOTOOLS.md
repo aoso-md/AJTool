@@ -1,12 +1,12 @@
 # Quality Tools Workspace — guía rápida para el equipo
 
-Para Carlos, programadores de IsoTools, Joaquín y Angel. Explicación
+Para [EXTERNAL_ADMIN], programadores de IsoTools, Joaquín y Angel. Explicación
 simple de qué es esto, cómo funciona, y cómo probarlo tú mismo.
 
 ## Qué es, en una frase
 
 Dos herramientas de calidad (Cpk/Ppk y MSA) que viven separadas, pero se
-conectan entre sí y con el resto del ecosistema de Carlos mandándose
+conectan entre sí y con el resto del ecosistema de [EXTERNAL_ADMIN] mandándose
 "mensajes estándar" en vez de llamarse directamente entre código.
 
 La regla de oro: **cada tool es dueña de su propia lógica — se conectan
@@ -25,7 +25,7 @@ solo por contrato, nunca por llamada directa.**
   válido. Si faltan, la tool no inventa un resultado — se detiene y avisa.
 - **Bus de eventos**: el "cartero" que reparte los eventos entre tools.
   Nadie llama directo a nadie, todos publican y consumen del mismo bus.
-- **Oficial vs. propuesto**: "oficial" significa que Carlos ya confirmó
+- **Oficial vs. propuesto**: "oficial" significa que [EXTERNAL_ADMIN] ya confirmó
   ese evento como parte real del contrato. "Propuesto" significa que la
   tool lo usa localmente, pero todavía no está confirmado — se etiqueta
   así en todos lados para no fingir que ya es definitivo.
@@ -54,7 +54,7 @@ produce oficialmente `CAPABILITY_BELOW_TARGET`.
 **`run_msa_analysis`** (Joaquín) — consume `NEW_DEVICE_REGISTERED`,
 produce oficialmente `MSA_VALIDATED`.
 
-Ambos contratos ya los confirmó Carlos. Todo lo demás que las tools
+Ambos contratos ya los confirmó [EXTERNAL_ADMIN]. Todo lo demás que las tools
 aceptan o emiten es propuesto, no oficial todavía.
 
 ## Qué es real y qué es simulado (sin adornos)
@@ -64,7 +64,7 @@ aceptan o emiten es propuesto, no oficial todavía.
   evento.
 - **Simulado / demo**: el ledger vive en memoria (no hay PostgreSQL
   todavía), y el bus de Railway todavía no está conectado a la API real
-  de IsoTools — corre en modo local hasta que Carlos confirme URL y
+  de IsoTools — corre en modo local hasta que [EXTERNAL_ADMIN] confirme URL y
   credenciales.
 - **Futuro, no construido**: MARLI. Aparece en la consola como referencia
   de hacia dónde podría ir esto, pero no hay código de MARLI hoy.
@@ -86,7 +86,7 @@ sin la consola:
 node tools/calculate-cpk-ppk/src/handler.js tools/calculate-cpk-ppk/demo/capable-case.json
 ```
 
-## Lo que falta confirmar con Carlos
+## Lo que falta confirmar con [EXTERNAL_ADMIN]
 
 - ¿`MSA_NOT_ACCEPTABLE` debería ser un evento oficial (hoy no lo es)?
 - ¿El caso "capable" de Cpk debería tener también un evento oficial de

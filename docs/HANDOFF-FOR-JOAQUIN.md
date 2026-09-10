@@ -21,17 +21,17 @@ deberías ver (ya verificados):
 - `not-acceptable-case.json` → `gageRRPercent: 119.508`, `ndc: 0`, verdict `not-acceptable`, emite `MSA_NOT_ACCEPTABLE`.
 - `incomplete-device-case.json` → sin `observations`, responde `status: "warning"`, no inventa análisis.
 
-## 2. Contrato oficial confirmado por Carlos (tu tool)
+## 2. Contrato oficial confirmado por [EXTERNAL_ADMIN] (tu tool)
 
 - **Input oficial**: `NEW_DEVICE_REGISTERED` → **Output oficial**: `MSA_VALIDATED`.
 - Todo lo demás que tu handler acepta o emite (`MSA_STUDY_REQUESTED` como
   input, `MSA_ANALYSIS_COMPLETED` y `MSA_NOT_ACCEPTABLE` como output) es
   **propuesto / no oficial** — sigue funcionando local, pero está marcado
   como tal en el código (`official: true/false` en cada evento emitido) y
-  en toda la UI. Detalle completo: `docs/OFFICIAL-CARLOS-CONTRACT.md`.
+  en toda la UI. Detalle completo: `docs/OFFICIAL-EXTERNAL-ADMIN-CONTRACT.md`.
 - Ojo con esto: `MSA_NOT_ACCEPTABLE` — el caso que más importa para
   enrutar a nonconformance — todavía **no** es oficial. Vale la pena que
-  lo confirmes con Carlos.
+  lo confirmes con [EXTERNAL_ADMIN].
 
 ## 3. Ver tu tool corriendo en la consola compartida
 
@@ -58,7 +58,7 @@ tarea pendiente.
 ## 4. El bus de eventos ahora es real (no solo mock)
 
 Nuevo: `bus-proxy/server.js` — un proceso Node aparte (sin dependencias)
-que expone el contrato real que pide Carlos: `POST /events`,
+que expone el contrato real que pide [EXTERNAL_ADMIN]: `POST /events`,
 `GET /events/subscriptions/:toolId`, `GET /events/chain/:correlationId`.
 
 ```bash
@@ -66,7 +66,7 @@ node bus-proxy/server.js
 ```
 
 Corre en modo `LOCAL` (en memoria, en tu máquina) hasta que se le pongan
-las credenciales reales de Carlos en `bus-proxy/.env` (copia
+las credenciales reales de [EXTERNAL_ADMIN] en `bus-proxy/.env` (copia
 `bus-proxy/.env.example`, nunca se commitea). Con el proxy corriendo, la
 pastilla "Event Bus" en la UI cambia sola de `MOCK` a `LIVE (LOCAL
 PROXY)`, y cada corrida en la consola también publica el evento ahí.
@@ -79,13 +79,13 @@ Tu `toolId` oficial para consultar el bus es `run_msa_analysis` (no
 Invoke-RestMethod http://localhost:8787/events/subscriptions/run_msa_analysis
 ```
 
-## 5. Pendientes que dependen de Carlos (los tuyos)
+## 5. Pendientes que dependen de [EXTERNAL_ADMIN] (los tuyos)
 
-De `docs/OPEN-QUESTIONS-FOR-CARLOS.md` y `docs/OFFICIAL-CARLOS-CONTRACT.md`:
+De `docs/OPEN-QUESTIONS-FOR-EXTERNAL-ADMIN.md` y `docs/OFFICIAL-EXTERNAL-ADMIN-CONTRACT.md`:
 
 - ¿`MSA_NOT_ACCEPTABLE` debería ser oficial y disparar
   `manage_nonconformances` automáticamente?
-- ¿Cuál es el criterio exacto de "aceptable" que Carlos quiere (hoy el
+- ¿Cuál es el criterio exacto de "aceptable" que [EXTERNAL_ADMIN] quiere (hoy el
   handler usa Gage R&R ≤ 10% y ndc ≥ 5 — estándar típico, pero no
   confirmado por él)?
 - ¿`NEW_DEVICE_REGISTERED` sin observations debería disparar

@@ -1,4 +1,4 @@
-# Quality Tools Workspace — Carlos Demo Explanation
+# Quality Tools Workspace — [EXTERNAL_ADMIN] Demo Explanation
 
 ## Core idea
 
@@ -65,7 +65,7 @@ It checks compatibility against four statuses:
 - `COMPATIBLE`
 - `MISSING DATA`
 - `NOT CONSUMABLE`
-- `NEEDS CARLOS CONFIRMATION`
+- `NEEDS EXTERNAL-ADMIN CONFIRMATION`
 
 ## What is real
 
@@ -85,7 +85,7 @@ It checks compatibility against four statuses:
 - real downstream execution
 - MARLI adapter
 
-## Questions for Carlos
+## Questions for [EXTERNAL_ADMIN]
 
 1. What are the official tool IDs for our tools?
 2. Should we use `/events/subscriptions/:toolId` as the main consume pattern?
@@ -96,9 +96,9 @@ It checks compatibility against four statuses:
 7. Should `MSA_NOT_ACCEPTABLE` trigger `manage_nonconformances`?
 8. Where do the official contracts live: IsoTools, industrial-api-v2, or a shared package?
 
-## Message draft for Carlos
+## Message draft for [EXTERNAL_ADMIN]
 
-> Qué onda Carlos, sí ya le eché un ojo al repo y al README-PROGRAMADORES.
+> Qué onda [EXTERNAL_ADMIN], sí ya le eché un ojo al repo y al README-PROGRAMADORES.
 >
 > Entendí que el modelo correcto es broker de eventos: la tool no habla
 > directo con otra tool, publica con POST /events y consume por
@@ -115,7 +115,7 @@ It checks compatibility against four statuses:
 > si el evento es compatible con la tool, si faltan campos, si no es
 > consumible o si necesita confirmación contigo. Por ejemplo, si entra
 > MEASUREMENTS_CAPTURED puede ir a calculate-cpk-ppk; si entra
-> NONCONFORMANCE_CREATED de Demian lo marcamos como needs
+> NONCONFORMANCE_CREATED de [DEVELOPER] lo marcamos como needs
 > confirmation/adaptador, no lo fingimos compatible.
 >
 > Nos falta confirmar contigo los event types oficiales, el envelope exacto

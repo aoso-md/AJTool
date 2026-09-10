@@ -3,7 +3,7 @@
 /* =====================================================================
    Quality Tools Workspace — Operations Console v0.4
    ---------------------------------------------------------------------
-   OFFICIAL CONTRACT (confirmed by Carlos — see docs/OFFICIAL-CARLOS-CONTRACT.md):
+   OFFICIAL CONTRACT (confirmed by [EXTERNAL_ADMIN] — see docs/OFFICIAL-EXTERNAL-ADMIN-CONTRACT.md):
      calculate_cpk_ppk : MEASUREMENTS_CAPTURED -> CAPABILITY_BELOW_TARGET
      run_msa_analysis  : NEW_DEVICE_REGISTERED -> MSA_VALIDATED
    Every other event type (CAPABILITY_ANALYSIS_COMPLETED, MSA_STUDY_REQUESTED,
@@ -23,7 +23,7 @@
      - Event bus transport (in-process function call).
    NOT CONNECTED:
      - The real IsoTools API (verified manually via PowerShell — see
-       docs/OFFICIAL-CARLOS-CONTRACT.md). No API key lives in this frontend
+       docs/OFFICIAL-EXTERNAL-ADMIN-CONTRACT.md). No API key lives in this frontend
        or anywhere in this repository. Production path when wired up:
        POST /events, GET /events/subscriptions/:toolId, GET /events/chain/:correlationId.
    FUTURE ADAPTER:
@@ -53,9 +53,9 @@ const I18N = {
     reqData: "Required fields", missingFieldsLabel: "Missing fields", emptyContract: "Load an example, fill a form, or paste an event.",
     cmpSelectedEvent: "Selected event", cmpTargetTool: "Target tool", cmpConsumable: "Consumable by this tool?",
     cmpYes: "Yes", cmpNo: "No",
-    cmpCompatible: "COMPATIBLE", cmpMissingData: "MISSING DATA", cmpNotConsumable: "NOT CONSUMABLE", cmpNeedsConfirm: "NEEDS CARLOS CONFIRMATION",
+    cmpCompatible: "COMPATIBLE", cmpMissingData: "MISSING DATA", cmpNotConsumable: "NOT CONSUMABLE", cmpNeedsConfirm: "NEEDS EXTERNAL-ADMIN CONFIRMATION",
     notConsumableMsg: "Event not directly consumable by selected tool. Adapter or mapping needed.",
-    deviceCompatWarn: "NEW_DEVICE_REGISTERED is the official input (confirmed by Carlos), but without repeated observations the handler cannot compute Gage R&R — it answers with a warning instead of inventing a result. MSA_STUDY_REQUESTED remains available as a proposed / not official local-only path.",
+    deviceCompatWarn: "NEW_DEVICE_REGISTERED is the official input (confirmed by [EXTERNAL_ADMIN]), but without repeated observations the handler cannot compute Gage R&R — it answers with a warning instead of inventing a result. MSA_STUDY_REQUESTED remains available as a proposed / not official local-only path.",
     s3Title: "Execution — the handler runs",
     s3Sub: "Same logic as tools/<tool>/src/handler.js, ported 1:1 into this console.",
     btnRunExternal: "▶ Run Tool", btnRunManual: "▶ Run Manual Input", btnRunRaw: "▶ Run Tool", btnReset: "Reset",
@@ -95,7 +95,7 @@ const I18N = {
     navInput: "1 · Input", navContract: "2 · Contract", navExec: "3 · Execution", navOutput: "4 · Output",
     navDash: "Dashboards", navMarli: "MARLI",
     connectTitle: "Connect a Tool",
-    connectSub: "Any producer — a real MES, a manual form, a future system, or Carlos' own tools — connects the same way: emit an event shaped like the contract below. No direct coupling, ever.",
+    connectSub: "Any producer — a real MES, a manual form, a future system, or [EXTERNAL_ADMIN]' own tools — connects the same way: emit an event shaped like the contract below. No direct coupling, ever.",
     cgRequired: "Required payload fields", cgExample: "Example payload — real, matches a demo fixture",
     cgSteps: "How any tool connects", cgCopy: "Copy JSON", cgCopied: "Copied!", cgLoad: "Load into Raw JSON Editor & Test",
     cgSchema: "Schema", cgTarget: "Target tool",
@@ -121,13 +121,13 @@ const I18N = {
       ["ok", "correlationId / causationId: generated and propagated — IMPLEMENTED"],
       ["mk", "event bus transport: in-process call — MOCK"],
       ["mk", "ledger persistence: in-memory, PostgreSQL-ready columns — DEMO DATA"],
-      ["mk", "downstream consumers: names from adapters/carlos-ecosystem — NEEDS CARLOS CONFIRMATION"]
+      ["mk", "downstream consumers: names from adapters/external-admin-ecosystem — NEEDS EXTERNAL-ADMIN CONFIRMATION"]
     ],
-    officialTitle: "Official Contract — Confirmed by Carlos",
+    officialTitle: "Official Contract — Confirmed by [EXTERNAL_ADMIN]",
     officialBadge: "OFFICIAL", proposedBadge: "PROPOSED / NOT OFFICIAL",
     flow1Label: "Flow 1 — Capability", flow2Label: "Flow 2 — MSA",
     officialNotes: [
-      "Official contract confirmed by Carlos.",
+      "Official contract confirmed by [EXTERNAL_ADMIN].",
       "This workspace is a local simulation only — it is not connected to the real API.",
       "The real IsoTools API was verified manually via PowerShell (/health, /ready, /catalog/tools, /events, /events/subscriptions/:toolId, /events/chain/:correlationId).",
       "Production path: POST /events, then GET /events/subscriptions/:toolId and GET /events/chain/:correlationId. No direct tool-to-tool calls.",
@@ -158,9 +158,9 @@ const I18N = {
     reqData: "Campos requeridos", missingFieldsLabel: "Campos faltantes", emptyContract: "Carga un ejemplo, llena un formulario, o pega un evento.",
     cmpSelectedEvent: "Evento seleccionado", cmpTargetTool: "Tool destino", cmpConsumable: "¿Consumible por esta tool?",
     cmpYes: "Sí", cmpNo: "No",
-    cmpCompatible: "COMPATIBLE", cmpMissingData: "MISSING DATA", cmpNotConsumable: "NOT CONSUMABLE", cmpNeedsConfirm: "NEEDS CARLOS CONFIRMATION",
+    cmpCompatible: "COMPATIBLE", cmpMissingData: "MISSING DATA", cmpNotConsumable: "NOT CONSUMABLE", cmpNeedsConfirm: "NEEDS EXTERNAL-ADMIN CONFIRMATION",
     notConsumableMsg: "Este evento no es consumible directamente por la tool seleccionada. Se necesita un adapter o mapping.",
-    deviceCompatWarn: "NEW_DEVICE_REGISTERED es el input oficial (confirmado por Carlos), pero sin observations repetidas el handler no puede calcular Gage R&R — responde con un warning en vez de inventar un resultado. MSA_STUDY_REQUESTED sigue disponible como vía propuesta / no oficial, solo local.",
+    deviceCompatWarn: "NEW_DEVICE_REGISTERED es el input oficial (confirmado por [EXTERNAL_ADMIN]), pero sin observations repetidas el handler no puede calcular Gage R&R — responde con un warning en vez de inventar un resultado. MSA_STUDY_REQUESTED sigue disponible como vía propuesta / no oficial, solo local.",
     s3Title: "Ejecución — corre el handler",
     s3Sub: "La misma lógica de tools/<tool>/src/handler.js, portada 1:1 a esta consola.",
     btnRunExternal: "▶ Ejecutar Tool", btnRunManual: "▶ Ejecutar Entrada Manual", btnRunRaw: "▶ Ejecutar Tool", btnReset: "Reiniciar",
@@ -200,7 +200,7 @@ const I18N = {
     navInput: "1 · Input", navContract: "2 · Contrato", navExec: "3 · Ejecución", navOutput: "4 · Output",
     navDash: "Dashboards", navMarli: "MARLI",
     connectTitle: "Conectar una Tool",
-    connectSub: "Cualquier productor — un MES real, un formulario manual, un sistema futuro, o las tools de Carlos — se conecta igual: emite un evento con la forma del contrato de abajo. Nunca hay acoplamiento directo.",
+    connectSub: "Cualquier productor — un MES real, un formulario manual, un sistema futuro, o las tools de [EXTERNAL_ADMIN] — se conecta igual: emite un evento con la forma del contrato de abajo. Nunca hay acoplamiento directo.",
     cgRequired: "Campos requeridos del payload", cgExample: "Ejemplo de payload — real, sale de un fixture demo",
     cgSteps: "Cómo se conecta cualquier tool", cgCopy: "Copiar JSON", cgCopied: "¡Copiado!", cgLoad: "Cargar en el Editor JSON Crudo y probar",
     cgSchema: "Schema", cgTarget: "Tool destino",
@@ -226,13 +226,13 @@ const I18N = {
       ["ok", "correlationId / causationId: generados y propagados — IMPLEMENTED"],
       ["mk", "transporte del bus: llamada in-process — MOCK"],
       ["mk", "persistencia del ledger: en memoria, columnas listas para PostgreSQL — DEMO DATA"],
-      ["mk", "consumidores downstream: nombres de adapters/carlos-ecosystem — NEEDS CARLOS CONFIRMATION"]
+      ["mk", "consumidores downstream: nombres de adapters/external-admin-ecosystem — NEEDS EXTERNAL-ADMIN CONFIRMATION"]
     ],
-    officialTitle: "Contrato Oficial — Confirmado por Carlos",
+    officialTitle: "Contrato Oficial — Confirmado por [EXTERNAL_ADMIN]",
     officialBadge: "OFICIAL", proposedBadge: "PROPUESTO / NO OFICIAL",
     flow1Label: "Flujo 1 — Capacidad", flow2Label: "Flujo 2 — MSA",
     officialNotes: [
-      "Contrato oficial confirmado por Carlos.",
+      "Contrato oficial confirmado por [EXTERNAL_ADMIN].",
       "Este workspace es solo una simulación local — no está conectado a la API real.",
       "La API real de IsoTools se verificó manualmente vía PowerShell (/health, /ready, /catalog/tools, /events, /events/subscriptions/:toolId, /events/chain/:correlationId).",
       "Camino de producción: POST /events, luego GET /events/subscriptions/:toolId y GET /events/chain/:correlationId. Sin llamadas directas tool-a-tool.",
@@ -319,7 +319,7 @@ function cpkHandle(event) {
     standardDeviation: round(standardDeviation), sampleSize: measurements.length,
     minimumCpk, verdict: belowTarget ? "below-target" : "capable", recommendation
   };
-  /* Only CAPABILITY_BELOW_TARGET is official (confirmed by Carlos: MEASUREMENTS_CAPTURED ->
+  /* Only CAPABILITY_BELOW_TARGET is official (confirmed by [EXTERNAL_ADMIN]: MEASUREMENTS_CAPTURED ->
      CAPABILITY_BELOW_TARGET). CAPABILITY_ANALYSIS_COMPLETED is proposed/local only. */
   const emittedEvents = [buildEvent("CAPABILITY_ANALYSIS_COMPLETED", "calculate-cpk-ppk", result, false)];
   if (belowTarget) {
@@ -422,7 +422,7 @@ function msaHandle(event) {
   const validation = msaValidatePayload(normalized.payload);
   if (validation) return validation;
   const result = msaAnalyze(normalized.payload);
-  /* Only MSA_VALIDATED is official (confirmed by Carlos: NEW_DEVICE_REGISTERED -> MSA_VALIDATED).
+  /* Only MSA_VALIDATED is official (confirmed by [EXTERNAL_ADMIN]: NEW_DEVICE_REGISTERED -> MSA_VALIDATED).
      MSA_ANALYSIS_COMPLETED and MSA_NOT_ACCEPTABLE are proposed/local only. */
   const emittedEvents = [buildEvent("MSA_ANALYSIS_COMPLETED", "run-msa-analysis", result, false)];
   const msaAcceptable = result.verdict === "acceptable";
@@ -436,7 +436,7 @@ function msaHandle(event) {
 
 /* ============================ registry data ============================ */
 /* consumes: [eventType, official] · produces: [eventType, chipClass, official]
-   Official = confirmed by Carlos. Everything else is proposed/future/not official —
+   Official = confirmed by [EXTERNAL_ADMIN]. Everything else is proposed/future/not official —
    kept for local use, never presented as an official broker contract. */
 const TOOLS = [
   {
@@ -554,18 +554,18 @@ const SCENARIOS = [
   {
     id: "msa-incomplete-device", tool: "run-msa-analysis", targetKey: "msa", expect: "WARNING",
     name: { en: "Load manage_device_registry → NEW_DEVICE_REGISTERED (official)", es: "Cargar manage_device_registry → NEW_DEVICE_REGISTERED (oficial)" },
-    desc: { en: "NEW_DEVICE_REGISTERED is the official input (confirmed by Carlos). Without observations the handler warns instead of computing MSA.", es: "NEW_DEVICE_REGISTERED es el input oficial (confirmado por Carlos). Sin observations el handler avisa en vez de calcular MSA." },
+    desc: { en: "NEW_DEVICE_REGISTERED is the official input (confirmed by [EXTERNAL_ADMIN]). Without observations the handler warns instead of computing MSA.", es: "NEW_DEVICE_REGISTERED es el input oficial (confirmado por [EXTERNAL_ADMIN]). Sin observations el handler avisa en vez de calcular MSA." },
     owner: "", event: { type: "NEW_DEVICE_REGISTERED", source: "manage_device_registry",
       payload: { deviceId: "CAL-300", deviceName: "Digital Caliper 300", calibrationStatus: "new" } }
   },
   {
-    id: "demian-nonconformance", tool: null, targetKey: null, expect: "NOT CONSUMABLE",
-    name: { en: "Load Demian example → NONCONFORMANCE_CREATED / needs adapter", es: "Cargar ejemplo de Demian → NONCONFORMANCE_CREATED / necesita adapter" },
+    id: "developer-nonconformance", tool: null, targetKey: null, expect: "NOT CONSUMABLE",
+    name: { en: "Load [DEVELOPER] example → NONCONFORMANCE_CREATED / needs adapter", es: "Cargar ejemplo de [DEVELOPER] → NONCONFORMANCE_CREATED / necesita adapter" },
     desc: { en: "manage_nonconformance emits NONCONFORMANCE_CREATED. Neither tool consumes it yet — needs a mapping.", es: "manage_nonconformance emite NONCONFORMANCE_CREATED. Ninguna tool lo consume todavía — necesita un mapping." },
-    owner: "Demian", needsConfirm: true,
+    owner: "[DEVELOPER]", needsConfirm: true,
     event: { type: "NONCONFORMANCE_CREATED", source: "manage_nonconformance",
       payload: { nonconformanceId: "NC-EXAMPLE-001", partNumber: "PN-9001",
-        description: "Example payload — shape not yet confirmed with Carlos.", detectedBy: "Demian" } }
+        description: "Example payload — shape not yet confirmed with [EXTERNAL_ADMIN].", detectedBy: "[DEVELOPER]" } }
   }
 ];
 /* Source Tool options per target tool — plus the always-available unconfirmed/external paths.
@@ -631,14 +631,14 @@ const CONNECT_GUIDES = [
     example: SCENARIOS[3].event,
     steps: {
       en: [
-        "PROPOSED / NOT OFFICIAL: Carlos confirmed run_msa_analysis' official input is NEW_DEVICE_REGISTERED (right tab), not this event. This path is kept for local use only.",
+        "PROPOSED / NOT OFFICIAL: [EXTERNAL_ADMIN] confirmed run_msa_analysis' official input is NEW_DEVICE_REGISTERED (right tab), not this event. This path is kept for local use only.",
         "Build an event: { type: \"MSA_STUDY_REQUESTED\", source: \"&lt;your-tool-name&gt;\", payload: { ...fields above } }.",
         "Use it whenever you already have repeated part/operator/trial observations, even though it is not the official broker input yet.",
         "Paste this JSON into the Raw JSON Event editor and click Run to see Gage R&R, repeatability, reproducibility, and ndc computed live.",
         "Result: MSA_ANALYSIS_COMPLETED (proposed) always, plus the official MSA_VALIDATED or the proposed MSA_NOT_ACCEPTABLE depending on the numbers."
       ],
       es: [
-        "PROPUESTO / NO OFICIAL: Carlos confirmó que el input oficial de run_msa_analysis es NEW_DEVICE_REGISTERED (tab derecha), no este evento. Esta vía se mantiene solo para uso local.",
+        "PROPUESTO / NO OFICIAL: [EXTERNAL_ADMIN] confirmó que el input oficial de run_msa_analysis es NEW_DEVICE_REGISTERED (tab derecha), no este evento. Esta vía se mantiene solo para uso local.",
         "Arma un evento: { type: \"MSA_STUDY_REQUESTED\", source: \"&lt;tu-tool&gt;\", payload: { ...campos de arriba } }.",
         "Úsala cuando ya tengas observaciones repetidas por parte/operador/trial, aunque todavía no sea el input oficial del broker.",
         "Pega este JSON en el editor de Evento JSON Crudo y dale Ejecutar para ver Gage R&R, repetibilidad, reproducibilidad y ndc en vivo.",
@@ -649,7 +649,7 @@ const CONNECT_GUIDES = [
   {
     id: "device", eventType: "NEW_DEVICE_REGISTERED", tool: "run-msa-analysis", official: true,
     tab: { en: "Device Registration → run_msa_analysis (official)", es: "Registro de Equipo → run_msa_analysis (oficial)" },
-    schema: "no dedicated schema yet — official input confirmed by Carlos, see tools/run-msa-analysis/src/handler.js",
+    schema: "no dedicated schema yet — official input confirmed by [EXTERNAL_ADMIN], see tools/run-msa-analysis/src/handler.js",
     fields: [
       ["deviceId", "string", { en: "Device / gage being registered.", es: "Equipo / gage que se registra." }],
       ["deviceType", "string · optional", { en: "e.g. digital caliper, micrometer.", es: "p. ej. calibrador digital, micrómetro." }],
@@ -659,14 +659,14 @@ const CONNECT_GUIDES = [
     example: SCENARIOS[5].event,
     steps: {
       en: [
-        "OFFICIAL: Carlos confirmed the contract NEW_DEVICE_REGISTERED -> MSA_VALIDATED. This is the primary input path for run_msa_analysis.",
+        "OFFICIAL: [EXTERNAL_ADMIN] confirmed the contract NEW_DEVICE_REGISTERED -> MSA_VALIDATED. This is the primary input path for run_msa_analysis.",
         "Build an event: { type: \"NEW_DEVICE_REGISTERED\", source: \"&lt;your-tool-name&gt;\", payload: { ...fields above } }.",
         "Paste this JSON into the Raw JSON Event editor and click Run. Without observations you will see a WARNING, not an invented analysis result.",
         "Add an observations[] array (same shape as the MSA Study tab) to get a full Gage R&R result and, when acceptable, the official MSA_VALIDATED event.",
         "MSA_STUDY_REQUESTED (left tab) remains available as a proposed / not official local-only alternative."
       ],
       es: [
-        "OFICIAL: Carlos confirmó el contrato NEW_DEVICE_REGISTERED -> MSA_VALIDATED. Esta es la vía de input principal de run_msa_analysis.",
+        "OFICIAL: [EXTERNAL_ADMIN] confirmó el contrato NEW_DEVICE_REGISTERED -> MSA_VALIDATED. Esta es la vía de input principal de run_msa_analysis.",
         "Arma un evento: { type: \"NEW_DEVICE_REGISTERED\", source: \"&lt;tu-tool&gt;\", payload: { ...campos de arriba } }.",
         "Pega este JSON en el editor de Evento JSON Crudo y dale Ejecutar. Sin observations verás un WARNING, no un resultado inventado.",
         "Agrega un array observations[] (misma forma que en la tab de Estudio MSA) para obtener un resultado Gage R&R completo y, si es aceptable, el evento oficial MSA_VALIDATED.",
@@ -730,7 +730,7 @@ function computeCompatibility(event, targetKey) {
 /* ============================ bus proxy (optional, real) ============================
    If bus-proxy/server.js is running locally (see bus-proxy/README.md), this workspace
    talks to it for a real POST /events + GET /events/subscriptions/:toolId +
-   GET /events/chain/:correlationId — the exact contract Carlos' platform expects.
+   GET /events/chain/:correlationId — the exact contract [EXTERNAL_ADMIN]' platform expects.
    If it is not running, every call below fails silently (short timeout, caught) and
    the UI's own local computation and in-memory ledger keep working exactly as
    before. Nothing about the demo depends on this proxy being up. */
@@ -979,7 +979,7 @@ function gaugeMetricHtml(k, vDisplay, value, max, threshold, bad, thresholdLabel
 }
 
 /* ============================ rendering: official contract panel ============================ */
-/* Static reference for the two flows Carlos confirmed. Not tied to the live
+/* Static reference for the two flows [EXTERNAL_ADMIN] confirmed. Not tied to the live
    Input/Output stages below — this is the fixed contract, always the same
    regardless of what is currently loaded in the editor. */
 function officialFlowHtml(nodes) {
@@ -1134,7 +1134,7 @@ function renderScenarios() {
       "<div class=\"s-name\">" + s.name[LANG] + "</div>" +
       "<div class=\"s-desc\">" + s.desc[LANG] + "</div>" +
       "<div class=\"s-badges\"><span class=\"badge demo\">DEMO DATA</span><span class=\"badge " + expCls + "\">" + s.expect + "</span>" +
-      (s.needsConfirm ? "<span class=\"badge confirm\">NEEDS CARLOS CONFIRMATION</span>" : "") + "</div></button>";
+      (s.needsConfirm ? "<span class=\"badge confirm\">NEEDS EXTERNAL-ADMIN CONFIRMATION</span>" : "") + "</div></button>";
   }).join("");
   Array.prototype.forEach.call(grid.querySelectorAll(".scen"), (el) => {
     el.onclick = () => {
@@ -1306,7 +1306,7 @@ function paintInspector(ctx) {
 }
 
 /* emitted-event chip: official events use produces/alert styling; anything not
-   confirmed by Carlos (official === false) is always styled + labeled "proposed",
+   confirmed by [EXTERNAL_ADMIN] (official === false) is always styled + labeled "proposed",
    never presented as if it were an official broker event. */
 function emitChipHtml(e) {
   const cls = e.official ? (e.type.indexOf("BELOW") >= 0 ? "alert" : "produces") : "proposed";
@@ -1385,7 +1385,7 @@ function paintEmitted(outcome) {
   list.innerHTML = outcome.emittedEvents.map((e) => {
     const routes = (ROUTING[e.type] || []).map((r) =>
       "<span class=\"peer " + r[1] + "\">" + r[0] + "</span>" +
-      "<span class=\"badge " + (r[1] === "future" ? "future" : "confirm") + "\">" + (r[1] === "future" ? "FUTURE ADAPTER" : "NEEDS CARLOS CONFIRMATION") + "</span>"
+      "<span class=\"badge " + (r[1] === "future" ? "future" : "confirm") + "\">" + (r[1] === "future" ? "FUTURE ADAPTER" : "NEEDS EXTERNAL-ADMIN CONFIRMATION") + "</span>"
     ).join("<span class=\"earrow\">·</span>");
     return "<div class=\"emit-row\">" + emitChipHtml(e) +
       "<span class=\"earrow\">→</span>" + (routes || "<span class=\"empty-note\">—</span>") + "</div>";
@@ -1574,7 +1574,7 @@ function renderExtExamples() {
       "<div class=\"s-name\">" + s.name[LANG] + "</div>" +
       "<div class=\"s-desc\">" + s.desc[LANG] + "</div>" +
       "<div class=\"s-badges\"><span class=\"badge demo\">DEMO DATA</span><span class=\"badge " + expCls + "\">" + s.expect + "</span>" +
-      (s.needsConfirm ? "<span class=\"badge confirm\">NEEDS CARLOS CONFIRMATION</span>" : "") + "</div></button>";
+      (s.needsConfirm ? "<span class=\"badge confirm\">NEEDS EXTERNAL-ADMIN CONFIRMATION</span>" : "") + "</div></button>";
   }).join("");
   Array.prototype.forEach.call(document.getElementById("extExamples").querySelectorAll(".scen"), (el) => {
     el.onclick = () => loadExtExample(el.dataset.sid);
@@ -1692,8 +1692,8 @@ document.getElementById("ext_target").onchange = (e) => {
 document.getElementById("ext_source").onchange = (e) => {
   extState.source = e.target.value;
   if (e.target.value === "manage_nonconformance") {
-    extState.owner = "Demian";
-    document.getElementById("ext_owner").value = "Demian";
+    extState.owner = "[DEVELOPER]";
+    document.getElementById("ext_owner").value = "[DEVELOPER]";
   }
   refreshFromInput();
 };

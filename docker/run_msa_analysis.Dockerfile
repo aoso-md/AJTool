@@ -1,11 +1,13 @@
 # run_msa_analysis — Gage R&R / MSA study analysis
-# Zero npm dependencies (pure Node). Build context must be the repo root:
+# One dependency (pg, only used if DATABASE_URL is set). Build context
+# must be the repo root:
 #   docker build -f docker/run_msa_analysis.Dockerfile -t run_msa_analysis .
 #
 # Runs tools/run-msa-analysis/src/server.js — an HTTP wrapper around the
 # same handler logic (same validation, same math, same emitted events):
 #   GET  /health
 #   POST /events   (body = full event envelope, see tools/run-msa-analysis/demo/*.json)
+#   GET  /reports  (recent invocations — only populated if DATABASE_URL is set)
 #
 # Run:
 #   docker run --rm -p 8082:8082 run_msa_analysis
@@ -20,6 +22,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY tools/run-msa-analysis/package.json ./package.json
+RUN npm install --omit=dev
 COPY tools/run-msa-analysis/src ./src
 COPY tools/run-msa-analysis/demo ./demo
 # src/public/index.html (the frontend served at GET /) is included

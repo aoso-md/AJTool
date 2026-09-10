@@ -57,7 +57,7 @@ required fields, missing fields, and one of four statuses:
 - `COMPATIBLE` — known event type, right target tool, all required fields present.
 - `MISSING DATA` — known event type, right target tool, something required is absent or invalid.
 - `NOT CONSUMABLE` — a known event type sent to the wrong target tool (e.g. `MEASUREMENTS_CAPTURED` aimed at `run-msa-analysis`).
-- `NEEDS CARLOS CONFIRMATION` — an event type this workspace doesn't have a contract for at all yet.
+- `NEEDS EXTERNAL-ADMIN CONFIRMATION` — an event type this workspace doesn't have a contract for at all yet.
 
 The rule each tool actually enforces:
 
@@ -66,15 +66,15 @@ The rule each tool actually enforces:
   `MSA_STUDY_REQUESTED` requires `studyId`, `deviceId`, `observations` (≥2 rows, each with `partId`/`operatorId`/`trial`/`value`). `tolerance` is shown as an optional field — the real handler (`tools/run-msa-analysis/src/handler.js`) and its schema (`contracts/events/MSA_STUDY_REQUESTED.schema.json`) do not require or use it today, so this UI does not invent enforcement stricter than the real handler has.
   `NEW_DEVICE_REGISTERED` (the compatibility path) requires `deviceId`, `deviceType`, `calibrationStatus`. If it has no `observations`, the UI shows the exact warning: *"Device registration is compatible as a trigger, but formal MSA requires MSA_STUDY_REQUESTED with repeated observations."* — and the handler answers with a warning, not an invented Gage R&R.
 
-**Demian's tool as a worked example.** One of the seven Load Example cards
-is `manage_nonconformance` (owner: Demian), emitting `NONCONFORMANCE_CREATED`.
+**[DEVELOPER]'s tool as a worked example.** One of the seven Load Example cards
+is `manage_nonconformance` (owner: [DEVELOPER]), emitting `NONCONFORMANCE_CREATED`.
 Neither tool consumes that event type today, so picking it (against either
-target) correctly shows `NOT CONSUMABLE` / `NEEDS CARLOS CONFIRMATION`, and
+target) correctly shows `NOT CONSUMABLE` / `NEEDS EXTERNAL-ADMIN CONFIRMATION`, and
 clicking **Run Tool** stops before any handler runs — no invented result.
-This is the honest answer to "can Demian's tool connect to ours?": **yes,
+This is the honest answer to "can [DEVELOPER]'s tool connect to ours?": **yes,
 the mechanism is identical — publish an event, we validate and consume it —
 but compatibility always depends on the actual `eventType` and `payload`
-shape, not on who the producer is.** If Carlos confirms a real event
+shape, not on who the producer is.** If [EXTERNAL_ADMIN] confirms a real event
 contract for nonconformances, wiring it in is a data change (new entry in
 `CONTRACT compatibility` rules and `TOOLS[].consumes`), not a redesign.
 
@@ -87,7 +87,7 @@ Producer Tool → Published Event → Event Broker / Ledger → Consuming Tool
 → Contract Validation → Handler Execution → Output Event → Downstream Consumers
 ```
 
-That maps directly onto Carlos' platform model: a tool **publishes** an
+That maps directly onto [EXTERNAL_ADMIN]' platform model: a tool **publishes** an
 event (POST), the platform **stores/routes** it (broker + ledger), a
 consumer tool **polls/consumes** it, and — if the contract validates — the
 consumer **emits an output event** of its own. There is no direct
@@ -96,13 +96,13 @@ tool-to-tool call anywhere in this diagram or in the code that drives it.
 ## What is IMPLEMENTED (real)
 
 - **Handler logic** — ported 1:1 from `tools/calculate-cpk-ppk/src/handler.js` and `tools/run-msa-analysis/src/handler.js`. Same validation, same math (Cp/Cpk, Gage R&R %, repeatability, reproducibility, ndc), same emitted-event decisions.
-- **Compatibility checking** — live, per required field, in all three input modes. `NOT CONSUMABLE` and `NEEDS CARLOS CONFIRMATION` events never reach a handler, the same way a real broker with no matching consumer never invents a result either. Contract-fail events reach the handler but stop at step 3 (`Contract validated`) with `VALIDATION ERROR`.
+- **Compatibility checking** — live, per required field, in all three input modes. `NOT CONSUMABLE` and `NEEDS EXTERNAL-ADMIN CONFIRMATION` events never reach a handler, the same way a real broker with no matching consumer never invents a result either. Contract-fail events reach the handler but stop at step 3 (`Contract validated`) with `VALIDATION ERROR`.
 - **correlationId / causationId** — generated (or taken from the form) and propagated to command bar, inspector, and ledger.
 - **Bilingual UI** — every label above, including the compatibility statuses and the Event Flow ribbon, is translated (EN/ES), not just the original scenario copy.
 
 ## What is DEMO DATA
 
-- The seven Load Example fixtures (six mirror `tools/<tool>/demo/*.json`; the seventh is the Demian/`NONCONFORMANCE_CREATED` example, invented for this demo and explicitly marked as such since no such contract exists yet).
+- The seven Load Example fixtures (six mirror `tools/<tool>/demo/*.json`; the seventh is the [DEVELOPER]/`NONCONFORMANCE_CREATED` example, invented for this demo and explicitly marked as such since no such contract exists yet).
 - The four seed rows in the Event Ledger.
 - The ledger itself: **in-memory**, but its columns (`id, timestamp, correlationId, causationId, sourceTool, eventType, targetTool, status, emittedEvents, downstreamConsumers`) are PostgreSQL-ready. No real database is connected, and the UI says so.
 
@@ -114,14 +114,14 @@ tool-to-tool call anywhere in this diagram or in the code that drives it.
 ## What is FUTURE ADAPTER
 
 - MARLI. Dashed, muted, labeled `FUTURE ADAPTER — NOT IMPLEMENTED IN CURRENT TOOL CODE`. No code exists for it and the UI never pretends otherwise.
-- Downstream consumers (`manage_product_specs`, `audit_report`, `calculate_control_charts`, `manage_nonconformances`) are shown as routing targets with `NEEDS CARLOS CONFIRMATION`.
+- Downstream consumers (`manage_product_specs`, `audit_report`, `calculate_control_charts`, `manage_nonconformances`) are shown as routing targets with `NEEDS EXTERNAL-ADMIN CONFIRMATION`.
 
-## 3-minute demo for Carlos
+## 3-minute demo for [EXTERNAL_ADMIN]
 
 1. **(0:00)** Open `index.html`, default mode **External Tool Event**. Point at the command bar: bus MOCK, ledger DEMO DATA — everything honest, everything labeled.
 2. **(0:30)** Click *Load collect_quality_measurements → MEASUREMENTS_CAPTURED*, then **Run Tool**. Narrate the ribbon: producer → published event → broker/ledger → consuming tool → contract validation → handler → output event → consumers. Cpk computed live, `CAPABILITY_ANALYSIS_COMPLETED` emitted, ledger row appended.
 3. **(1:00)** Change **Target Tool** to `run-msa-analysis` without changing the event type. Point at Stage 2: `NOT CONSUMABLE` — *"Event not directly consumable by selected tool. Adapter or mapping needed."* That is the honest answer to "can any tool send us anything."
-4. **(1:45)** Click *Load Demian example → NONCONFORMANCE_CREATED / needs adapter*. Same story, this time for a real name: `NEEDS CARLOS CONFIRMATION`, no handler called, nothing invented.
+4. **(1:45)** Click *Load [DEVELOPER] example → NONCONFORMANCE_CREATED / needs adapter*. Same story, this time for a real name: `NEEDS EXTERNAL-ADMIN CONFIRMATION`, no handler called, nothing invented.
 5. **(2:15)** Switch to **Manual Input**, change one measurement, run. Same pipeline, same ledger — input can come from any tool or from a person. Switch to **Raw JSON Event**, paste any envelope, hit **Validate Event** before running it.
 6. **(2:45)** Point at MARLI, dashed: future consumer, not implemented, and the UI says so. Close with the thesis: two tools, one shared contract boundary, no direct coupling.
 
@@ -130,7 +130,7 @@ tool-to-tool call anywhere in this diagram or in the code that drives it.
 `bus-proxy/server.js` (see `bus-proxy/README.md`) is a real, standalone Node
 process implementing `POST /events`, `GET /events/subscriptions/:toolId`,
 `GET /events/chain/:correlationId`, and `GET /health` — the exact contract
-Carlos' platform expects. `app.js` checks it on load and every 4s
+[EXTERNAL_ADMIN]' platform expects. `app.js` checks it on load and every 4s
 (`checkBusProxy()`), and best-effort publishes every incoming + emitted
 event to it during `run()` (`publishToBus()` — fire-and-forget, never blocks
 or breaks the UI if the proxy isn't running). The **Event Bus** pill in the
@@ -153,9 +153,9 @@ show the target schema), or point `bus-proxy/server.js`'s in-memory ledger
 at a real Postgres instance — either works, since both already use the
 same column shape.
 
-## New producers (like Demian's tool)
+## New producers (like [DEVELOPER]'s tool)
 
-Once Carlos confirms an event contract for a new event type, add it to
+Once [EXTERNAL_ADMIN] confirms an event contract for a new event type, add it to
 `EVENT_TO_TOOL`/`TOOLS[].consumes` and the required-field list in
 `computeCompatibility()` — the External Tool Event form, compatibility
 check, and ledger all pick it up automatically. Nothing else changes:

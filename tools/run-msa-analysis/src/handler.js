@@ -162,9 +162,9 @@ function handle(event) {
   if (validation) return validation;
 
   const result = analyze(normalized.payload);
-  /* MSA_ANALYSIS_COMPLETED and MSA_NOT_ACCEPTABLE are not part of Carlos' confirmed
+  /* MSA_ANALYSIS_COMPLETED and MSA_NOT_ACCEPTABLE are not part of [EXTERNAL_ADMIN]' confirmed
      contract yet — emitted as proposed/internal events only (official: false). The
-     only official output event is MSA_VALIDATED, confirmed by Carlos:
+     only official output event is MSA_VALIDATED, confirmed by [EXTERNAL_ADMIN]:
      NEW_DEVICE_REGISTERED -> MSA_VALIDATED. */
   const emittedEvents = [buildEvent("MSA_ANALYSIS_COMPLETED", result, false)];
   const acceptable = result.verdict === "acceptable";

@@ -1,11 +1,18 @@
-name: Build and publish tool Docker images
+name: Test and publish tool Docker images
 
-# Builds the two tool Dockerfiles and publishes them to GitHub Container
-# Registry (ghcr.io) — no Railway account, no local Docker, and no
-# private repo access needed on Carlos' side. He just points his
+# Runs the test suite first, then builds the two tool Dockerfiles and
+# publishes them to GitHub Container Registry (ghcr.io).
+#
+# Why this path exists: [EXTERNAL_ADMIN] needs no Railway account of Angel's, no
+# local Docker, and no access to this GitHub repo. He points his own
 # Railway service at the published image (Settings -> Source -> Deploy
-# from Docker Image) using the image name printed at the end of this
-# workflow's run in the Actions tab.
+# from Docker Image) using:
+#
+#   ghcr.io/<owner>/calculate_cpk_ppk:latest
+#   ghcr.io/<owner>/run_msa_analysis:latest
+#
+# The images are only published if the tests pass — a broken build can
+# never reach his environment.
 
 on:
   push:
@@ -14,11 +21,32 @@ on:
       - "tools/calculate-cpk-ppk/**"
       - "tools/run-msa-analysis/**"
       - "docker/**"
+      - "test/**"
       - ".github/workflows/docker-publish.yml"
+  pull_request:
+    branches: [ main ]
   workflow_dispatch: {}
 
 jobs:
+  # ---------------------------------------------------------------
+  # Gate: no image is published unless the maths, the event contract,
+  # and the HTTP layer all still behave. Needs no npm install and no
+  # database — the suite runs the services on their in-memory tier.
+  # ---------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Run test suite
+        run: node test/run-tests.js
+
   calculate_cpk_ppk:
+    needs: test
+    # Don't publish from pull requests — only from main.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,10 +64,23 @@ jobs:
           context: .
           file: docker/calculate_cpk_ppk.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/calculate_cpk_ppk:latest
-      - run: echo "Published ghcr.io/${{ github.repository_owner }}/calculate_cpk_ppk:latest"
+          # :latest is what [EXTERNAL_ADMIN]' Railway service tracks. The commit SHA tag
+          # exists so a bad deploy can be rolled back to an exact build
+          # instead of guessing which "latest" was live at the time.
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/calculate_cpk_ppk:latest
+            ghcr.io/${{ github.repository_owner }}/calculate_cpk_ppk:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - run: |
+          echo "Published:"
+          echo "  ghcr.io/${{ github.repository_owner }}/calculate_cpk_ppk:latest"
+          echo "  ghcr.io/${{ github.repository_owner }}/calculate_cpk_ppk:${{ github.sha }}"
+          echo "Remember: the package must be set to Public once, in GitHub -> Packages -> Package settings."
 
   run_msa_analysis:
+    needs: test
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,5 +98,13 @@ jobs:
           context: .
           file: docker/run_msa_analysis.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/run_msa_analysis:latest
-      - run: echo "Published ghcr.io/${{ github.repository_owner }}/run_msa_analysis:latest"
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/run_msa_analysis:latest
+            ghcr.io/${{ github.repository_owner }}/run_msa_analysis:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - run: |
+          echo "Published:"
+          echo "  ghcr.io/${{ github.repository_owner }}/run_msa_analysis:latest"
+          echo "  ghcr.io/${{ github.repository_owner }}/run_msa_analysis:${{ github.sha }}"
+          echo "Remember: the package must be set to Public once, in GitHub -> Packages -> Package settings."

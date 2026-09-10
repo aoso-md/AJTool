@@ -20,5 +20,5 @@ Translate API events into the independent quality-tool event contracts.
 
 ## Open Item
 
-Carlos should confirm exact API endpoint names, event bus format, authentication, and retry semantics.
+[EXTERNAL_ADMIN] should confirm exact API endpoint names, event bus format, authentication, and retry semantics.
 

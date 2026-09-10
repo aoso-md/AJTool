@@ -116,6 +116,35 @@ pre.json {
   color: var(--text-soft); overflow: auto; max-height: 300px; margin-top: 10px;
 }
 .foot { color: var(--faint); font-size: 11px; margin-top: 30px; text-align: center; font-family: var(--mono); }
+
+/* history */
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.card-head h2 { margin: 0; }
+.btn.ghost {
+  background: var(--panel-soft); color: var(--text-soft); border: 1px solid var(--border);
+  font-size: 12px; padding: 7px 14px;
+}
+.btn.ghost:hover { border-color: var(--border-strong); color: var(--text); }
+.store-note { font-size: 11.5px; color: var(--muted); margin: 0 0 12px; display: flex; align-items: center; gap: 7px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.dot.durable { background: var(--success); }
+.dot.volatile { background: var(--warning); }
+table.hist { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.hist th {
+  text-align: left; font-size: 9.5px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: var(--faint); padding: 0 10px 7px 0; border-bottom: 1px solid var(--border);
+}
+table.hist td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.hist tr:last-child td { border-bottom: 0; }
+table.hist td.mono { font-family: var(--mono); font-size: 11.5px; color: var(--text-soft); }
+.pill {
+  display: inline-block; font-family: var(--mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
+}
+.pill.capable { background: var(--success-soft); color: var(--success); }
+.pill.below { background: var(--critical-soft); color: var(--critical); }
+.pill.err { background: var(--warning-soft); color: var(--warning); }
+.empty { color: var(--faint); font-size: 12.5px; padding: 6px 0; }
 </style>
 </head>
 <body>
@@ -169,7 +198,16 @@ pre.json {
     <details><summary>Ver JSON técnico</summary><pre class="json" id="rawJson"></pre></details>
   </div>
 
-  <p class="foot">POST /events · GET /health · docker/run_msa_analysis.Dockerfile</p>
+  <div class="card">
+    <div class="card-head">
+      <h2>Historial de estudios</h2>
+      <button class="btn ghost" onclick="loadHistory()">↻ Actualizar</button>
+    </div>
+    <p class="store-note" id="storeNote"><span class="dot volatile"></span><span>cargando…</span></p>
+    <div id="histBox"><p class="empty">Sin estudios todavía.</p></div>
+  </div>
+
+  <p class="foot">POST /events · GET /health · GET /reports · docker/run_msa_analysis.Dockerfile</p>
 </div>
 
 <script>
@@ -258,7 +296,82 @@ pre.json {
       ["Reproducibility", r.reproducibility], ["NDC", r.ndc]
     ].map(([l,v]) => '<div class="metric"><div class="mk">'+l+'</div><div class="mv">'+v+'</div></div>').join("");
     recoBox.textContent = r.recommendation || body.recommendation || "";
+
+    loadHistory();
   }
+
+  /* ---- Historial ------------------------------------------------------
+     Consume GET /reports. Sirve para dos cosas: que un ingeniero vea sus
+     estudios anteriores, y que quede a la vista si el guardado es
+     duradero (Postgres) o volátil (memoria). No se inventa nada: se
+     muestra exactamente lo que el servicio reporta. */
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d)) return String(iso);
+    return d.toLocaleString("es-MX", {
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit"
+    });
+  }
+
+  async function loadHistory() {
+    const note = document.getElementById("storeNote");
+    const box = document.getElementById("histBox");
+    const key = document.getElementById("apiKey").value.trim();
+
+    let body;
+    try {
+      const res = await fetch("/reports?limit=20", {
+        headers: key ? { "x-api-key": key } : {}
+      });
+      if (res.status === 401) {
+        note.innerHTML = '<span class="dot volatile"></span><span>Se requiere x-api-key para ver el historial.</span>';
+        box.innerHTML = '<p class="empty">Captura la llave arriba y vuelve a intentar.</p>';
+        return;
+      }
+      body = await res.json();
+    } catch (e) {
+      note.innerHTML = '<span class="dot volatile"></span><span>No se pudo leer el historial: ' + esc(e.message) + '</span>';
+      return;
+    }
+
+    const p = body.persistence || {};
+    note.innerHTML =
+      '<span class="dot ' + (p.durable ? "durable" : "volatile") + '"></span>' +
+      '<span><b>' + esc(p.tier || "desconocido") + '</b> — ' + esc(p.detail || "") + '</span>';
+
+    const rows = body.invocations || [];
+    if (!rows.length) { box.innerHTML = '<p class="empty">Sin estudios todavía.</p>'; return; }
+
+    box.innerHTML =
+      '<table class="hist"><thead><tr>' +
+      '<th>Cuándo</th><th>Estudio / Equipo</th><th>Gage R&amp;R %</th><th>Resultado</th>' +
+      '</tr></thead><tbody>' +
+      rows.map(function (row) {
+        const req = row.request_payload || {};
+        const resp = row.response_body || {};
+        const r = resp.result || {};
+        let pill;
+        if (!row.ok) pill = '<span class="pill err">' + esc(row.status || "error") + '</span>';
+        else if (row.verdict === "acceptable") pill = '<span class="pill capable">acceptable</span>';
+        else pill = '<span class="pill below">not acceptable</span>';
+        return '<tr>' +
+          '<td class="mono">' + esc(fmtTime(row.occurred_at)) + '</td>' +
+          '<td class="mono">' + esc(req.studyId || r.studyId || "—") +
+            (req.deviceId ? ' · ' + esc(req.deviceId) : '') + '</td>' +
+          '<td class="mono">' + esc(r.gageRRPercent !== undefined ? r.gageRRPercent : "—") + '</td>' +
+          '<td>' + pill + '</td>' +
+        '</tr>';
+      }).join("") +
+      '</tbody></table>';
+  }
+
+  loadHistory();
 </script>
 </body>
 </html>

@@ -2,11 +2,14 @@
   "name": "run-msa-analysis",
   "version": "0.1.0",
   "private": true,
-  "description": "MSA / Gage R&R tool — HTTP service and CLI, zero dependencies.",
+  "description": "MSA / Gage R&R tool — HTTP service and CLI. Optional Postgres persistence via DATABASE_URL.",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "cli": "node src/handler.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
   },
   "engines": {
     "node": ">=18"

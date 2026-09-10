@@ -5,7 +5,7 @@
    ---------------------------------------------------------------------
    What this is:
    - A real, standalone Node process (zero npm dependencies) implementing
-     the exact event-bus contract Carlos' platform expects:
+     the exact event-bus contract [EXTERNAL_ADMIN]' platform expects:
        POST /events
        GET  /events/subscriptions/:toolId
        GET  /events/chain/:correlationId
@@ -19,16 +19,16 @@
                     reaches the browser or any tracked file in this repo.
    - This is intentionally NOT a message queue, NOT Kafka/RabbitMQ, NOT
      a database. It is the smallest real thing that satisfies the
-     contract while the real endpoint/key get confirmed with Carlos.
+     contract while the real endpoint/key get confirmed with [EXTERNAL_ADMIN].
 
-   Inbound direction (Carlos' platform calling INTO this proxy):
-   - The path Carlos' platform needs is this deployment's base URL plus
+   Inbound direction ([EXTERNAL_ADMIN]' platform calling INTO this proxy):
+   - The path [EXTERNAL_ADMIN]' platform needs is this deployment's base URL plus
      the routes above, e.g. POST https://<this-deploy>/events.
    - If INBOUND_API_KEY is set, every request except GET /health and
      OPTIONS must include a matching "x-api-key" header, or it gets a
      401. If INBOUND_API_KEY is not set, these routes stay open (same
      as before — no auth), which is fine for local dev, not for a
-     public deployment once Carlos is actually calling in.
+     public deployment once [EXTERNAL_ADMIN] is actually calling in.
 
    Run:
      node bus-proxy/server.js
@@ -41,6 +41,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const db = require("./db.js");
 
 /* ---- tiny .env loader (no dependency) ---- */
 function loadEnvFile(file) {
@@ -64,7 +65,7 @@ const UPSTREAM_API_KEY = process.env.ISOTOOLS_API_KEY || "";
 const CONNECTED = !!(UPSTREAM_BASE_URL && UPSTREAM_API_KEY);
 
 /* ---- inbound auth: required only if INBOUND_API_KEY is set ----
-   This guards calls coming IN (e.g. from Carlos' platform), separate
+   This guards calls coming IN (e.g. from [EXTERNAL_ADMIN]' platform), separate
    from UPSTREAM_API_KEY above, which is used for calls going OUT. */
 const INBOUND_API_KEY = process.env.INBOUND_API_KEY || "";
 function inboundAuthOk(req) {
@@ -73,7 +74,7 @@ function inboundAuthOk(req) {
 }
 
 /* ---- known contract: which tool consumes which event type ----
-   Mirrors adapters/carlos-ecosystem/tool-registry-mapping.json and the
+   Mirrors adapters/external-admin-ecosystem/tool-registry-mapping.json and the
    TOOLS registry in workspace/ui/app.js. Kept in sync manually — this
    is the same "unified contract" boundary, just enforced here too. */
 const CONSUMES = {
@@ -135,7 +136,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "OPTIONS") { send(res, 204, {}); return; }
 
-  // Root path — generic uptime/health checks (Railway's own, or Carlos'
+  // Root path — generic uptime/health checks (Railway's own, or [EXTERNAL_ADMIN]'
   // platform monitoring) often hit "/" instead of "/health". Answer here
   // too so those don't report this service as offline. No auth, no data.
   if (req.method === "GET" && pathname === "/") {
@@ -150,6 +151,7 @@ const server = http.createServer(async (req, res) => {
       upstreamConfigured: CONNECTED,
       upstreamBaseUrl: CONNECTED ? UPSTREAM_BASE_URL : null,
       inboundAuthRequired: !!INBOUND_API_KEY,
+      persistence: db.status(),
       note: CONNECTED
         ? "Forwarding every POST /events to the real IsoTools API with x-api-key."
         : "No ISOTOOLS_API_BASE_URL / ISOTOOLS_API_KEY configured — running in-memory only. See bus-proxy/.env.example.",
@@ -182,6 +184,7 @@ const server = http.createServer(async (req, res) => {
       payload: body.payload || {}
     };
     ledger.unshift(event);
+    db.record(event); // best-effort — survives restarts if DATABASE_URL is set
 
     const upstream = await forwardUpstream("/events", { method: "POST", body });
     send(res, 201, { ok: true, mode: CONNECTED ? "CONNECTED" : "LOCAL", event, upstream });
@@ -208,9 +211,31 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Read-only history straight from Postgres (if configured) — proof
+  // that published events actually persist, independent of the
+  // in-memory ledger above which resets on every restart. Empty list
+  // (not an error) if DATABASE_URL isn't set.
+  if (req.method === "GET" && pathname === "/reports") {
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 20, 1), 100);
+    const { source, rows } = await db.recent(limit);
+    send(res, 200, {
+      ok: true,
+      service: "quality-tools-bus-proxy",
+      servedFrom: source,
+      persistence: db.status(),
+      count: rows.length,
+      events: rows
+    });
+    return;
+  }
+
   send(res, 404, {
     ok: false, error: "not found",
-    knownRoutes: ["GET /health", "POST /events", "GET /events/subscriptions/:toolId", "GET /events/chain/:correlationId"]
+    knownRoutes: [
+      "GET /health", "POST /events",
+      "GET /events/subscriptions/:toolId", "GET /events/chain/:correlationId",
+      "GET /reports"
+    ]
   });
 });
 

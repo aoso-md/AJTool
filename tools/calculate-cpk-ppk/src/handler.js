@@ -112,9 +112,9 @@ function handle(event) {
     recommendation
   };
 
-  /* CAPABILITY_ANALYSIS_COMPLETED is not part of Carlos' confirmed contract yet —
+  /* CAPABILITY_ANALYSIS_COMPLETED is not part of [EXTERNAL_ADMIN]' confirmed contract yet —
      emitted as a proposed/internal event only (official: false). The only official
-     output event is CAPABILITY_BELOW_TARGET, confirmed by Carlos:
+     output event is CAPABILITY_BELOW_TARGET, confirmed by [EXTERNAL_ADMIN]:
      MEASUREMENTS_CAPTURED -> CAPABILITY_BELOW_TARGET. */
   const emittedEvents = [buildEvent("CAPABILITY_ANALYSIS_COMPLETED", result, false)];
   if (belowTarget) {

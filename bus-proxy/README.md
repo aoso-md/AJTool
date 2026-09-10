@@ -2,7 +2,7 @@
 
 This is what "conectarse al event bus" means in this repo, concretely: a
 small standalone Node process, zero npm dependencies, that speaks the exact
-contract Carlos' platform expects.
+contract [EXTERNAL_ADMIN]' platform expects.
 
 ## Why this exists, not something bigger
 
@@ -52,9 +52,9 @@ Quality Tools Bus Proxy listening on http://localhost:8787
 Mode: LOCAL (in-memory only — see bus-proxy/.env.example)
 ```
 
-## Giving Carlos a path to call in (inbound direction)
+## Giving [EXTERNAL_ADMIN] a path to call in (inbound direction)
 
-If Carlos' platform is the one calling INTO this proxy (not the other way
+If [EXTERNAL_ADMIN]' platform is the one calling INTO this proxy (not the other way
 around), he doesn't need a URL from you — he needs the path(s) below,
 appended to wherever this proxy is deployed (e.g. the Railway URL):
 
@@ -64,7 +64,7 @@ appended to wherever this proxy is deployed (e.g. the Railway URL):
 - `GET    <deploy-url>/health` (no auth, always open — for uptime checks)
 
 By default those routes have no auth (fine for local dev/demo, not for a
-public deployment). To require the key Carlos already gave you on every
+public deployment). To require the key [EXTERNAL_ADMIN] already gave you on every
 inbound call:
 
 1. Set `INBOUND_API_KEY` in `bus-proxy/.env` (local) or as a Railway
@@ -82,17 +82,34 @@ this proxy also needs to call OUT to a real IsoTools API.
 
 1. Copy `bus-proxy/.env.example` to `bus-proxy/.env` (same folder).
 2. Fill in `ISOTOOLS_API_BASE_URL` and `ISOTOOLS_API_KEY` with the real
-   values from Carlos.
+   values from [EXTERNAL_ADMIN].
 3. Restart the proxy. `/health` now reports `"mode": "CONNECTED"`.
 
 `bus-proxy/.env` is listed in `.gitignore` — it will never be committed.
 
 ## Routes
 
-- `GET /health` — `{ ok, mode, upstreamConfigured, upstreamBaseUrl, note, eventCount }`
-- `POST /events` — body `{ type, source, payload, correlationId?, causationId? }`. Stores the event, forwards it upstream if CONNECTED, returns `{ ok, mode, event, upstream }`.
-- `GET /events/subscriptions/:toolId` — `toolId` is the **official broker ID** (`calculate_cpk_ppk` or `run_msa_analysis`, see `docs/OFFICIAL-CARLOS-CONTRACT.md`), not the folder name. Returns events of the types that tool consumes.
-- `GET /events/chain/:correlationId` — every event published under that correlation ID, oldest first.
+- `GET /health` — `{ ok, mode, upstreamConfigured, upstreamBaseUrl, inboundAuthRequired, persistence, note, eventCount }`
+- `POST /events` — body `{ type, source, payload, correlationId?, causationId? }`. Stores the event (in-memory ledger, plus Postgres if `DATABASE_URL` is set), forwards it upstream if CONNECTED, returns `{ ok, mode, event, upstream }`.
+- `GET /events/subscriptions/:toolId` — `toolId` is the **official broker ID** (`calculate_cpk_ppk` or `run_msa_analysis`, see `docs/OFFICIAL-EXTERNAL-ADMIN-CONTRACT.md`), not the folder name. Returns events of the types that tool consumes, from the in-memory ledger.
+- `GET /events/chain/:correlationId` — every event published under that correlation ID, oldest first, from the in-memory ledger.
+- `GET /reports?limit=20` — recent events straight from Postgres (newest first), independent of the in-memory ledger above — this is what survives a restart. Returns an empty list, not an error, if persistence isn't configured.
+
+## Persistence (optional, survives restarts)
+
+By default the ledger above is in-memory only — a Railway restart wipes
+it. Set `DATABASE_URL` (a Postgres connection string) to also write
+every published event to a `bus_events` table:
+
+1. In Railway, open this service → **New** → **Database** → **Add
+   PostgreSQL** (or attach an existing instance).
+2. Railway injects `DATABASE_URL` into this service automatically —
+   nothing else to configure.
+3. Redeploy. `GET /health` now reports `"persistence": "postgres"`, and
+   `GET /reports` starts returning real rows.
+
+Without `DATABASE_URL`, nothing changes from before — `/reports` simply
+returns an empty list. See `bus-proxy/db.js`.
 
 ## Quick manual test (PowerShell)
 
@@ -135,8 +152,10 @@ about the demo depends on this proxy being up).
 
 - No retry/backoff on forwarding failures — a failed forward is reported
   in the response and dropped, not queued.
-- No persistence across restarts — the ledger is in memory only. Real
-  persistence is PostgreSQL, still not connected (see main
-  `workspace/ui/README.md`).
+- The in-memory ledger (used by `/events/subscriptions/:toolId` and
+  `/events/chain/:correlationId`) still resets on restart even with
+  Postgres attached — only `/reports` reads from the durable store today.
+  Moving the other two routes onto Postgres as well is a small follow-up,
+  not done yet.
 - No auth on the proxy's own local endpoints — it only binds to
   `localhost`, meant for local development, not for exposing on a network.

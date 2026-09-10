@@ -4,7 +4,7 @@
    run_msa_analysis — HTTP wrapper around handler.js
    ---------------------------------------------------------------------
    Zero npm dependencies, same pattern as bus-proxy/server.js. This is
-   the path Carlos' platform (or anyone) calls to run the tool directly:
+   the path [EXTERNAL_ADMIN]' platform (or anyone) calls to run the tool directly:
 
      GET  /health   — status, no auth required
      POST /events   — body is the full event envelope, same shape as
@@ -27,6 +27,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { handle } = require("./handler.js");
+const db = require("./db.js");
 
 const PORT = Number(process.env.PORT) || 8082;
 const INBOUND_API_KEY = process.env.INBOUND_API_KEY || "";
@@ -95,7 +96,8 @@ const server = http.createServer(async (req, res) => {
       tool: "run_msa_analysis",
       officialInput: "NEW_DEVICE_REGISTERED",
       officialOutput: "MSA_VALIDATED",
-      inboundAuthRequired: !!INBOUND_API_KEY
+      inboundAuthRequired: !!INBOUND_API_KEY,
+      persistence: db.status()
     });
     return;
   }
@@ -114,14 +116,39 @@ const server = http.createServer(async (req, res) => {
     try { result = handle(event); }
     catch (e) { send(res, 500, { ok: false, error: "handler crashed", message: String((e && e.message) || e) }); return; }
 
+    // Best-effort persistence — never blocks or fails the response even
+    // if DATABASE_URL isn't set or the insert fails (db.js swallows and
+    // logs its own errors). This is what lets /reports show a real
+    // history of every call this service has answered.
+    db.record(event, result);
+
     const status = result.ok ? 200 : (result.status === "validation-error" ? 422 : 200);
     send(res, status, result);
     return;
   }
 
+  // Read-only history of past invocations — proof that calls are really
+  // being recorded, not just answered and forgotten. Requires the same
+  // x-api-key as /events (it carries payload data). Always answers:
+  // from Postgres when it's configured and reachable, otherwise from the
+  // in-memory ring buffer, and it says which one it used.
+  if (req.method === "GET" && pathname === "/reports") {
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 20, 1), 100);
+    const { source, rows } = await db.recent(limit);
+    send(res, 200, {
+      ok: true,
+      tool: "run_msa_analysis",
+      servedFrom: source,
+      persistence: db.status(),
+      count: rows.length,
+      invocations: rows
+    });
+    return;
+  }
+
   send(res, 404, {
     ok: false, error: "not found",
-    knownRoutes: ["GET /health", "POST /events"]
+    knownRoutes: ["GET /health", "POST /events", "GET /reports"]
   });
 });
 
