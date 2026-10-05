@@ -1,0 +1,4 @@
+# Same as the orchestrator dashboard (core repo, web/pnpm-workspace.yaml):
+# pnpm 11 blocks dependency build scripts unless allowed. Vite needs esbuild's.
+allowBuilds:
+  esbuild: true

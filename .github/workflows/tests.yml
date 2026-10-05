@@ -1,0 +1,38 @@
+# .github/workflows/tests.yml
+# Backend tests + frontend typecheck/build for both tools. Runs on every pull
+# request, and is called by deploy-railway.yml so nothing deploys on red.
+name: Tests
+
+on:
+  pull_request:
+  workflow_call:
+
+jobs:
+  tool:
+    name: test ${{ matrix.tool }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: [calculate-cpk-ppk, run-msa-analysis]
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      # pnpm at the exact version of `packageManager` in each package.json.
+      - run: corepack enable
+
+      - name: Backend — install and test
+        working-directory: tools/${{ matrix.tool }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm test
+
+      - name: Frontend — typecheck and build
+        working-directory: tools/${{ matrix.tool }}/web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build

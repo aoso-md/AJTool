@@ -1,0 +1,81 @@
+# =============================================================================
+# Run BOTH tools locally exactly as they deploy (same images), plus a Postgres.
+# From the platform template plantillas/integracion/docker/docker-compose.tool.yml
+#
+#   docker compose up --build
+#   -> http://localhost:8108   calculate_cpk_ppk
+#   -> http://localhost:8109   run_msa_analysis
+#
+# To receive real events, export ISOTOOLS_API_KEY (and ISOTOOLS_API_URL if the
+# core isn't the production one) before `up`. Without them the tools work from
+# their UI and say "no configurado" on the Integración tab.
+# =============================================================================
+services:
+  calculate_cpk_ppk:
+    build:
+      context: .
+      dockerfile: docker/calculate_cpk_ppk.Dockerfile
+    ports:
+      - "8108:8108"
+    environment:
+      - PORT=8108
+      - DATABASE_URL=postgresql://tool:tool@db:5432/tool
+      - ISOTOOLS_API_URL=${ISOTOOLS_API_URL:-https://isotools-production.up.railway.app/api/v1}
+      - ISOTOOLS_API_KEY=${ISOTOOLS_API_KEY:-}
+      # shadow: computes and stores, never sends. Keep it until the tool is
+      # registered in the core's deployments.json (docs/DESPLIEGUE.md §5).
+      - CORE_PUBLISH=${CORE_PUBLISH:-shadow}
+      - OIDC_ISSUER=${OIDC_ISSUER:-}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID:-}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET:-}
+      - OIDC_REDIRECT_URI=http://localhost:8108/auth/callback
+      - SESSION_SECRET=${SESSION_SECRET:-solo-para-local-cambiame-00000000000}
+      - SESSION_COOKIE_NAME=ccp_session
+      # Plain HTTP locally: with `Secure` the browser drops the cookie silently.
+      - SESSION_INSECURE_COOKIES=true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  run_msa_analysis:
+    build:
+      context: .
+      dockerfile: docker/run_msa_analysis.Dockerfile
+    ports:
+      - "8109:8109"
+    environment:
+      - PORT=8109
+      - DATABASE_URL=postgresql://tool:tool@db:5432/tool
+      - ISOTOOLS_API_URL=${ISOTOOLS_API_URL:-https://isotools-production.up.railway.app/api/v1}
+      - ISOTOOLS_API_KEY=${ISOTOOLS_API_KEY:-}
+      - CORE_PUBLISH=${CORE_PUBLISH:-shadow}
+      - OIDC_ISSUER=${OIDC_ISSUER:-}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID:-}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET:-}
+      - OIDC_REDIRECT_URI=http://localhost:8109/auth/callback
+      - SESSION_SECRET=${SESSION_SECRET:-solo-para-local-cambiame-00000000000}
+      - SESSION_COOKIE_NAME=rma_session
+      - SESSION_INSECURE_COOKIES=true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=tool
+      - POSTGRES_PASSWORD=tool
+      - POSTGRES_DB=tool
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # `condition: service_healthy` without a healthcheck waits for nothing.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tool -d tool"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
