@@ -3,9 +3,10 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { Button, ErrorState, Loading, Metric, Mono, Panel, StatusChip } from '../components/primitives';
 import { PublicationPanel, TraceabilityPanel, Warnings, actorLabel } from '../components/StudyMeta';
+import { PriorityBadge } from '../components/Priority';
 import { useResource } from '../lib/useResource';
 import { api } from '../lib/api';
-import { navigate } from '../lib/router';
+import { Link, navigate } from '../lib/router';
 import { fmt, metricTone, verdictChip, type CpkStudy } from '../lib/domain';
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
@@ -55,6 +56,7 @@ export function StudyPage({ id }: { id: string }) {
         description={r ? `${r.sampleSize} mediciones · USL ${r.usl} · LSL ${r.lsl} · Cpk mínimo ${r.minimumCpk}` : s.reason ?? undefined}
         actions={
           <div className="flex items-center gap-2">
+            <PriorityBadge priority={s.priority} />
             <StatusChip status={v.label} tone={v.tone} />
             <Button onClick={() => navigate('/')}>
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
@@ -63,6 +65,13 @@ export function StudyPage({ id }: { id: string }) {
           </div>
         }
       />
+
+      {s.priority && s.priority.level !== 'low' && (
+        <p className="text-2xs text-muted">
+          <span className="text-faint">Por qué es prioritario: </span>
+          {s.priority.reason}
+        </p>
+      )}
 
       {s.status !== 'completed' && s.reason && (
         <ErrorState title={s.status === 'skipped' ? 'Estudio omitido — no se calculó' : 'El estudio falló'} detail={s.reason} />
@@ -115,6 +124,28 @@ export function StudyPage({ id }: { id: string }) {
             </dl>
           </Panel>
         )}
+        <Panel
+          title="Criterios aplicados"
+          subtitle="Con los que se juzgó este estudio; no cambian aunque los criterios se modifiquen después"
+          actions={<Link to="/criterios">Ver criterios vigentes</Link>}
+        >
+          <dl>
+            <Row label="Cpk mínimo"><Mono>{r?.minimumCpk ?? '—'}</Mono></Row>
+            <Row label="Origen del mínimo">
+              <span className="text-muted">
+                {s.criteria?.minimumCpkSource === 'event'
+                  ? 'valor indicado en el evento o en el formulario'
+                  : s.criteria?.minimumCpkSource === 'characteristic'
+                    ? 'excepción de esta característica'
+                    : s.criteria?.minimumCpkSource === 'default'
+                      ? 'valor general vigente'
+                      : 'registro anterior a los criterios configurables'}
+              </span>
+            </Row>
+            <Row label="Límite de «marginal»"><Mono>{r?.marginalFloor ?? (s.criteria?.marginalFloor as number | undefined) ?? 1}</Mono></Row>
+            <Row label="Versión de criterios"><Mono>{s.criteria?.version != null ? `v${s.criteria.version}` : '—'}</Mono></Row>
+          </dl>
+        </Panel>
         <Panel title="Especificación usada">
           <dl>
             <Row label="USL"><Mono>{s.spec?.usl ?? '—'}</Mono></Row>

@@ -44,11 +44,15 @@ function range (values) {
   return Math.max(...values) - Math.min(...values);
 }
 
-export function verdictFor (gageRRPercent, ndc) {
-  let verdict = gageRRPercent < 10 ? 'acceptable' : gageRRPercent <= 30 ? 'marginal' : 'unacceptable';
-  // AIAG: a system that can't separate parts into at least 5 categories is not
+/** AIAG guideline; the plant may tune it (see domain/criteria.js). */
+export const AIAG_CRITERIA = Object.freeze({ grrAcceptable: 10, grrMarginal: 30, minNdc: 5 });
+
+export function verdictFor (gageRRPercent, ndc, criteria = AIAG_CRITERIA) {
+  const { grrAcceptable, grrMarginal, minNdc } = { ...AIAG_CRITERIA, ...criteria };
+  let verdict = gageRRPercent < grrAcceptable ? 'acceptable' : gageRRPercent <= grrMarginal ? 'marginal' : 'unacceptable';
+  // AIAG: a system that can't separate parts into enough categories is not
   // acceptable for process control even if %GRR looks fine.
-  if (verdict === 'acceptable' && ndc < 5) verdict = 'marginal';
+  if (verdict === 'acceptable' && ndc < minNdc) verdict = 'marginal';
   return verdict;
 }
 
@@ -56,7 +60,7 @@ export function verdictFor (gageRRPercent, ndc) {
  * @param {{partId:string, operatorId:string, trial:number|string, value:number}[]} observations
  * @returns {{ok:true, result:object, warnings:string[]} | {ok:false, errors:string[]}}
  */
-export function analyzeGageRR (observations) {
+export function analyzeGageRR (observations, criteria = AIAG_CRITERIA) {
   const errors = [];
   if (!Array.isArray(observations) || observations.length === 0) {
     return { ok: false, errors: ['El estudio no tiene observaciones.'] };
@@ -138,7 +142,8 @@ export function analyzeGageRR (observations) {
 
   const gageRRPercent = (100 * grr) / tv;
   const ndc = Math.floor((1.41 * pv) / grr);
-  const verdict = verdictFor(gageRRPercent, ndc);
+  const applied = { ...AIAG_CRITERIA, ...criteria };
+  const verdict = verdictFor(gageRRPercent, ndc, applied);
 
   const warnings = [];
   if (n < 10) warnings.push(`Estudio con ${n} piezas: AIAG recomienda 10 piezas que cubran el rango del proceso.`);
@@ -163,9 +168,10 @@ export function analyzeGageRR (observations) {
       partVariationPercent: round((100 * pv) / tv, 2),
       contributionPercent: round((100 * grr ** 2) / tv ** 2, 2),
       ndc,
-      verdict
+      verdict,
+      criteria: { grrAcceptable: applied.grrAcceptable, grrMarginal: applied.grrMarginal, minNdc: applied.minNdc }
     }
   };
 }
 
-export default { analyzeGageRR, verdictFor, LIMITS };
+export default { analyzeGageRR, verdictFor, LIMITS, AIAG_CRITERIA };

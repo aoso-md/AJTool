@@ -119,7 +119,15 @@ export function createApp ({ tool, config, core, store, poller, publisher, regis
     });
   });
 
-  registerRoutes(api, { requireQuality: requireRole(...QUALITY_ROLES), actorOf });
+  // Who may change records and criteria: services and open-mode callers (as in
+  // requireRole) or a person holding one of the quality roles. Exposed to the UI
+  // as `canEdit` so it can say "solo lectura" instead of failing on submit.
+  const canEdit = (req) => Boolean(req.caller) && (
+    req.caller.kind === 'service' || req.caller.kind === 'open' ||
+    (req.caller.roles || []).some((role) => QUALITY_ROLES.includes(role))
+  );
+
+  registerRoutes(api, { requireQuality: requireRole(...QUALITY_ROLES), actorOf, canEdit });
 
   app.use('/api', api);
   // Unknown /api is JSON 404, BEFORE the SPA fallback, so a typo'd endpoint
@@ -127,7 +135,9 @@ export function createApp ({ tool, config, core, store, poller, publisher, regis
   app.use('/api', (req, res) => res.status(404).json({ error: 'not_found', path: req.originalUrl }));
 
   // ── 4. The SPA, same origin ────────────────────────────────────────────────
-  const uiDir = config.uiDistDir;
+  // Resolved to an absolute path: sendFile refuses relative ones, and the
+  // documented local command sets UI_DIST_DIR=web/dist.
+  const uiDir = config.uiDistDir ? path.resolve(config.uiDistDir) : null;
   if (uiDir && existsSync(path.join(uiDir, 'index.html'))) {
     // Assets open and cached forever (hashed names). A 302 to the IdP in
     // response to a .js file is followed by nobody and breaks the page load.

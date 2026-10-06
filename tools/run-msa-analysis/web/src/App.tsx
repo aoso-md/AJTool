@@ -6,6 +6,7 @@ import { IntegrationPage } from './pages/IntegrationPage';
 import { StudiesPage } from './pages/StudiesPage';
 import { CapturePage } from './pages/CapturePage';
 import { StudyPage } from './pages/StudyPage';
+import { CriteriaPage } from './pages/CriteriaPage';
 import { linkProps, match, usePath } from './lib/router';
 import { setAuthMode } from './lib/api';
 
@@ -31,6 +32,7 @@ export function App() {
   else if (path === '/capturar') page = <CapturePage />;
   else if (capture) page = <CapturePage pendingId={capture.id!} />;
   else if (study) page = <StudyPage id={study.id!} />;
+  else if (path === '/criterios') page = <CriteriaPage />;
   else if (path === '/integracion') page = <IntegrationPage />;
   else page = <EmptyState title="Esta pantalla no existe" detail={path} />;
 
@@ -38,6 +40,7 @@ export function App() {
     <nav className="-mb-px flex gap-1" aria-label="Secciones">
       <Tab active={path === '/' || Boolean(study)} {...linkProps('/')}>Estudios</Tab>
       <Tab active={path === '/capturar' || Boolean(capture)} {...linkProps('/capturar')}>Capturar estudio</Tab>
+      <Tab active={path === '/criterios'} {...linkProps('/criterios')}>Criterios</Tab>
       <Tab active={path === '/integracion'} {...linkProps('/integracion')}>Integración</Tab>
     </nav>
   );

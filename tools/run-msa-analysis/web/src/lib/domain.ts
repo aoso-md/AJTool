@@ -25,7 +25,11 @@ export interface GageResult {
   contributionPercent: number;
   ndc: number;
   verdict: 'acceptable' | 'marginal' | 'unacceptable';
+  /** Thresholds this verdict was judged with (absent in studies from before they were configurable). */
+  criteria?: { grrAcceptable: number; grrMarginal: number; minNdc: number };
 }
+
+export const AIAG = { grrAcceptable: 10, grrMarginal: 30, minNdc: 5 } as const;
 
 export interface MsaStudy extends StudyBase {
   gaugeId: string | null;

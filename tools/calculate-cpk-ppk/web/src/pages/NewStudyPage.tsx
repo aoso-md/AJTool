@@ -7,6 +7,7 @@ import { api } from '../lib/api';
 import { navigate } from '../lib/router';
 import { actorLabel } from '../components/StudyMeta';
 import { parseMeasurements, type CpkStudy, type Spec } from '../lib/domain';
+import type { CriteriaResponse } from '../lib/criteria';
 
 const num = (v: string) => (v.trim() === '' ? undefined : Number(v));
 
@@ -19,12 +20,13 @@ export function NewStudyPage() {
   const [usl, setUsl] = useState('');
   const [lsl, setLsl] = useState('');
   const [target, setTarget] = useState('');
-  const [minimumCpk, setMinimumCpk] = useState('1.33');
+  const [minimumCpk, setMinimumCpk] = useState(''); // empty = the criteria in force
   const [raw, setRaw] = useState('');
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const criteria = useResource(() => api.get<CriteriaResponse>('/api/settings'), []);
   const parsed = useMemo(() => parseMeasurements(raw), [raw]);
   const known = useMemo(
     () => (specs.data?.specs ?? []).find((s) => s.characteristicId === characteristicId.trim() && (!s.partId || !partId || s.partId === partId.trim())),
@@ -37,6 +39,17 @@ export function NewStudyPage() {
     setUsl(String(known.usl));
     setLsl(String(known.lsl));
   }
+
+  // What the criteria in force say for this characteristic — shown, not sent,
+  // unless the engineer types a value to override it for this one study.
+  const criteriaNow = criteria.data?.settings;
+  const overrideFor = (criteriaNow?.overrides as Record<string, number> | undefined)?.[characteristicId.trim()];
+  const effective = criteriaNow
+    ? { value: overrideFor ?? (criteriaNow.minimumCpk as number), fromCharacteristic: overrideFor != null }
+    : null;
+  const minimumHint = effective
+    ? `Vacío = criterio vigente: ${effective.value}${effective.fromCharacteristic ? ' (excepción de esta característica)' : ''}. Escriba un valor solo para este estudio; se cambia en general en «Criterios».`
+    : 'Vacío = el criterio vigente (pestaña «Criterios»).';
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -109,8 +122,14 @@ export function NewStudyPage() {
           <Field label="LSL — límite inferior" required>
             <Input inputMode="decimal" value={lsl} onChange={(e) => setLsl(e.target.value)} placeholder="9.95" className="font-mono" />
           </Field>
-          <Field label="Cpk mínimo" hint="1.33 por defecto. Por debajo, el resultado se puede escalar.">
-            <Input inputMode="decimal" value={minimumCpk} onChange={(e) => setMinimumCpk(e.target.value)} className="font-mono" />
+          <Field label="Cpk mínimo" hint={minimumHint}>
+            <Input
+              inputMode="decimal"
+              value={minimumCpk}
+              onChange={(e) => setMinimumCpk(e.target.value)}
+              placeholder={String(effective?.value ?? '')}
+              className="font-mono"
+            />
           </Field>
           <Field label="Valor objetivo" hint="Opcional, informativo">
             <Input inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} className="font-mono" />

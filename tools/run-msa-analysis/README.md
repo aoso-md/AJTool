@@ -19,14 +19,30 @@ el veredicto, encadenado al registro del equipo. Contrato completo:
 | `POST /api/studies/:id/capture` | rol de calidad | capturar el estudio de un equipo registrado (publica) |
 | `POST /api/studies` | rol de calidad | estudio sin registro (se guarda) |
 | `POST /api/studies/:id/publish` | rol de calidad | publicar / reintentar |
+| `GET /api/summary` | credencial | conteo por urgencia, equipos pendientes y «qué atender primero» |
+| `GET /api/settings` | credencial | criterios vigentes, límites, versión e historial |
+| `POST /api/settings/preview` | rol de calidad | vista previa: cambios, desviaciones de AIAG e impacto (no escribe) |
+| `PUT /api/settings` | rol de calidad | aplicar un cambio de criterios: exige `confirm: true`, la versión vista y un motivo |
 | `POST /api/invoke` | credencial | calcular sin guardar ni publicar |
 | `/` | sesión (si hay SSO) | interfaz |
 
 ```powershell
 pnpm install
-pnpm test                         # 39 pruebas: cálculo AIAG, contrato, poller, HTTP
+pnpm test                         # 54 pruebas: cálculo AIAG, criterios, prioridad, contrato, poller, HTTP
 cd web; pnpm install; pnpm run build; cd ..
 $env:UI_DIST_DIR = "web/dist"; pnpm start      # http://localhost:8109
 ```
 
 Variables: [`.env.example`](.env.example) · Despliegue: [`docs/DESPLIEGUE.md`](../../docs/DESPLIEGUE.md)
+
+## Criterios de aceptación editables
+
+Los umbrales que deciden «capaz / aceptable» se pueden ajustar desde la pestaña
+**Criterios**, y el cambio es deliberadamente de dos pasos: primero una vista
+previa (qué cambia, qué se aparta de la referencia, qué habría significado para
+los estudios ya registrados) y después una confirmación con motivo. El servidor
+rechaza (428) cualquier cambio sin `confirm: true`, y cada cambio queda en el
+historial con quién, cuándo, por qué y antes/después.
+
+Los cambios aplican solo a estudios **nuevos**: cada estudio guarda los criterios
+con los que se evaluó, y el evento publicado a la plataforma los lleva dentro.

@@ -5,8 +5,9 @@ import { Button, ErrorState, Loading, Metric, Mono, Panel, StatusChip } from '..
 import { MetaRow, PublicationPanel, TraceabilityPanel, Warnings, actorLabel } from '../components/StudyMeta';
 import { useResource } from '../lib/useResource';
 import { api } from '../lib/api';
-import { navigate } from '../lib/router';
-import { fmt, metricTone, verdictChip, type MsaStudy } from '../lib/domain';
+import { PriorityBadge } from '../components/Priority';
+import { Link, navigate } from '../lib/router';
+import { AIAG, fmt, metricTone, verdictChip, type MsaStudy } from '../lib/domain';
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -68,6 +69,8 @@ export function StudyPage({ id }: { id: string }) {
   const r = s.result;
   const v = verdictChip(s);
   const canPublish = s.status === 'completed' && PUBLISHABLE.has(s.publish.state);
+  const crit = r?.criteria ?? AIAG;
+  const legacy = !r?.criteria;
 
   async function publish() {
     setBusy(true);
@@ -90,6 +93,7 @@ export function StudyPage({ id }: { id: string }) {
         description={r ? `${r.parts} piezas · ${r.appraisers} operadores · ${r.trials} ensayos · ${r.method}` : s.reason ?? undefined}
         actions={
           <div className="flex items-center gap-2">
+            <PriorityBadge priority={s.priority} />
             <StatusChip status={v.label} tone={v.tone} />
             <Button onClick={() => navigate('/')}>
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
@@ -98,6 +102,13 @@ export function StudyPage({ id }: { id: string }) {
           </div>
         }
       />
+
+      {s.priority && s.priority.level !== 'low' && (
+        <p className="text-2xs text-muted">
+          <span className="text-faint">Por qué es prioritario: </span>
+          {s.priority.reason}
+        </p>
+      )}
 
       {s.status === 'pending' && (
         <Panel
@@ -118,7 +129,7 @@ export function StudyPage({ id }: { id: string }) {
         <>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Metric label="%GRR" value={fmt(r.gageRRPercent, 2)} tone={metricTone(r.verdict)} hint="de la variación total del estudio" />
-            <Metric label="ndc" value={r.ndc} tone={r.ndc >= 5 ? 'default' : 'warn'} hint="categorías distintas · se requiere ≥ 5" />
+            <Metric label="ndc" value={r.ndc} tone={r.ndc >= crit.minNdc ? 'default' : 'warn'} hint={`categorías distintas · se requiere ≥ ${crit.minNdc}`} />
             <Metric label="Repetibilidad (EV)" value={fmt(r.repeatability, 4)} hint={`${fmt(r.repeatabilityPercent, 1)} % · el equipo`} />
             <Metric label="Reproducibilidad (AV)" value={fmt(r.reproducibility, 4)} hint={`${fmt(r.reproducibilityPercent, 1)} % · los operadores`} />
           </div>
@@ -157,11 +168,15 @@ export function StudyPage({ id }: { id: string }) {
               <Row label="% contribución (varianza)"><Mono>{fmt(r.contributionPercent, 2)} %</Mono></Row>
             </dl>
           </Panel>
-          <Panel title="Criterio de aceptación" subtitle="AIAG MSA, 4.ª edición">
+          <Panel
+            title="Criterio de aceptación aplicado"
+            subtitle={legacy ? 'AIAG MSA, 4.ª edición (estudio anterior a los criterios configurables)' : `Versión de criterios v${s.criteria?.version ?? 0} · no cambia aunque se modifiquen después`}
+            actions={<Link to="/criterios">Ver criterios vigentes</Link>}
+          >
             <dl>
-              <Row label="Aceptable"><Mono>%GRR &lt; 10 y ndc ≥ 5</Mono></Row>
-              <Row label="Marginal"><Mono>%GRR 10–30, o ndc &lt; 5</Mono></Row>
-              <Row label="Inaceptable"><Mono>%GRR &gt; 30</Mono></Row>
+              <Row label="Aceptable"><Mono>%GRR &lt; {crit.grrAcceptable} y ndc ≥ {crit.minNdc}</Mono></Row>
+              <Row label="Marginal"><Mono>%GRR {crit.grrAcceptable}–{crit.grrMarginal}, o ndc &lt; {crit.minNdc}</Mono></Row>
+              <Row label="Inaceptable"><Mono>%GRR &gt; {crit.grrMarginal}</Mono></Row>
               <Row label="Este estudio"><StatusChip status={v.label} tone={v.tone} /></Row>
             </dl>
           </Panel>

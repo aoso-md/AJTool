@@ -29,6 +29,8 @@ function createMemoryStore () {
   const studies = new Map();
   const cursors = new Map();
   const specs = new Map();
+  const settings = new Map();
+  const settingsHistory = new Map();
 
   const specKey = (partId, characteristicId) => `${partId || ''}::${characteristicId}`;
 
@@ -71,6 +73,18 @@ function createMemoryStore () {
     },
     async listSpecs () {
       return [...specs.values()].sort((a, b) => a.characteristicId.localeCompare(b.characteristicId));
+    },
+    async getSettings (key) {
+      return settings.has(key) ? structuredClone(settings.get(key)) : null;
+    },
+    async saveSettings (record) {
+      settings.set(record.key, structuredClone(record));
+      const list = settingsHistory.get(record.key) || [];
+      list.unshift({ key: record.key, version: record.version, before: record.before, after: record.doc, reason: record.reason, actor: record.updatedBy, at: record.updatedAt });
+      settingsHistory.set(record.key, list.slice(0, 200));
+    },
+    async listSettingsHistory (key, limit) {
+      return structuredClone((settingsHistory.get(key) || []).slice(0, limit));
     },
     async findSpec (partId, characteristicId) {
       if (partId && specs.has(specKey(partId, characteristicId))) return { ...specs.get(specKey(partId, characteristicId)) };
@@ -116,6 +130,29 @@ const SCHEMA_SQL = `
     updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (part_id, characteristic_id)
   );
+
+  -- Acceptance criteria (minimum Cpk, %GRR limits…). One current row per key,
+  -- plus an append-only history: who changed what, from what, and why.
+  CREATE TABLE IF NOT EXISTS settings (
+    key        TEXT        PRIMARY KEY,
+    doc        JSONB       NOT NULL,
+    version    INTEGER     NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
+    updated_by JSONB,
+    reason     TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS settings_history (
+    id      BIGSERIAL   PRIMARY KEY,
+    key     TEXT        NOT NULL,
+    version INTEGER     NOT NULL,
+    before  JSONB,
+    after   JSONB       NOT NULL,
+    reason  TEXT,
+    actor   JSONB,
+    at      TIMESTAMPTZ NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS settings_history_key_idx ON settings_history (key, id DESC);
 `;
 
 /* Railway's private network (*.railway.internal) rejects TLS; its public proxy
@@ -304,6 +341,100 @@ export async function createStore ({ databaseUrl, log = console } = {}) {
         return any && any[0] ? rowToSpec(any[0]) : null;
       }
       return memory.findSpec(partId, characteristicId);
+    },
+
+    // ── Acceptance criteria ───────────────────────────────────────────────────
+    async getSettings (key) {
+      const rows = await pg(async (p) => (await p.query('SELECT * FROM settings WHERE key = $1', [key])).rows);
+      if (rows) {
+        const r = rows[0];
+        if (!r) return null;
+        return {
+          key: r.key,
+          doc: r.doc,
+          version: Number(r.version),
+          updatedAt: r.updated_at instanceof Date ? r.updated_at.toISOString() : r.updated_at,
+          updatedBy: r.updated_by,
+          reason: r.reason
+        };
+      }
+      return memory.getSettings(key);
+    },
+
+    /**
+     * Optimistic concurrency: the write only lands if `expectedVersion` is still
+     * the current one. Two engineers editing criteria at once cannot silently
+     * overwrite each other — the second gets { conflict: true } and the current
+     * values to look at.
+     */
+    async saveSettings ({ key, doc, expectedVersion, actor, reason, before }) {
+      const current = await this.getSettings(key);
+      const currentVersion = current?.version ?? 0;
+      if (Number(expectedVersion) !== currentVersion) return { ok: false, conflict: true, current };
+
+      const record = {
+        key,
+        doc,
+        version: currentVersion + 1,
+        updatedAt: new Date().toISOString(),
+        updatedBy: actor ?? null,
+        reason: reason ?? null,
+        before: before ?? current?.doc ?? null
+      };
+
+      const written = await pg(async (p) => {
+        const client = await p.connect();
+        try {
+          await client.query('BEGIN');
+          const upsert = await client.query(
+            `INSERT INTO settings (key, doc, version, updated_at, updated_by, reason)
+             VALUES ($1,$2,$3,$4,$5,$6)
+             ON CONFLICT (key) DO UPDATE
+               SET doc = EXCLUDED.doc, version = EXCLUDED.version, updated_at = EXCLUDED.updated_at,
+                   updated_by = EXCLUDED.updated_by, reason = EXCLUDED.reason
+             WHERE settings.version = $7`,
+            [key, JSON.stringify(doc), record.version, record.updatedAt, JSON.stringify(actor ?? null), record.reason, currentVersion]
+          );
+          if (upsert.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return { conflict: true };
+          }
+          await client.query(
+            `INSERT INTO settings_history (key, version, before, after, reason, actor, at)
+             VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+            [key, record.version, JSON.stringify(record.before), JSON.stringify(doc), record.reason, JSON.stringify(actor ?? null), record.updatedAt]
+          );
+          await client.query('COMMIT');
+          return { conflict: false };
+        } catch (error) {
+          await client.query('ROLLBACK').catch(() => {});
+          throw error;
+        } finally {
+          client.release();
+        }
+      });
+
+      if (written && written.conflict) return { ok: false, conflict: true, current: await this.getSettings(key) };
+      await memory.saveSettings(record);
+      return { ok: true, record, durable: Boolean(written) };
+    },
+
+    async listSettingsHistory (key, limit = 20) {
+      const rows = await pg(async (p) => (await p.query(
+        'SELECT * FROM settings_history WHERE key = $1 ORDER BY id DESC LIMIT $2', [key, limit]
+      )).rows);
+      if (rows) {
+        return rows.map((r) => ({
+          key: r.key,
+          version: Number(r.version),
+          before: r.before,
+          after: r.after,
+          reason: r.reason,
+          actor: r.actor,
+          at: r.at instanceof Date ? r.at.toISOString() : r.at
+        }));
+      }
+      return memory.listSettingsHistory(key, limit);
     },
 
     async close () {

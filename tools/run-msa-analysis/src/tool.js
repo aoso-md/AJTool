@@ -29,7 +29,10 @@
 // -----------------------------------------------------------------------------
 import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { analyzeGageRR } from './domain/gage-rr.js';
+import { analyzeGageRR, verdictFor } from './domain/gage-rr.js';
+import { SETTINGS_KEY, DEFAULTS, BOUNDS, validateCriteria, describeChanges, deviations, impactOn } from './domain/criteria.js';
+import { byPriority, priorityOf, summarize } from './domain/priority.js';
+import { createSettingsService } from './platform/settings.js';
 import { buildChild, buildRoot, fromCore } from './platform/ies.js';
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -95,6 +98,10 @@ export function validatedData (study) {
     partVariation: r.partVariation,
     totalVariation: r.totalVariation,
     contributionPercent: r.contributionPercent,
+    // the thresholds this verdict was judged with, so a downstream reader
+    // never has to guess whether 12% was "acceptable" under that plant's rule
+    acceptanceCriteria: r.criteria ?? null,
+    criteriaVersion: study.criteria?.version ?? null,
     studyId: study.id
   };
 }
@@ -118,6 +125,19 @@ function newStudy (fields) {
 }
 
 export function createMsaTool ({ store, publisher, log = console }) {
+  // ── Acceptance criteria (editable, with confirmation) ──────────────────────
+  const settings = createSettingsService({
+    store,
+    key: SETTINGS_KEY,
+    defaults: DEFAULTS,
+    bounds: BOUNDS,
+    validate: validateCriteria,
+    describeChanges,
+    deviations,
+    impact: (studies, before, after) => impactOn(studies, before, after, verdictFor),
+    recentStudies: () => store.listStudies(TOOL.id, 200)
+  });
+
   async function publishInto (study, envelope) {
     try {
       study.publish = await publisher.publish(envelope);
@@ -144,9 +164,12 @@ export function createMsaTool ({ store, publisher, log = console }) {
     });
   }
 
-  function computeInto (study, observations) {
-    const analysis = analyzeGageRR(observations);
+  // Judged under the criteria in force NOW; the study keeps that snapshot.
+  async function computeInto (study, observations) {
+    const now = await settings.current();
+    const analysis = analyzeGageRR(observations, now.value);
     if (!analysis.ok) return analysis;
+    study.criteria = { version: now.version, ...now.value };
     study.status = 'completed';
     study.reason = null;
     study.result = analysis.result;
@@ -183,7 +206,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
 
     const embedded = normalizeObservations(data.observations ?? (Array.isArray(data.measurements) && typeof data.measurements[0] === 'object' ? data.measurements : null));
     if (embedded && embedded.length) {
-      const analysis = computeInto(study, embedded);
+      const analysis = await computeInto(study, embedded);
       if (analysis.ok) {
         const envelope = childEnvelope(study);
         const ok = await publishInto(study, envelope);
@@ -219,18 +242,27 @@ export function createMsaTool ({ store, publisher, log = console }) {
   }
 
   // ── HTTP ───────────────────────────────────────────────────────────────────
-  function registerRoutes (api, { requireQuality, actorOf }) {
+  function registerRoutes (api, { requireQuality, actorOf, canEdit }) {
     api.get('/studies', async (req, res) => {
       const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
       let studies = await store.listStudies(TOOL.id, limit);
       if (req.query.status) studies = studies.filter((s) => s.status === req.query.status);
+      studies = studies.map((s) => ({ ...s, priority: priorityOf(s) }));
+      if (req.query.sort === 'priority') studies = studies.sort(byPriority);
       res.json({ studies });
     });
+
+    // The header of the studies screen: counts by urgency and what to open first.
+    api.get('/summary', async (req, res) => {
+      res.json(summarize(await store.listStudies(TOOL.id, 200)));
+    });
+
+    settings.registerRoutes(api, { requireQuality, actorOf, canEdit });
 
     api.get('/studies/:id', async (req, res) => {
       const study = await store.getStudy(req.params.id);
       if (!study || study.tool !== TOOL.id) return res.status(404).json({ error: 'not_found' });
-      return res.json({ study });
+      return res.json({ study: { ...study, priority: priorityOf(study) } });
     });
 
     // Capture the readings for a gauge the platform registered. Computes and
@@ -246,7 +278,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
         return res.status(422).json({ error: 'unsupported_study_type', errors: [`Tipo de estudio "${studyType}" no soportado todavía. Disponible: gage_rr.`] });
       }
       const observations = normalizeObservations(req.body?.observations);
-      const analysis = observations ? computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
+      const analysis = observations ? await computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
       if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
 
       study.studyType = studyType;
@@ -255,7 +287,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
       const published = await publishInto(study, childEnvelope(study));
       study.updatedAt = new Date().toISOString();
       await store.saveStudy(study);
-      return res.status(published ? 200 : 202).json({ study });
+      return res.status(published ? 200 : 202).json({ study: { ...study, priority: priorityOf(study) } });
     });
 
     // A study with no registration behind it (e.g. a periodic re-study).
@@ -278,10 +310,10 @@ export function createMsaTool ({ store, publisher, log = console }) {
         notes: body.notes ? String(body.notes).slice(0, 2000) : null,
         publish: { state: 'awaiting_decision' }
       });
-      const analysis = observations ? computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
+      const analysis = observations ? await computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
       if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
       await store.saveStudy(study);
-      return res.status(201).json({ study });
+      return res.status(201).json({ study: { ...study, priority: priorityOf(study) } });
     });
 
     // Publish a completed study: a manual one (as a root event), or retry one
@@ -320,13 +352,14 @@ export function createMsaTool ({ store, publisher, log = console }) {
       const event = fromCore(req.body || {});
       const observations = normalizeObservations(event.data?.observations ?? event.data?.measurements);
       if (!observations) return res.status(422).json({ error: 'invalid_input', detail: 'observations' });
-      const analysis = analyzeGageRR(observations);
+      const now = await settings.current();
+      const analysis = analyzeGageRR(observations, now.value);
       if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
-      return res.json({ result: analysis.result, warnings: analysis.warnings, wouldPublish: 'MSA_VALIDATED' });
+      return res.json({ result: analysis.result, criteria: { version: now.version, ...now.value }, warnings: analysis.warnings, wouldPublish: 'MSA_VALIDATED' });
     });
   }
 
-  return { processEvent, beforeTick: retryPublishes, retryPublishes, registerRoutes };
+  return { processEvent, beforeTick: retryPublishes, retryPublishes, registerRoutes, settings };
 }
 
 export default { TOOL, createMsaTool, normalizeObservations, gaugeIdOf, validatedData, severityFor };

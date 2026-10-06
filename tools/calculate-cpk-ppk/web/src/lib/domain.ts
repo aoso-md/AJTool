@@ -17,6 +17,7 @@ export interface CapabilityResult {
   ppmDefects: number;
   observedOutOfSpec: number;
   minimumCpk: number;
+  marginalFloor?: number;
   status: 'capable' | 'marginal' | 'not_capable';
   belowTarget: boolean;
 }

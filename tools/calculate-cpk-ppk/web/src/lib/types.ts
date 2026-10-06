@@ -27,6 +27,34 @@ export interface PublishInfo {
   event?: unknown;
 }
 
+export type PriorityLevel = 'critical' | 'high' | 'medium' | 'low';
+
+/** What to look at first. Computed by the server on read, never stored. */
+export interface Priority {
+  score: number;
+  level: PriorityLevel;
+  reason: string;
+}
+
+export interface AttentionItem {
+  id: string;
+  status?: string;
+  label: string;
+  level: PriorityLevel;
+  score: number;
+  reason: string;
+  createdAt: string;
+}
+
+export interface Summary {
+  total: number;
+  byLevel: Record<PriorityLevel, number>;
+  needsAttention: number;
+  pending?: number;
+  oldestPendingDays?: number;
+  attention: AttentionItem[];
+}
+
 export interface StudyBase {
   id: string;
   tool: string;
@@ -36,6 +64,9 @@ export interface StudyBase {
   warnings: string[];
   verdict: string | null;
   publish: PublishInfo;
+  priority?: Priority;
+  /** Snapshot of the acceptance criteria this study was judged with. */
+  criteria?: ({ version?: number } & Record<string, unknown>) | null;
   actor: Actor | null;
   publishedBy?: Actor | null;
   inputEventId: string | null;

@@ -23,7 +23,12 @@
 // -----------------------------------------------------------------------------
 import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { analyzeCapability } from './domain/capability.js';
+import { analyzeCapability, classify } from './domain/capability.js';
+import {
+  SETTINGS_KEY, DEFAULTS, BOUNDS, validateCriteria, minimumCpkFor, describeChanges, deviations, impactOn
+} from './domain/criteria.js';
+import { byPriority, priorityOf, summarize } from './domain/priority.js';
+import { createSettingsService } from './platform/settings.js';
 import { buildChild, buildRoot, fromCore } from './platform/ies.js';
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -104,6 +109,8 @@ export function belowTargetData (study) {
     status: r.status,
     // traceability — what manage_product_specs needs to review the spec
     minimumCpk: r.minimumCpk,
+    minimumCpkSource: study.criteria?.minimumCpkSource ?? null,
+    criteriaVersion: study.criteria?.version ?? null,
     usl: r.usl,
     lsl: r.lsl,
     specVersion: study.spec?.version ?? null,
@@ -134,6 +141,46 @@ function newStudy (fields) {
 }
 
 export function createCapabilityTool ({ store, core, publisher, log = console }) {
+  // ── Acceptance criteria (editable, with confirmation) ──────────────────────
+  const settings = createSettingsService({
+    store,
+    key: SETTINGS_KEY,
+    defaults: DEFAULTS,
+    bounds: BOUNDS,
+    validate: validateCriteria,
+    describeChanges,
+    deviations,
+    impact: (studies, before, after) => impactOn(studies, before, after, classify),
+    recentStudies: () => store.listStudies(TOOL.id, 200)
+  });
+
+  /**
+   * Run the analysis under the CURRENT criteria and stamp the study with the
+   * snapshot it was judged by. `explicit` is a minimum Cpk that came with the
+   * event or the form: it beats any configured value.
+   */
+  async function analyzeUnderCriteria ({ measurements, spec, characteristicId, explicit, target }) {
+    const now = await settings.current();
+    const min = minimumCpkFor(now.value, characteristicId, explicit);
+    const analysis = analyzeCapability({
+      measurements,
+      usl: spec.usl,
+      lsl: spec.lsl,
+      minimumCpk: min.value,
+      marginalFloor: now.value.marginalFloor,
+      recommendedSampleSize: now.value.recommendedSampleSize,
+      target
+    });
+    const criteria = {
+      version: now.version,
+      minimumCpk: min.value,
+      minimumCpkSource: min.source,
+      marginalFloor: now.value.marginalFloor,
+      recommendedSampleSize: now.value.recommendedSampleSize
+    };
+    return { analysis, criteria };
+  }
+
   // ── Spec cache ─────────────────────────────────────────────────────────────
   // Reference data, read-only: here starting from seq 0 IS correct (we want
   // every spec ever approved; nothing is published from this, so replaying it
@@ -221,7 +268,8 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
         study.reason = `No hay especificación (USL/LSL) conocida para la característica ${characteristicId ?? '(sin id)'}${partId ? ` de la pieza ${partId}` : ''}. Debe publicarse en ${SPEC_EVENT} (manage_product_specs).`;
       } else {
         study.spec = spec;
-        const analysis = analyzeCapability({ measurements, usl: spec.usl, lsl: spec.lsl, minimumCpk: num(data.minimumCpk) });
+        const { analysis, criteria } = await analyzeUnderCriteria({ measurements, spec, characteristicId, explicit: num(data.minimumCpk) });
+        study.criteria = criteria;
         if (!analysis.ok) {
           study.status = 'skipped';
           study.reason = analysis.errors.join(' ');
@@ -256,16 +304,25 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
   }
 
   // ── HTTP ───────────────────────────────────────────────────────────────────
-  function registerRoutes (api, { requireQuality, actorOf }) {
+  function registerRoutes (api, { requireQuality, actorOf, canEdit }) {
     api.get('/studies', async (req, res) => {
       const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
-      res.json({ studies: await store.listStudies(TOOL.id, limit) });
+      let studies = (await store.listStudies(TOOL.id, limit)).map((s) => ({ ...s, priority: priorityOf(s) }));
+      if (req.query.sort === 'priority') studies = studies.sort(byPriority);
+      res.json({ studies });
     });
+
+    // The header of the studies screen: counts by urgency and what to open first.
+    api.get('/summary', async (req, res) => {
+      res.json(summarize(await store.listStudies(TOOL.id, 200)));
+    });
+
+    settings.registerRoutes(api, { requireQuality, actorOf, canEdit });
 
     api.get('/studies/:id', async (req, res) => {
       const study = await store.getStudy(req.params.id);
       if (!study || study.tool !== TOOL.id) return res.status(404).json({ error: 'not_found' });
-      return res.json({ study });
+      return res.json({ study: { ...study, priority: priorityOf(study) } });
     });
 
     api.get('/specs', async (req, res) => {
@@ -289,11 +346,11 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
           errors: ['Indique USL y LSL, o una característica con especificación publicada en la plataforma.']
         });
       }
-      const analysis = analyzeCapability({
+      const { analysis, criteria } = await analyzeUnderCriteria({
         measurements,
-        usl: spec.usl,
-        lsl: spec.lsl,
-        minimumCpk: num(body.minimumCpk),
+        spec,
+        characteristicId,
+        explicit: num(body.minimumCpk),
         target: num(body.target)
       });
       if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
@@ -307,6 +364,7 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
         spec: spec.source === 'event' ? { ...spec, source: 'manual' } : spec,
         input: { partId, characteristicId, usl: spec.usl, lsl: spec.lsl, minimumCpk: num(body.minimumCpk) ?? null, target: num(body.target) ?? null, measurements },
         result: analysis.result,
+        criteria,
         warnings: analysis.warnings,
         verdict: analysis.result.status,
         actor: actorOf(req.caller),
@@ -314,7 +372,7 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
         notes: body.notes ? String(body.notes).slice(0, 2000) : null
       });
       await store.saveStudy(study);
-      return res.status(201).json({ study });
+      return res.status(201).json({ study: { ...study, priority: priorityOf(study) } });
     });
 
     // Escalate a below-target study to specification review. Explicit and
@@ -352,7 +410,7 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
       study.publishedBy = actor;
       study.updatedAt = new Date().toISOString();
       await store.saveStudy(study);
-      return res.json({ study });
+      return res.json({ study: { ...study, priority: priorityOf(study) } });
     });
 
     // Machine plane: compute an IES event synchronously. No side effects —
@@ -374,13 +432,18 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
       if (!measurements || !spec) {
         return res.status(422).json({ error: 'invalid_input', detail: !measurements ? 'measurements' : 'no spec for characteristic' });
       }
-      const analysis = analyzeCapability({ measurements, usl: spec.usl, lsl: spec.lsl, minimumCpk: num(data.minimumCpk) });
+      const { analysis, criteria } = await analyzeUnderCriteria({
+        measurements,
+        spec,
+        characteristicId: data.characteristicId ? String(data.characteristicId) : null,
+        explicit: num(data.minimumCpk)
+      });
       if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
-      return res.json({ result: analysis.result, warnings: analysis.warnings, wouldPublish: analysis.result.belowTarget ? 'CAPABILITY_BELOW_TARGET' : null });
+      return res.json({ result: analysis.result, criteria, warnings: analysis.warnings, wouldPublish: analysis.result.belowTarget ? 'CAPABILITY_BELOW_TARGET' : null });
     });
   }
 
-  return { processEvent, beforeTick: syncSpecs, syncSpecs, registerRoutes };
+  return { processEvent, beforeTick: syncSpecs, syncSpecs, registerRoutes, settings };
 }
 
 export default { TOOL, createCapabilityTool, specsFromEvent, belowTargetData, severityFor };

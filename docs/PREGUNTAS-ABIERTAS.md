@@ -33,11 +33,14 @@ core (están al final). Estas son las que solo plataforma puede contestar.
 9. **Lecturas de MSA:** `NEW_DEVICE_REGISTERED` no trae lecturas, así que el
    estudio se captura en la interfaz. ¿Algún sistema va a enviar las lecturas
    (por ejemplo, desde el instrumento)?
-10. **Criterio de aceptación de MSA:** usamos AIAG (%GRR < 10 y ndc ≥ 5). ¿Es el
-    criterio de la planta?
-11. **Cpk mínimo:** 1.33 por defecto, sobrescribible por evento con
-    `minimumCpk`. ¿Hay características con otro mínimo (p. ej. 1.67 en
-    críticas)?
+10. **Criterio de aceptación de MSA:** el valor por defecto es AIAG (%GRR < 10 y
+    ndc ≥ 5) y ahora es editable en la tool. ¿Cuál es el criterio de la planta, y
+    quién está autorizado a cambiarlo (hoy: roles de calidad)?
+11. **Cpk mínimo:** 1.33 por defecto, editable en la tool, con excepciones por
+    característica y sobrescribible por evento con `minimumCpk`. ¿Qué
+    características llevan otro mínimo (p. ej. 1.67 en críticas)? Ojo: la regla
+    rule-qual-005 del core dispara en cpk < 1.33, así que un mínimo menor aquí
+    deja a la cadena sin ver casos que sí vigilaría.
 12. ¿Linealidad, sesgo y estabilidad (`studyType` en `tools.json`) entran en el
     alcance del 1 de noviembre? Hoy solo `gage_rr`; los otros se rechazan con un
     mensaje claro.

@@ -7,6 +7,7 @@ import { StudiesPage } from './pages/StudiesPage';
 import { NewStudyPage } from './pages/NewStudyPage';
 import { StudyPage } from './pages/StudyPage';
 import { SpecsPanel } from './pages/SpecsPanel';
+import { CriteriaPage } from './pages/CriteriaPage';
 import { linkProps, match, usePath } from './lib/router';
 import { setAuthMode } from './lib/api';
 
@@ -31,6 +32,7 @@ export function App() {
   if (path === '/') page = <StudiesPage />;
   else if (path === '/nuevo') page = <NewStudyPage />;
   else if (study) page = <StudyPage id={study.id!} />;
+  else if (path === '/criterios') page = <CriteriaPage />;
   else if (path === '/integracion') page = <IntegrationPage extra={<SpecsPanel />} />;
   else page = <EmptyState title="Esta pantalla no existe" detail={path} />;
 
@@ -38,6 +40,7 @@ export function App() {
     <nav className="-mb-px flex gap-1" aria-label="Secciones">
       <Tab active={path === '/' || Boolean(study)} {...linkProps('/')}>Estudios</Tab>
       <Tab active={path === '/nuevo'} {...linkProps('/nuevo')}>Nuevo estudio</Tab>
+      <Tab active={path === '/criterios'} {...linkProps('/criterios')}>Criterios</Tab>
       <Tab active={path === '/integracion'} {...linkProps('/integracion')}>Integración</Tab>
     </nav>
   );

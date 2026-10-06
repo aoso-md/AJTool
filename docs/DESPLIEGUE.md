@@ -186,7 +186,7 @@ abajo: `manage_product_specs` dejaría de recibir `CAPABILITY_BELOW_TARGET` y
 ```powershell
 cd tools\calculate-cpk-ppk
 pnpm install
-pnpm test                        # 40 pruebas
+pnpm test                        # 60 pruebas (54 en MSA)
 cd web; pnpm install; pnpm run build; cd ..
 $env:UI_DIST_DIR = "web/dist"; pnpm start      # http://localhost:8108
 ```

@@ -64,9 +64,9 @@ function sampleStdDev (values, avg) {
 }
 
 /** Classification the contract expects: capable | marginal | not_capable. */
-export function classify (cpk, minimumCpk) {
+export function classify (cpk, minimumCpk, marginalFloor = 1.0) {
   if (cpk >= minimumCpk) return 'capable';
-  if (cpk >= 1.0) return 'marginal';
+  if (cpk >= marginalFloor) return 'marginal';
   return 'not_capable';
 }
 
@@ -76,10 +76,12 @@ export function classify (cpk, minimumCpk) {
  * @param {number}   input.usl
  * @param {number}   input.lsl
  * @param {number}  [input.minimumCpk=1.33]
+ * @param {number}  [input.marginalFloor=1.0]          Cpk below this is not_capable
+ * @param {number}  [input.recommendedSampleSize=25]  fewer readings only warn
  * @param {number}  [input.target]       informative only
  * @returns {{ ok: true, result: object, warnings: string[] } | { ok: false, errors: string[] }}
  */
-export function analyzeCapability ({ measurements, usl, lsl, minimumCpk, target } = {}) {
+export function analyzeCapability ({ measurements, usl, lsl, minimumCpk, target, marginalFloor, recommendedSampleSize } = {}) {
   const errors = [];
 
   if (!Array.isArray(measurements) || measurements.length < 2) {
@@ -95,6 +97,14 @@ export function analyzeCapability ({ measurements, usl, lsl, minimumCpk, target 
   if (typeof minCpk !== 'number' || !Number.isFinite(minCpk) || minCpk <= 0) {
     errors.push('El Cpk mínimo debe ser un número mayor que 0.');
   }
+  // A minimum at or below the marginal floor leaves no marginal band: the floor
+  // collapses onto the minimum (capable or not_capable, nothing in between).
+  const rawFloor = marginalFloor == null ? 1.0 : marginalFloor;
+  if (typeof rawFloor !== 'number' || !Number.isFinite(rawFloor) || rawFloor <= 0) {
+    errors.push('El límite inferior de «marginal» debe ser un número positivo.');
+  }
+  const floor = typeof rawFloor === 'number' && typeof minCpk === 'number' ? Math.min(rawFloor, minCpk) : rawFloor;
+  const recommended = recommendedSampleSize == null ? RECOMMENDED_SAMPLE_SIZE : recommendedSampleSize;
   if (errors.length) return { ok: false, errors };
 
   const n = measurements.length;
@@ -123,11 +133,11 @@ export function analyzeCapability ({ measurements, usl, lsl, minimumCpk, target 
   const ppm = 1e6 * (upperTail((usl - avg) / sigmaOverall) + upperTail((avg - lsl) / sigmaOverall));
   const observedOutOfSpec = measurements.filter((v) => v > usl || v < lsl).length;
 
-  const status = classify(cpk, minCpk);
+  const status = classify(cpk, minCpk, floor);
 
   const warnings = [];
-  if (n < RECOMMENDED_SAMPLE_SIZE) {
-    warnings.push(`Muestra de ${n} mediciones: con menos de ${RECOMMENDED_SAMPLE_SIZE} el intervalo de confianza del Cpk es amplio. Úselo como indicativo.`);
+  if (n < recommended) {
+    warnings.push(`Muestra de ${n} mediciones: con menos de ${recommended} el intervalo de confianza del Cpk es amplio. Úselo como indicativo.`);
   }
   if (typeof target === 'number' && Number.isFinite(target) && (target < lsl || target > usl)) {
     warnings.push('El valor objetivo está fuera de los límites de especificación.');
@@ -156,6 +166,7 @@ export function analyzeCapability ({ measurements, usl, lsl, minimumCpk, target 
       ppmDefects: round(ppm, 1),
       observedOutOfSpec,
       minimumCpk: minCpk,
+      marginalFloor: floor,
       status,
       belowTarget: cpk < minCpk
     }

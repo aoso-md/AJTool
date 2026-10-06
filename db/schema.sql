@@ -94,6 +94,41 @@ CREATE TABLE IF NOT EXISTS spec_cache (
 
 
 -- ---------------------------------------------------------------------
+-- settings / settings_history — editable acceptance criteria.
+--
+--   calculate_cpk_ppk   key 'capability_criteria'  minimum Cpk, marginal floor,
+--                       recommended sample size, per-characteristic overrides
+--   run_msa_analysis    key 'msa_criteria'         %GRR limits, minimum ndc
+--
+-- `settings` holds the current value (one row per key, `version` for optimistic
+-- concurrency: two people editing at once cannot overwrite each other).
+-- `settings_history` is append-only: who changed what, from what, and why.
+-- Studies never read these retroactively: each study stores the criteria it
+-- was judged with, so changing a value does not re-judge the past.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS settings (
+  key        TEXT        PRIMARY KEY,
+  doc        JSONB       NOT NULL,
+  version    INTEGER     NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL,
+  updated_by JSONB,
+  reason     TEXT
+);
+
+CREATE TABLE IF NOT EXISTS settings_history (
+  id      BIGSERIAL   PRIMARY KEY,
+  key     TEXT        NOT NULL,
+  version INTEGER     NOT NULL,
+  before  JSONB,
+  after   JSONB       NOT NULL,
+  reason  TEXT,
+  actor   JSONB,
+  at      TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS settings_history_key_idx ON settings_history (key, id DESC);
+
+
+-- ---------------------------------------------------------------------
 -- Useful queries for a review or an audit
 -- ---------------------------------------------------------------------
 
@@ -113,3 +148,7 @@ CREATE TABLE IF NOT EXISTS spec_cache (
 --   SELECT updated_at, doc->>'gaugeId', doc->'actor'->>'name', doc->'actor'->>'role',
 --          doc->'result'->>'verdict'
 --   FROM studies WHERE tool = 'run_msa_analysis' AND status = 'completed';
+
+-- Who changed the acceptance criteria, when, and why:
+--   SELECT at, key, version, actor->>'name' AS who, reason, before, after
+--   FROM settings_history ORDER BY id DESC;
