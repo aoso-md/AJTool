@@ -1,34 +1,66 @@
-# run_msa_analysis — Gage R&R / MSA study analysis
-# One dependency (pg, only used if DATABASE_URL is set). Build context
-# must be the repo root:
-#   docker build -f docker/run_msa_analysis.Dockerfile -t run_msa_analysis .
+# syntax=docker/dockerfile:1
+# =============================================================================
+# run_msa_analysis — backend (Node) + frontend (React) in ONE image.
 #
-# Runs tools/run-msa-analysis/src/server.js — an HTTP wrapper around the
-# same handler logic (same validation, same math, same emitted events):
-#   GET  /health
-#   POST /events   (body = full event envelope, see tools/run-msa-analysis/demo/*.json)
-#   GET  /reports  (recent invocations — only populated if DATABASE_URL is set)
+# From the platform template `plantillas/integracion/docker/tool.Dockerfile`
+# (core repo). Changed only where the template says <-- EDITA:
+#   · paths: this is a monorepo, the tool lives in tools/run-msa-analysis/
+#   · no backend build stage: the backend is plain JavaScript, runs as-is
+#   · CMD: node src/server.js
 #
-# Run:
-#   docker run --rm -p 8082:8082 run_msa_analysis
-#   docker run --rm -p 8082:8082 -e INBOUND_API_KEY=xxx run_msa_analysis
+# Build context = REPO ROOT. In Railway, the project of this tool sets
+#   RAILWAY_DOCKERFILE_PATH = docker/run_msa_analysis.Dockerfile
+# and leaves Root Directory EMPTY (repo root) — see docs/DESPLIEGUE.md.
 #
-# The one-shot CLI form (node src/handler.js <file>) still works if you
-# exec into the container or run it outside Docker — this image just
-# defaults to the HTTP service.
+# One origin serves everything:  /  the SPA  ·  /api/*  the API  ·  /auth/*  OIDC
+# =============================================================================
 
-FROM node:18-alpine
+ARG NODE_IMAGE=node:22-slim
 
+# --- 1. Frontend (React) -----------------------------------------------------
+FROM ${NODE_IMAGE} AS web
+# Without this, Corepack asks before downloading pnpm and a non-interactive
+# build hangs until the timeout without saying why.
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+WORKDIR /web
+RUN corepack enable
+
+# Manifests first, code after: touching a .tsx must not reinstall the tree.
+# pnpm-workspace.yaml carries `allowBuilds: esbuild` (pnpm 11 blocks it otherwise).
+COPY tools/run-msa-analysis/web/package.json tools/run-msa-analysis/web/pnpm-lock.yaml tools/run-msa-analysis/web/pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY tools/run-msa-analysis/web/ ./
+# VITE_* is BAKED into the bundle and public. Only URLs here, never a key.
+ARG VITE_DASHBOARD_URL=""
+RUN VITE_DASHBOARD_URL="${VITE_DASHBOARD_URL}" pnpm run build
+
+# --- 2. Runtime --------------------------------------------------------------
+FROM ${NODE_IMAGE} AS runtime
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+ENV NODE_ENV=production
 WORKDIR /app
+RUN corepack enable
 
-COPY tools/run-msa-analysis/package.json ./package.json
-RUN npm install --omit=dev
+# Production dependencies only. Nothing in the container may depend on a
+# devDependency.
+COPY tools/run-msa-analysis/package.json tools/run-msa-analysis/pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+
 COPY tools/run-msa-analysis/src ./src
-COPY tools/run-msa-analysis/demo ./demo
-# src/public/index.html (the frontend served at GET /) is included
-# automatically since it lives under src/, copied above.
 
-ENV PORT=8082
-EXPOSE 8082
+# The compiled frontend, and NOTHING else from the frontend.
+COPY --from=web /web/dist ./web/dist
+ENV UI_DIST_DIR=/app/web/dist
+
+# A DEFAULT, not a rule: Railway injects its own PORT and the server reads it.
+# 8109 is this tool's `localPort` in the core's deployments.json.
+ENV PORT=8109
+EXPOSE 8109
+
+# Liveness, not readiness: does the PROCESS answer. It never touches the
+# database — a Postgres blip must not restart a healthy container in a loop.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||8109)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 CMD ["node", "src/server.js"]

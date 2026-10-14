@@ -1,0 +1,32 @@
+# railway.toml — from the platform template (plantillas/integracion/despliegue/railway.toml)
+# =============================================================================
+# Shared by BOTH tool projects of this repo. It can be, because both images run
+# the same way: WORKDIR /app, `node src/server.js`, /health open.
+#
+# MONOREPO: `dockerfilePath` is deliberately NOT set here. Each Railway project
+# sets the service variable
+#     RAILWAY_DOCKERFILE_PATH = docker/calculate_cpk_ppk.Dockerfile   (or run_msa_analysis)
+# and leaves Root Directory EMPTY. The Dockerfiles copy from the repo root, so a
+# Root Directory pointing at tools/<tool> breaks the build (core template,
+# despliegue/README.md §3: this can only be set from the dashboard).
+# =============================================================================
+
+[build]
+builder = "dockerfile"
+
+[deploy]
+# Railway injects PORT; the service reads process.env.PORT. Never set PORT by hand.
+startCommand = "node src/server.js"
+
+# Railway sends no traffic until this answers 200. Open: no cookie, no key.
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+
+# `always` hides crash loops: the service looks "up" while restarting every 5 s.
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
+
+# ONE replica. Each instance runs the subscription poller; two replicas would
+# race on the same cursor. (Deterministic event ids keep that from producing
+# duplicates at the core, but it is wasted work and confusing logs.)
+numReplicas = 1

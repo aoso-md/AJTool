@@ -1,0 +1,37 @@
+diff --git a/src/data/platform/deployments.json b/src/data/platform/deployments.json
+index 2b8f17f..aa42249 100644
+--- a/src/data/platform/deployments.json
++++ b/src/data/platform/deployments.json
+@@ -172,18 +172,26 @@
+     {
+       "toolId": "calculate_cpk_ppk",
+       "kind": "federated",
+-      "status": "pending",
+-      "owner": "pendiente de asignar",
++      "status": "live",
++      "subdomain": "ccp",
++      "localPort": 8108,
++      "owner": "Equipo externo (AJTool)",
++      "repo": "AJTool",
+       "isoClause": "9.1.3",
+-      "note": "Federada por contrato: su equipo sera dueno del servicio. Todavia no declara `subdomain`, asi que la URL no se resuelve y el bus cae de vuelta al handler de src/tools/ (el fallback documentado en CLAUDE.md): la cadena ISO sigue viva sin desplegar nada. Ese handler queda como REFERENCIA del contrato para quien implemente el servicio. En cuanto el equipo declare aqui su `subdomain`, el router delega en el y deja de ejecutarlo."
++      "summary": "Capacidad de proceso Cp/Cpk (σ dentro) y Pp/Ppk (σ global) con ppm esperado; publica CAPABILITY_BELOW_TARGET cuando Cpk < mínimo.",
++      "note": "Servicio federado: consume MEASUREMENTS_CAPTURED por poll de /events/subscriptions/calculate_cpk_ppk (arranque en frío en la punta, cursor persistido) y toma USL/LSL de PRODUCT_SPEC_UPDATED. Si la característica no tiene especificación publicada, el estudio queda OMITIDO y no se publica nada: no calcula contra límites inventados. event_id determinista derivado del evento padre, así que un reproceso sale como duplicado. Al declarar este subdomain el router delega y deja de ejecutar src/tools/calculate_cpk_ppk.js, que queda como referencia del contrato."
+     },
+     {
+       "toolId": "run_msa_analysis",
+       "kind": "federated",
+-      "status": "pending",
+-      "owner": "pendiente de asignar",
++      "status": "live",
++      "subdomain": "rma",
++      "localPort": 8109,
++      "owner": "Equipo externo (AJTool)",
++      "repo": "AJTool",
+       "isoClause": "7.1.5.2",
+-      "note": "Federada por contrato: su equipo sera dueno del servicio. Todavia no declara `subdomain`, asi que la URL no se resuelve y el bus cae de vuelta al handler de src/tools/ (el fallback documentado en CLAUDE.md): la cadena ISO sigue viva sin desplegar nada. Ese handler queda como REFERENCIA del contrato para quien implemente el servicio. En cuanto el equipo declare aqui su `subdomain`, el router delega en el y deja de ejecutarlo."
++      "summary": "Estudio Gage R&R (AIAG, promedios y rangos) por cada equipo registrado; publica MSA_VALIDATED con el veredicto acceptable | marginal | unacceptable.",
++      "note": "Servicio federado: consume NEW_DEVICE_REGISTERED (operation == register) por poll y abre un estudio PENDIENTE para ese equipo; el evento no trae lecturas, así que un ingeniero las captura en la tool. Al guardar publica MSA_VALIDATED como hijo del registro (causation_id = el evento de registro), con quien lo realizó en metadata.operator_id. Publica para todo veredicto: rule-pkg-005 solo enruta verdict == acceptable. Al declarar este subdomain el router deja de ejecutar el mock de src/tools/run_msa_analysis.js."
+     },
+     {
+       "toolId": "detect_business_anomalies",

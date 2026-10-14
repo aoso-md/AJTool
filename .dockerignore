@@ -1,20 +1,26 @@
-# Keep the build context small and reproducible. The Dockerfiles copy
-# only the folders they need, but excluding these keeps the context
-# upload fast and guarantees no local secret or stray node_modules can
-# be baked into a published image.
+# From the platform template (plantillas/integracion/docker/dockerignore.example).
+
+# `**/` is mandatory: without it only the root node_modules is excluded and the
+# one in web/ is copied into the image (pnpm's symlink farm = broken imports).
+**/node_modules
+
+# Images build from source, never from a dist/ left on a laptop.
+dist
+**/dist
+coverage
 
 .git
-.github
-**/node_modules
-**/.env
-**/.env.*
-!**/.env.example
-workspace
-obsidian
+.env
+.env.*
+!.env.example
+npm-debug.log*
+*.log
+
+# Not input of any build.
+*.md
+docker-compose*.yml
+archive
 docs
-test
 db
-*.docx
-*.pptx
-*.pdf
-README.md
+
+# Do NOT add tools/*/web, tools/*/src or the lockfiles: they ARE build input.

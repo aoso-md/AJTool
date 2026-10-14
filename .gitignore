@@ -1,6 +1,8 @@
 node_modules/
+dist/
+coverage/
 .env
 .env.*
 !.env.example
-bus-proxy/.env
 *.log
+.DS_Store

@@ -1,17 +1,29 @@
 {
   "name": "calculate-cpk-ppk",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Cpk/Ppk process capability tool — HTTP service and CLI. Optional Postgres persistence via DATABASE_URL.",
+  "type": "module",
+  "description": "calculate_cpk_ppk — federated tool of the ORCA platform. Consumes MEASUREMENTS_CAPTURED by poll, publishes CAPABILITY_BELOW_TARGET. Backend only: the frontend lives in web/ with its own toolchain.",
   "main": "src/server.js",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node src/server.js",
-    "cli": "node src/handler.js"
+    "dev": "node --watch src/server.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "web:install": "cd web && pnpm install --frozen-lockfile",
+    "web:dev": "cd web && pnpm run dev",
+    "web:build": "cd web && pnpm run build"
   },
   "dependencies": {
-    "pg": "^8.13.0"
+    "express": "^5.2.1",
+    "openid-client": "^6.8.4",
+    "pg": "^8.18.0"
   },
-  "engines": {
-    "node": ">=18"
+  "devDependencies": {
+    "ajv": "^8.18.0",
+    "ajv-formats": "^3.0.1"
   }
 }
