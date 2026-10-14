@@ -52,18 +52,18 @@ env:
     [
       {
         "name":    "cpk-ppk",
-        "service": "calculate_cpk_ppk",
+        "service": "calculate-cpk-ppk",
         "secret":  "RAILWAY_TOKEN_CCP",
-        "health":  "https://ccp.orcalabs.mx/health",
+        "health":  "https://calculate-cpk-ppk-production.up.railway.app/health",
         "paths":   ["tools/calculate-cpk-ppk/",
                     "docker/calculate_cpk_ppk.Dockerfile",
                     "railway.toml"]
       },
       {
         "name":    "msa",
-        "service": "run_msa_analysis",
+        "service": "run-msa-analysis",
         "secret":  "RAILWAY_TOKEN_RMA",
-        "health":  "https://rma.orcalabs.mx/health",
+        "health":  "https://run-msa-analysis-production.up.railway.app/health",
         "paths":   ["tools/run-msa-analysis/",
                     "docker/run_msa_analysis.Dockerfile",
                     "railway.toml"]
