@@ -91,7 +91,7 @@ function createMemoryStore () {
       // No part-specific spec: the most recent one for this characteristic.
       let best = null;
       for (const s of specs.values()) {
-        if (s.characteristicId !== characteristicId) continue;
+        if (s.characteristicId !== characteristicId || (s.partId || '') !== '') continue;
         if (!best || Number(s.sourceSeq ?? -1) > Number(best.sourceSeq ?? -1)) best = s;
       }
       return best ? { ...best } : null;
@@ -333,12 +333,7 @@ export async function createStore ({ databaseUrl, log = console } = {}) {
       )).rows);
       if (rows) {
         if (rows[0]) return rowToSpec(rows[0]);
-        // Fallback: any part, most recent.
-        const any = await pg(async (p) => (await p.query(
-          'SELECT * FROM spec_cache WHERE characteristic_id = $1 ORDER BY source_seq DESC NULLS LAST LIMIT 1',
-          [characteristicId]
-        )).rows);
-        return any && any[0] ? rowToSpec(any[0]) : null;
+        return null;
       }
       return memory.findSpec(partId, characteristicId);
     },
