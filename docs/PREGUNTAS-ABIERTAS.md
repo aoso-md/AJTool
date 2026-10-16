@@ -5,15 +5,22 @@ core (están al final). Estas son las que solo plataforma puede contestar.
 
 ## Para dejarlas en línea
 
-1. **API key del core** para estas dos tools con scopes `events:read` y
-   `events:write`. ¿Una por tool o una compartida?
+1. **Dar de alta la API key en el core** (`npm run apikey:create` contra la
+   base de producción, tabla `api_keys`). Una compartida basta: el scope es `events:read` / `events:write`, no
+   por tool. Hoy el core responde 401 a la llave configurada → no está activa.
+   Ver `docs/DESPLIEGUE.md` §1.
+1b. **rule-qual-005** (core `communication-rules.json`): cambiar
+   `triggerCondition` de `cpk < 1.33 OR status == 'not_capable'` a `always`.
+   Todo `CAPABILITY_BELOW_TARGET` ya está bajo el mínimo por construcción; con
+   un mínimo configurado mayor (p. ej. 1.67, Cpk = 1.5 → `status: marginal`)
+   la regla actual no enruta el evento a `manage_product_specs`.
 2. **Tokens de proyecto** de Railway (`RAILWAY_TOKEN_CCP`, `RAILWAY_TOKEN_RMA`)
    y confirmar los **nombres de servicio** dentro de cada proyecto (el workflow
    usa `calculate_cpk_ppk` y `run_msa_analysis`).
 3. ¿Quién ata `ccp.orcalabs.mx` y `rma.orcalabs.mx` a los servicios? Hoy
    responden el 404 de Railway (dominio sin servicio).
-4. ¿Quién aplica `docs/deployments-ajtool.patch` en el core, y con qué nombre de
-   `owner` quieren registrarnos?
+4. ~~¿Quién aplica `docs/deployments-ajtool.patch`?~~ Resuelto: plataforma
+   declaró `ccp` / `rma` en el core (`7d12d3f`).
 5. ¿El proyecto hoy despliega por la integración de GitHub de Railway? Si
    pasamos al workflow estándar, hay que desconectarla para no desplegar doble.
 

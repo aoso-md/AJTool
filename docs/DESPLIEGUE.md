@@ -49,6 +49,48 @@ corrige; ver `docs/CONTRATO.md`.
 Una llave con solo `events:read` lee bien y falla cada publicación con 403.
 La pestaña **Integración** de la tool lo dice explícitamente si pasa.
 
+### `401 {"error":"Invalid API key"}` — diagnóstico (2026-10-13)
+
+El código está bien: con una llave activa, `GET /events/latest` y
+`GET /events/subscriptions/calculate_cpk_ppk` (y `run_msa_analysis`) responden
+200 con este mismo cliente y la misma cabecera `x-api-key`.
+`https://api-events.orcalabs.mx/api/v1` e
+`https://isotools-production.up.railway.app/api/v1` son el mismo core; cualquiera
+sirve. El 401 significa que **la llave no está dada de alta en el core**:
+
+- El core busca `sha256(x-api-key)` en su tabla `api_keys`
+  (`src/middleware/apiKeyAuth.js`); si no hay fila activa, 401. La da de alta el
+  admin de plataforma (Carlos) contra la base de producción:
+  `npm run apikey:create -- ajtool --scopes=events:read,events:write`, y entrega
+  la llave (se muestra una sola vez). Una llave inventada o copiada de otro
+  entorno no sirve.
+- Una sola llave sirve para ambas tools: el permiso es por scope
+  (`events:read` / `events:write`), no por tool.
+- Al activarla, la pestaña Integración debe pasar de `state: error` a
+  `state: idle` con `lastSuccessAt` reciente. No cambies `CORE_PUBLISH` a `live`
+  hasta registrar el subdominio (§5).
+
+### Dominios `ccp` / `rma`
+
+El core ya declara `subdomain: ccp` / `rma` (commit `7d12d3f` del core), así que
+el dashboard sondea `https://ccp.orcalabs.mx/health` y `https://rma.orcalabs.mx/health`.
+Al 2026-10-16 fallan: `ccp` responde el 404 de Railway
+(`x-railway-fallback: true`, "Application not found") y `rma` da error de
+certificado. Los servicios sí responden 200 en su `*.up.railway.app`: el dominio
+**no está agregado al servicio**.
+
+1. Dueño del proyecto Railway: Settings → Networking → Custom Domain →
+   `ccp.orcalabs.mx` (o `rma`). Railway muestra un CNAME (y a veces un TXT de
+   verificación).
+2. Admin del DNS: poner exactamente esos registros. Si el DNS está en
+   Cloudflare con proxy, SSL/TLS en **Full** (no Flexible).
+3. Verificar: `curl https://ccp.orcalabs.mx/health` → 200.
+
+**Ojo:** con el `subdomain` declarado, el core ya **delega** estos eventos y
+dejó de correr su handler de respaldo. Mientras el poller siga con 401 y
+`CORE_PUBLISH=shadow`, nadie procesa `MEASUREMENTS_CAPTURED` ni
+`NEW_DEVICE_REGISTERED`.
+
 ---
 
 ## 2. Railway: un proyecto por tool
