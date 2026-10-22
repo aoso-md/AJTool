@@ -19,7 +19,8 @@ services:
       - "8108:8108"
     environment:
       - PORT=8108
-      - DATABASE_URL=postgresql://tool:tool@db:5432/tool
+      - DATABASE_URL=postgresql://ajtool_runtime:local-only-runtime@db:5432/tool
+      - DATABASE_REQUIRED=true
       - ISOTOOLS_API_URL=${ISOTOOLS_API_URL:-https://isotools-production.up.railway.app/api/v1}
       - ISOTOOLS_API_KEY=${ISOTOOLS_API_KEY:-}
       # shadow: computes and stores, never sends. Keep it until the tool is
@@ -34,8 +35,8 @@ services:
       # Plain HTTP locally: with `Secure` the browser drops the cookie silently.
       - SESSION_INSECURE_COOKIES=true
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   run_msa_analysis:
     build:
@@ -45,7 +46,8 @@ services:
       - "8109:8109"
     environment:
       - PORT=8109
-      - DATABASE_URL=postgresql://tool:tool@db:5432/tool
+      - DATABASE_URL=postgresql://ajtool_runtime:local-only-runtime@db:5432/tool
+      - DATABASE_REQUIRED=true
       - ISOTOOLS_API_URL=${ISOTOOLS_API_URL:-https://isotools-production.up.railway.app/api/v1}
       - ISOTOOLS_API_KEY=${ISOTOOLS_API_KEY:-}
       - CORE_PUBLISH=${CORE_PUBLISH:-shadow}
@@ -56,6 +58,22 @@ services:
       - SESSION_SECRET=${SESSION_SECRET:-solo-para-local-cambiame-00000000000}
       - SESSION_COOKIE_NAME=rma_session
       - SESSION_INSECURE_COOKIES=true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Explicit one-shot migration job. Owner credentials never enter the runtimes.
+  migrate:
+    image: postgres:16
+    environment:
+      - PGHOST=db
+      - PGUSER=tool
+      - PGPASSWORD=tool
+      - PGDATABASE=tool
+    volumes:
+      - ./db:/migrations:ro
+    entrypoint: ["psql"]
+    command: ["-X", "-v", "ON_ERROR_STOP=1", "-f", "/migrations/local-bootstrap.sql"]
     depends_on:
       db:
         condition: service_healthy

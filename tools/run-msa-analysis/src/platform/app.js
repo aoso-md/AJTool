@@ -158,6 +158,9 @@ export function createApp ({ tool, config, core, store, poller, publisher, regis
   // Malformed JSON is the caller's error, not ours.
   // eslint-disable-next-line no-unused-vars
   app.use((error, req, res, next) => {
+    if (error?.code === 'persistence_unavailable') {
+      return res.status(503).json({ error: error.code, detail: error.message });
+    }
     if (error?.type === 'entity.parse.failed') return res.status(400).json({ error: 'invalid_json' });
     log.error?.(`[http] ${req.method} ${req.originalUrl}: ${error?.stack || error}`);
     return res.status(500).json({ error: 'internal_error' });

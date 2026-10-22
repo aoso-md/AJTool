@@ -82,10 +82,12 @@ tool**, todos en el mismo workspace. En cada uno:
 SSO, el navegador ya no puede entrar (solo servicios con la llave). La interfaz
 lo explica si ocurre.
 
-**Base de datos:** New → Database → Add PostgreSQL en cada proyecto. Las tablas
-se crean solas. Sin base de datos la tool funciona, pero el cursor y los
-estudios viven en memoria y se pierden al reiniciar — `/ready` y la pestaña
-Integración lo dicen.
+**Base de datos:** las migraciones se ejecutan por separado con el rol
+propietario; el runtime usa un rol sin DDL. Consultar
+[`db/README.md`](../db/README.md) antes de configurar la conexi?n.
+Con `DATABASE_URL`, PostgreSQL es obligatorio: una ca?da rechaza operaciones
+con `503 persistence_unavailable`. Solo sin URL y sin `DATABASE_REQUIRED=true`
+se permite memoria vol?til. Estos cambios no se han aplicado a Railway.
 
 **Networking → Custom Domain:** `ccp.orcalabs.mx` en el de Cpk,
 `rma.orcalabs.mx` en el de MSA. Railway da un CNAME; quien administra el DNS lo

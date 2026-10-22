@@ -17,7 +17,10 @@ import { TOOL, createMsaTool } from './tool.js';
 const log = console;
 const config = loadConfig(process.env, TOOL);
 
-const store = await createStore({ databaseUrl: config.databaseUrl, log });
+const store = await createStore({ databaseUrl: config.databaseUrl, databaseRequired: config.databaseRequired, failFast: true, log }).catch((error) => {
+  log.error(error.message);
+  process.exit(1);
+});
 const core = createCoreClient({ baseUrl: config.coreUrl, apiKey: config.coreKey });
 const publisher = createPublisher({ core, mode: config.publishMode, log });
 const domain = createMsaTool({ store, publisher, log });

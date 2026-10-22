@@ -23,6 +23,7 @@ export function loadConfig (env = process.env, tool) {
     publishMode: env.CORE_PUBLISH?.trim().toLowerCase() === 'live' ? 'live' : 'shadow',
     pollEnabled: env.POLL_ENABLED?.trim().toLowerCase() !== 'false',
     pollIntervalMs: clampInt(env.POLL_INTERVAL_MS, 5_000, 1_000, 600_000),
+    databaseRequired: env.DATABASE_REQUIRED?.trim().toLowerCase() === 'true' || Boolean(env.DATABASE_URL?.trim()),
     databaseUrl: env.DATABASE_URL?.trim() || null,
     uiDistDir: env.UI_DIST_DIR?.trim() || null
   };
