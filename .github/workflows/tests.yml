@@ -1,5 +1,5 @@
 # .github/workflows/tests.yml
-# Backend tests + frontend typecheck/build for both tools. Runs on every pull
+# Backend/PostgreSQL tests + frontend typecheck/build. Runs on every pull
 # request, and is called by deploy-railway.yml so nothing deploys on red.
 name: Tests
 
@@ -8,6 +8,28 @@ on:
   workflow_call:
 
 jobs:
+  postgres:
+    name: PostgreSQL durability (Node 22)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+      AJTOOL_TEST_EVIDENCE: artifacts/postgres
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: corepack enable
+      - name: Install locked backend dependencies
+        run: |
+          (cd tools/calculate-cpk-ppk && pnpm install --frozen-lockfile)
+          (cd tools/run-msa-analysis && pnpm install --frozen-lockfile)
+      # Docker is available on ubuntu-latest; the runner creates and removes
+      # its own loopback-only PostgreSQL 16 container, including outage tests.
+      - name: Migrate, validate and test PostgreSQL from scratch
+        run: node db/test/run-postgres-tests.mjs
+
   tool:
     name: test ${{ matrix.tool }}
     runs-on: ubuntu-latest

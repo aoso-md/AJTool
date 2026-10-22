@@ -92,7 +92,7 @@ test('memory store: cursor round-trip and newest spec wins', async () => {
   await store.upsertSpec({ partId: 'P', characteristicId: 'C', usl: 9, lsl: 8, version: '1', sourceSeq: 10 });
   const spec = await store.findSpec('P', 'C');
   assert.equal(spec.version, '2', 'an older event replayed later must not overwrite a newer spec');
-  assert.equal((await store.findSpec('OTHER', 'C')).version, '2', 'falls back to the characteristic on any part');
+  assert.equal(await store.findSpec('OTHER', 'C'), null, 'must not use another part specification');
   assert.equal(store.tier().durable, false);
 });
 

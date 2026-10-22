@@ -198,7 +198,7 @@ export function createPublisher ({ core, mode = 'shadow', log = console }) {
         // Retryable: let the caller decide (the poller keeps its cursor and
         // retries; a human action reports it). Invalid: recorded, not retried —
         // the same envelope would be rejected the same way.
-        if (error?.kind === 'retryable') throw error;
+        if (error?.kind === 'retryable' || error?.kind === 'auth') throw error;
         return { state: 'failed', eventId: envelope.event_id, at, event: envelope, error: error?.message || String(error), status: error?.status ?? null };
       }
     }
