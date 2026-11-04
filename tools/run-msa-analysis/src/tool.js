@@ -1,3 +1,4 @@
+import { inboxEvent, transactionStore, outboxPublisher, compareSequence, manualRoute } from './platform/reliability.js';
 // src/tool.js — run_msa_analysis on the ORCA platform
 // -----------------------------------------------------------------------------
 // Where this tool sits in the ISO chain (core communication-rules.json):
@@ -143,6 +144,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
       study.publish = await publisher.publish(envelope);
       return true;
     } catch (error) {
+      if (store.transactionLocal) throw error;
       // Saved as "retrying": the next poller tick picks it up (retryPublishes).
       study.publish = { state: 'retrying', eventId: envelope.event_id, event: envelope, error: error.message, at: new Date().toISOString() };
       return false;
@@ -180,7 +182,24 @@ export function createMsaTool ({ store, publisher, log = console }) {
   }
 
   // ── Platform path ──────────────────────────────────────────────────────────
-  async function processEvent (event) {
+  async function processEvent (event, context = {}) {
+    if (store.transactional) {
+      return store.processEventTransaction({
+        tool: TOOL.id, consumer: context.cursor?.name || `subscription:${TOOL.id}`,
+        event: inboxEvent(event), cursor: context.cursor,
+        handler: async (tx) => {
+          if (event.type !== 'NEW_DEVICE_REGISTERED' || event.module?.id !== 'manage_device_registry') {
+            tx.reject({ code: 'invalid_event_source', reason: 'Unexpected event type or producing module' });
+            return null;
+          }
+          const local = createMsaTool({ store: transactionStore(store, tx), publisher: outboxPublisher(tx, publisher.mode), log });
+          const study = await local.processEvent(event);
+          if (!study) tx.ignore({ reason: 'Event does not satisfy the documented registration predicate' });
+          else if (study.status === 'skipped') tx.reject({ code: 'invalid_business_input', reason: study.reason });
+          return { studyId: study?.id ?? null, study };
+        }
+      });
+    }
     const data = event.data || {};
     if (data.operation && data.operation !== 'register') return null; // rule-pkg-004 only fires on 'register'
 
@@ -228,6 +247,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
 
   // Publishes that couldn't reach the core are retried on every tick.
   async function retryPublishes () {
+    if (store.transactional) return; // Only the durable worker may deliver new outbox records.
     const studies = await store.listStudies(TOOL.id, 200);
     for (const study of studies.filter((s) => s.publish?.state === 'retrying' && s.publish.event)) {
       if (await publishInto(study, study.publish.event)) {
@@ -239,6 +259,53 @@ export function createMsaTool ({ store, publisher, log = console }) {
         throw error;
       }
     }
+  }
+
+  async function captureStudy ({ studyId, body, actor }) {
+    const study = await store.getStudy(studyId);
+    if (!study || study.tool !== TOOL.id) return { status: 404, body: { error: 'not_found' } };
+    if (study.status !== 'pending') return { status: 409, body: { error: 'not_pending', study } };
+    const studyType = String(body.studyType || 'gage_rr');
+    if (!SUPPORTED_STUDY_TYPES.has(studyType)) return { status: 422, body: { error: 'unsupported_study_type', errors: [`Tipo de estudio "${studyType}" no soportado todavía. Disponible: gage_rr.`] } };
+    const observations = normalizeObservations(body.observations);
+    const analysis = observations ? await computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
+    if (!analysis.ok) return { status: 422, body: { error: 'invalid_input', errors: analysis.errors } };
+    study.studyType = studyType;
+    study.actor = actor;
+    study.notes = body.notes ? String(body.notes).slice(0, 2000) : null;
+    const published = await publishInto(study, childEnvelope(study));
+    study.updatedAt = new Date().toISOString();
+    await store.saveStudy(study);
+    return { status: published ? 200 : 202, body: { study: { ...study, priority: priorityOf(study) } } };
+  }
+
+  async function createManualStudy ({ body, actor }) {
+    const gaugeId = body.gaugeId ? String(body.gaugeId).trim() : '';
+    if (!gaugeId) return { status: 422, body: { error: 'invalid_input', errors: ['Indique el equipo de medición (gaugeId).'] } };
+    const studyType = String(body.studyType || 'gage_rr');
+    if (!SUPPORTED_STUDY_TYPES.has(studyType)) return { status: 422, body: { error: 'unsupported_study_type', errors: [`Tipo de estudio "${studyType}" no soportado todavía. Disponible: gage_rr.`] } };
+    const observations = normalizeObservations(body.observations);
+    const study = newStudy({ source: 'manual', inputEventId: null, gaugeId, studyType,
+      asset: { asset_id: gaugeId, asset_type: 'gauge' }, actor,
+      notes: body.notes ? String(body.notes).slice(0, 2000) : null, publish: { state: 'awaiting_decision' } });
+    const analysis = observations ? await computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
+    if (!analysis.ok) return { status: 422, body: { error: 'invalid_input', errors: analysis.errors } };
+    await store.saveStudy(study);
+    return { status: 201, body: { study: { ...study, priority: priorityOf(study) } } };
+  }
+
+  async function publishStudy ({ studyId, actor }) {
+    const study = await store.getStudy(studyId);
+    if (!study || study.tool !== TOOL.id) return { status: 404, body: { error: 'not_found' } };
+    if (study.status !== 'completed') return { status: 409, body: { error: 'not_publishable', detail: 'Solo se publica un estudio completado.' } };
+    if (['published','duplicate','pending'].includes(study.publish?.state)) return { status: 409, body: { error: 'already_published', study } };
+    const envelope = study.publish?.event || (study.parent ? childEnvelope(study) : buildRoot({ seed: study.id,
+      toolId: TOOL.id, toolVersion: TOOL.version, asset: study.asset || { asset_id: study.gaugeId, asset_type: 'gauge' },
+      type: 'MSA_VALIDATED', category: 'quality', severity: severityFor(study.result.verdict), data: validatedData(study),
+      metadata: { operator_id: actor?.ref ?? null, source: 'manual_study' } }));
+    const published = await publishInto(study, envelope);
+    study.publishedBy = actor; study.updatedAt = new Date().toISOString(); await store.saveStudy(study);
+    return { status: published ? 200 : 503, body: published ? { study } : { error: 'core_unavailable', detail: study.publish.error, study } };
   }
 
   // ── HTTP ───────────────────────────────────────────────────────────────────
@@ -268,84 +335,14 @@ export function createMsaTool ({ store, publisher, log = console }) {
     // Capture the readings for a gauge the platform registered. Computes and
     // publishes MSA_VALIDATED as a child of the registration event, signed by
     // the person in session.
-    api.post('/studies/:id/capture', requireQuality, async (req, res) => {
-      const study = await store.getStudy(req.params.id);
-      if (!study || study.tool !== TOOL.id) return res.status(404).json({ error: 'not_found' });
-      if (study.status !== 'pending') return res.status(409).json({ error: 'not_pending', study });
-
-      const studyType = String(req.body?.studyType || 'gage_rr');
-      if (!SUPPORTED_STUDY_TYPES.has(studyType)) {
-        return res.status(422).json({ error: 'unsupported_study_type', errors: [`Tipo de estudio "${studyType}" no soportado todavía. Disponible: gage_rr.`] });
-      }
-      const observations = normalizeObservations(req.body?.observations);
-      const analysis = observations ? await computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
-      if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
-
-      study.studyType = studyType;
-      study.actor = actorOf(req.caller);
-      study.notes = req.body?.notes ? String(req.body.notes).slice(0, 2000) : null;
-      const published = await publishInto(study, childEnvelope(study));
-      study.updatedAt = new Date().toISOString();
-      await store.saveStudy(study);
-      return res.status(published ? 200 : 202).json({ study: { ...study, priority: priorityOf(study) } });
-    });
+    api.post('/studies/:id/capture', requireQuality, manualRoute({ store, tool: TOOL.id, publisher, factory: createMsaTool, method: 'captureStudy', actorOf, log }));
 
     // A study with no registration behind it (e.g. a periodic re-study).
-    api.post('/studies', requireQuality, async (req, res) => {
-      const body = req.body || {};
-      const gaugeId = body.gaugeId ? String(body.gaugeId).trim() : '';
-      if (!gaugeId) return res.status(422).json({ error: 'invalid_input', errors: ['Indique el equipo de medición (gaugeId).'] });
-      const studyType = String(body.studyType || 'gage_rr');
-      if (!SUPPORTED_STUDY_TYPES.has(studyType)) {
-        return res.status(422).json({ error: 'unsupported_study_type', errors: [`Tipo de estudio "${studyType}" no soportado todavía. Disponible: gage_rr.`] });
-      }
-      const observations = normalizeObservations(body.observations);
-      const study = newStudy({
-        source: 'manual',
-        inputEventId: null,
-        gaugeId,
-        studyType,
-        asset: { asset_id: gaugeId, asset_type: 'gauge' },
-        actor: actorOf(req.caller),
-        notes: body.notes ? String(body.notes).slice(0, 2000) : null,
-        publish: { state: 'awaiting_decision' }
-      });
-      const analysis = observations ? await computeInto(study, observations) : { ok: false, errors: ['`observations` debe ser un arreglo.'] };
-      if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
-      await store.saveStudy(study);
-      return res.status(201).json({ study: { ...study, priority: priorityOf(study) } });
-    });
+    api.post('/studies', requireQuality, manualRoute({ store, tool: TOOL.id, publisher, factory: createMsaTool, method: 'createManualStudy', actorOf, log }));
 
     // Publish a completed study: a manual one (as a root event), or retry one
     // whose publish failed. Signed by the person in session.
-    api.post('/studies/:id/publish', requireQuality, async (req, res) => {
-      const study = await store.getStudy(req.params.id);
-      if (!study || study.tool !== TOOL.id) return res.status(404).json({ error: 'not_found' });
-      if (study.status !== 'completed') return res.status(409).json({ error: 'not_publishable', detail: 'Solo se publica un estudio completado.' });
-      if (['published', 'duplicate'].includes(study.publish?.state)) return res.status(409).json({ error: 'already_published', study });
-
-      const actor = actorOf(req.caller);
-      const envelope = study.publish?.event || (study.parent
-        ? childEnvelope(study)
-        : buildRoot({
-          seed: study.id,
-          toolId: TOOL.id,
-          toolVersion: TOOL.version,
-          asset: study.asset || { asset_id: study.gaugeId, asset_type: 'gauge' },
-          type: 'MSA_VALIDATED',
-          category: 'quality',
-          severity: severityFor(study.result.verdict),
-          data: validatedData(study),
-          metadata: { operator_id: actor?.ref ?? null, source: 'manual_study' }
-        }));
-
-      const published = await publishInto(study, envelope);
-      study.publishedBy = actor;
-      study.updatedAt = new Date().toISOString();
-      await store.saveStudy(study);
-      if (!published) return res.status(503).json({ error: 'core_unavailable', detail: study.publish.error, study });
-      return res.json({ study });
-    });
+    api.post('/studies/:id/publish', requireQuality, manualRoute({ store, tool: TOOL.id, publisher, factory: createMsaTool, method: 'publishStudy', actorOf, log }));
 
     // Machine plane: compute synchronously, no side effects.
     api.post('/invoke', async (req, res) => {
@@ -359,7 +356,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
     });
   }
 
-  return { processEvent, beforeTick: retryPublishes, retryPublishes, registerRoutes, settings };
+  return { captureStudy, createManualStudy, publishStudy, processEvent, beforeTick: retryPublishes, retryPublishes, registerRoutes, settings };
 }
 
 export default { TOOL, createMsaTool, normalizeObservations, gaugeIdOf, validatedData, severityFor };

@@ -1,3 +1,4 @@
+import { createContext, useContext, useId, Children, isValidElement } from 'react';
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 
@@ -19,6 +20,8 @@ import { AlertTriangle, Loader2 } from 'lucide-react';
  * Solo depende de react y lucide-react.
  */
 
+const FieldContext = createContext<{id:string;describedBy?:string;invalid?:boolean;required?:boolean} | null>(null);
+
 /* ── Accion ────────────────────────────────────────────────────────────────── */
 
 /**
@@ -28,6 +31,7 @@ import { AlertTriangle, Loader2 } from 'lucide-react';
  */
 export function Button({
   variant = 'ghost',
+  type = 'button',
   loading = false,
   disabled,
   children,
@@ -45,7 +49,9 @@ export function Button({
   return (
     <button
       {...props}
+      type={type}
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded border px-2.5 py-1.5 text-2xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
     >
       {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
@@ -79,10 +85,10 @@ export function Panel({
   return (
     <section className={`rounded-md border border-border bg-surface ${className}`}>
       {(title || actions) && (
-        <header className="flex items-center gap-3 border-b border-border px-4 py-2.5">
+        <header className="flex flex-wrap items-start gap-3 border-b border-border px-4 py-2.5">
           <div className="min-w-0 flex-1">
-            {title && <h2 className="truncate text-sm font-medium text-text">{title}</h2>}
-            {subtitle && <p className="truncate text-2xs text-faint">{subtitle}</p>}
+            {title && <h2 className="break-words text-sm font-medium text-text">{title}</h2>}
+            {subtitle && <p className="mt-0.5 break-words text-2xs text-muted">{subtitle}</p>}
           </div>
           {actions}
         </header>
@@ -112,7 +118,7 @@ export function Metric({
   }[tone];
   return (
     <div className="rounded-md border border-border bg-surface px-4 py-3">
-      <p className="text-2xs uppercase tracking-wide text-faint">{label}</p>
+      <p className="text-2xs uppercase tracking-wide text-muted">{label}</p>
       <p className={`mt-1 font-mono text-2xl leading-tight ${toneClass}`}>{value}</p>
       {hint && <p className="mt-1 text-2xs text-muted">{hint}</p>}
     </div>
@@ -221,7 +227,7 @@ export function Table<T>({
             {columns.map((c) => (
               <th
                 key={c.key}
-                className="px-4 py-2 text-left font-medium uppercase tracking-wide text-faint"
+                className="px-4 py-2 text-left font-medium uppercase tracking-wide text-muted"
               >
                 {c.header}
               </th>
@@ -258,10 +264,15 @@ export function Mono({ children, className = '' }: { children: ReactNode; classN
 /* ── Formularios ───────────────────────────────────────────────────────────── */
 
 export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  const field=useContext(FieldContext);
   return (
     <input
+      id={field?.id}
+      aria-describedby={field?.describedBy}
+      aria-invalid={field?.invalid || undefined}
+      required={field?.required}
       {...props}
-      className={`w-full rounded border border-border bg-bg px-2 py-1.5 text-2xs text-text placeholder:text-faint focus:border-info/60 focus:outline-none ${className}`}
+      className={`w-full rounded border border-border bg-bg px-2 py-1.5 text-2xs text-text placeholder:text-muted focus:border-info/60 focus:outline-none ${className}`}
     />
   );
 }
@@ -280,9 +291,15 @@ export function Field({
   required?: boolean;
   children: ReactNode;
 }) {
+  const generated=useId();
+  const control=Children.toArray(children).find(child=>isValidElement(child) && [Input,Select,Textarea].includes(child.type as typeof Input));
+  const explicit=isValidElement<{id?:string}>(control)?control.props.id:undefined;
+  const id=explicit || generated;
+  const describedBy=error || hint ? `${id}-help` : undefined;
   return (
+    <FieldContext.Provider value={{id,describedBy,invalid:Boolean(error),required}}>
     <div className="space-y-1.5">
-      <label className="block text-2xs font-medium text-muted">
+      <label htmlFor={id} className="block text-2xs font-medium text-muted">
         {label}
         {required && (
           <span className="text-danger" aria-hidden="true">
@@ -293,11 +310,12 @@ export function Field({
       </label>
       {children}
       {error ? (
-        <p className="text-2xs text-danger">{error}</p>
+        <p id={describedBy} role="alert" className="text-2xs text-danger">{error}</p>
       ) : hint ? (
-        <p className="text-2xs text-faint">{hint}</p>
+        <p id={describedBy} className="text-2xs text-muted">{hint}</p>
       ) : null}
     </div>
+    </FieldContext.Provider>
   );
 }
 
@@ -305,7 +323,7 @@ export function Field({
 
 export function Loading({ label = 'Cargando' }: { label?: string }) {
   return (
-    <div className="flex items-center justify-center gap-2 px-4 py-10 text-2xs text-faint">
+    <div role="status" aria-live="polite" className="flex items-center justify-center gap-2 px-4 py-10 text-2xs text-muted">
       <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
       {label}
     </div>
@@ -318,7 +336,7 @@ export function Loading({ label = 'Cargando' }: { label?: string }) {
  */
 export function ErrorState({ title, detail }: { title: string; detail?: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-md border border-danger/40 bg-danger/5 px-4 py-3">
+    <div role="alert" className="flex items-start gap-3 rounded-md border border-danger/40 bg-danger/5 px-4 py-3">
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
       <div className="min-w-0">
         <p className="text-sm text-text">{title}</p>
@@ -333,7 +351,7 @@ export function EmptyState({ title, detail }: { title: string; detail?: string }
   return (
     <div className="px-4 py-10 text-center">
       <p className="text-sm text-muted">{title}</p>
-      {detail && <p className="mt-1 text-2xs text-faint">{detail}</p>}
+      {detail && <p className="mt-1 text-2xs text-muted">{detail}</p>}
     </div>
   );
 }
@@ -381,17 +399,27 @@ export function formatRelative(value: string | null | undefined): string {
  * ───────────────────────────────────────────────────────────────────────────── */
 
 export function Textarea({ className = '', ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const field=useContext(FieldContext);
   return (
     <textarea
+      id={field?.id}
+      aria-describedby={field?.describedBy}
+      aria-invalid={field?.invalid || undefined}
+      required={field?.required}
       {...props}
-      className={`w-full rounded border border-border bg-bg px-2 py-1.5 font-mono text-2xs text-text placeholder:text-faint focus:border-info/60 focus:outline-none ${className}`}
+      className={`min-h-24 resize-none w-full rounded border border-border bg-bg px-2 py-1.5 font-mono text-2xs text-text placeholder:text-muted focus:border-info/60 focus:outline-none ${className}`}
     />
   );
 }
 
 export function Select({ className = '', children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  const field=useContext(FieldContext);
   return (
     <select
+      id={field?.id}
+      aria-describedby={field?.describedBy}
+      aria-invalid={field?.invalid || undefined}
+      required={field?.required}
       {...props}
       className={`w-full rounded border border-border bg-bg px-2 py-1.5 text-2xs text-text focus:border-info/60 focus:outline-none ${className}`}
     >

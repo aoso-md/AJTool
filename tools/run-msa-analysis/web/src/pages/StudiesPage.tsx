@@ -5,7 +5,7 @@ import { PublishChip, SourceBadge } from '../components/StudyMeta';
 import { AttentionPanel, PriorityBadge } from '../components/Priority';
 import { useResource } from '../lib/useResource';
 import { api } from '../lib/api';
-import { navigate } from '../lib/router';
+import { Link, navigate } from '../lib/router';
 import { fmt, verdictChip, type MsaStudy } from '../lib/domain';
 import type { CriteriaResponse } from '../lib/criteria';
 import type { Summary } from '../lib/types';
@@ -13,7 +13,7 @@ import type { Summary } from '../lib/types';
 const pendingColumns: Column<MsaStudy>[] = [
   { key: 'priority', header: 'Prioridad', render: (s) => <PriorityBadge priority={s.priority} /> },
   { key: 'when', header: 'Registrado', render: (s) => <Mono className="text-muted">{formatTime(s.createdAt)}</Mono> },
-  { key: 'gauge', header: 'Equipo', render: (s) => <Mono>{s.gaugeId ?? '—'}</Mono> },
+  { key: 'gauge', header: 'Equipo', render: (s) => <Link to={`/capturar/${s.id}`}><Mono>{s.gaugeId ?? 'Equipo sin identificar'}</Mono></Link> },
   { key: 'type', header: 'Tipo', render: (s) => <span className="text-muted">{s.input?.device?.type ?? '—'}</span> },
   { key: 'event', header: 'Evento de registro', render: (s) => <Mono className="text-muted">{s.inputEventId?.slice(0, 8) ?? '—'}</Mono> },
   { key: 'wait', header: 'Espera', render: (s) => <Mono className="text-muted">{waiting(s.createdAt)}</Mono> },
@@ -24,7 +24,7 @@ const studyColumns: Column<MsaStudy>[] = [
   { key: 'priority', header: 'Prioridad', render: (s) => <PriorityBadge priority={s.priority} /> },
   { key: 'when', header: 'Fecha', render: (s) => <Mono className="text-muted">{formatTime(s.updatedAt)}</Mono> },
   { key: 'source', header: 'Origen', render: (s) => <SourceBadge source={s.source} /> },
-  { key: 'gauge', header: 'Equipo', render: (s) => <Mono>{s.gaugeId ?? '—'}</Mono> },
+  { key: 'gauge', header: 'Equipo', render: (s) => <Link to={`/estudios/${s.id}`}><Mono>{s.gaugeId ?? 'Equipo sin identificar'}</Mono></Link> },
   { key: 'grr', header: '%GRR', render: (s) => <Mono>{fmt(s.result?.gageRRPercent, 1)}</Mono>, className: 'text-right' },
   { key: 'ndc', header: 'ndc', render: (s) => <Mono>{s.result?.ndc ?? '—'}</Mono>, className: 'text-right' },
   {

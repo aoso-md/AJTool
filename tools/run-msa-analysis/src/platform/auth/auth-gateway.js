@@ -30,20 +30,20 @@ import { extractIdpRoles, mapRoles } from './role-mapping.js';
 // vivo.
 const HANDSHAKE_TTL_SECONDS = 10 * 60;
 const HANDSHAKE_COOKIE = 'oidc_handshake';
-const HANDSHAKE_PATH = '/auth';
+const HANDSHAKE_PATH = '/';
+const LEGACY_HANDSHAKE_PATH = '/auth';
 
 // El discovery es PEREZOSO y cacheado: el IdP es una dependencia externa, y un
 // servicio que se niega a arrancar porque el IdP esta un momento inalcanzable
 // fallaria su healthcheck y quedaria en reinicio perpetuo. En vez de eso arranca,
 // sirve /health, y los logins fallan hasta que el discovery funcione: degradacion,
 // no caida.
-export function createAuthGateway (config) {
+export function createAuthGateway (config, { discoverProvider = oidc.discovery, log = console } = {}) {
   let discovered = null;
 
   async function discover () {
     if (!discovered) {
-      discovered = oidc
-        .discovery(config.issuer, config.clientId, config.clientSecret)
+      discovered = discoverProvider(config.issuer, config.clientId, config.clientSecret)
         .catch((error) => {
           // Suelta la promesa rechazada para que el siguiente request reintente en
           // vez de cachear el fallo para siempre.
@@ -85,6 +85,7 @@ export function createAuthGateway (config) {
     });
 
     res.setHeader('set-cookie', [
+      clearCookie(HANDSHAKE_COOKIE, config.secureCookies, LEGACY_HANDSHAKE_PATH),
       buildCookie({
         name: HANDSHAKE_COOKIE,
         value: handshake,
@@ -135,7 +136,8 @@ export function createAuthGateway (config) {
         maxAgeSeconds: config.sessionTtlSeconds,
         secure: config.secureCookies
       }),
-      clearCookie(HANDSHAKE_COOKIE, config.secureCookies, HANDSHAKE_PATH)
+      clearCookie(HANDSHAKE_COOKIE, config.secureCookies, HANDSHAKE_PATH),
+      clearCookie(HANDSHAKE_COOKIE, config.secureCookies, LEGACY_HANDSHAKE_PATH)
     ]);
     redirect(res, safeReturnTo(asString(handshake.returnTo)));
   }
@@ -143,7 +145,8 @@ export function createAuthGateway (config) {
   async function logout (req, res) {
     res.setHeader('set-cookie', [
       clearCookie(config.sessionCookieName, config.secureCookies),
-      clearCookie(HANDSHAKE_COOKIE, config.secureCookies, HANDSHAKE_PATH)
+      clearCookie(HANDSHAKE_COOKIE, config.secureCookies, HANDSHAKE_PATH),
+      clearCookie(HANDSHAKE_COOKIE, config.secureCookies, LEGACY_HANDSHAKE_PATH)
     ]);
 
     // Logout iniciado por la RP, best effort: si el IdP no responde ya borramos la
@@ -187,7 +190,7 @@ export function createAuthGateway (config) {
       } catch (error) {
         // Nunca se exponen las tripas del IdP al navegador; el detalle va al log
         // para quien opera.
-        console.error(`[auth] /auth/${action} fallo:`, error.message);
+        log.error?.(JSON.stringify({event:'auth_unavailable',action,code:/^[A-Z0-9_]{1,60}$/.test(error?.code || '')?error.code:'OIDC_PROVIDER_ERROR'}));
         return res.status(502).json({
           error: 'AUTH_UNAVAILABLE',
           message: 'proveedor de identidad no disponible'
@@ -205,6 +208,8 @@ export function createAuthGateway (config) {
 // protocolo-relativas (`//malo.com`) y con backslash.
 export function safeReturnTo (candidate) {
   if (!candidate || typeof candidate !== 'string') return '/';
+  // Reject characters that URL parsers strip or normalize before navigation.
+  if (/[\u0000-\u0020\u007f\\]/.test(candidate)) return '/';
   if (!candidate.startsWith('/')) return '/';
   if (candidate.startsWith('//') || candidate.startsWith('/\\')) return '/';
   return candidate;

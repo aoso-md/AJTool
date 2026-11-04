@@ -1,3 +1,4 @@
+import { VariationPlot } from '../components/VariationPlot';
 import { useState, type ReactNode } from 'react';
 import { ArrowLeft, ClipboardEdit, Send } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
@@ -12,8 +13,8 @@ import { AIAG, fmt, metricTone, verdictChip, type MsaStudy } from '../lib/domain
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="grid grid-cols-[13rem_1fr] gap-3 border-b border-border/60 px-4 py-2 text-2xs last:border-0">
-      <dt className="text-faint">{label}</dt>
-      <dd className="min-w-0 text-text">{children}</dd>
+      <dt className="text-muted">{label}</dt>
+      <dd className="min-w-0 break-words text-text">{children}</dd>
     </div>
   );
 }
@@ -33,9 +34,9 @@ function Readings({ study }: { study: MsaStudy }) {
         <table className="w-full border-collapse text-2xs">
           <thead>
             <tr className="border-b border-border bg-surface2">
-              <th className="px-4 py-2 text-left font-medium uppercase tracking-wide text-faint">Pieza</th>
+              <th className="px-4 py-2 text-left font-medium uppercase tracking-wide text-muted">Pieza</th>
               {cols.map((c) => (
-                <th key={c} className="px-3 py-2 text-right font-medium uppercase tracking-wide text-faint"><Mono>{c}</Mono></th>
+                <th key={c} className="px-3 py-2 text-right font-medium uppercase tracking-wide text-muted"><Mono>{c}</Mono></th>
               ))}
             </tr>
           </thead>
@@ -128,12 +129,13 @@ export function StudyPage({ id }: { id: string }) {
       {r && (
         <>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Metric label="%GRR" value={fmt(r.gageRRPercent, 2)} tone={metricTone(r.verdict)} hint="de la variación total del estudio" />
+            <Metric label="%GRR · variación del estudio" value={fmt(r.gageRRPercent, 2)} tone={metricTone(r.verdict)} hint="100 × GRR / TV · desviaciones estándar" />
             <Metric label="ndc" value={r.ndc} tone={r.ndc >= crit.minNdc ? 'default' : 'warn'} hint={`categorías distintas · se requiere ≥ ${crit.minNdc}`} />
             <Metric label="Repetibilidad (EV)" value={fmt(r.repeatability, 4)} hint={`${fmt(r.repeatabilityPercent, 1)} % · el equipo`} />
             <Metric label="Reproducibilidad (AV)" value={fmt(r.reproducibility, 4)} hint={`${fmt(r.reproducibilityPercent, 1)} % · los operadores`} />
           </div>
           <Warnings items={s.warnings} />
+          <VariationPlot ev={r.repeatabilityPercent} av={r.reproducibilityPercent} pv={r.partVariationPercent} grr={r.gageRRPercent} />
         </>
       )}
 

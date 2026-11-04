@@ -1,3 +1,4 @@
+import { sequenceValue } from './reliability.js';
 // src/platform/core-client.js
 // -----------------------------------------------------------------------------
 // Machine-plane client for the ORCA core (`/api/v1/events`).
@@ -54,7 +55,7 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
   const base = normalizeBaseUrl(baseUrl);
   const configured = Boolean(base && apiKey);
 
-  async function request (method, path, { query, body } = {}) {
+  async function request (method, path, { query, body, bodyText } = {}) {
     if (!configured) {
       throw new CoreError('core no configurado (ISOTOOLS_API_URL / ISOTOOLS_API_KEY)', { kind: 'auth' });
     }
@@ -71,9 +72,9 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
         headers: {
           'x-api-key': apiKey,
           accept: 'application/json',
-          ...(body ? { 'content-type': 'application/json' } : {})
+          ...((body || bodyText) ? { 'content-type': 'application/json' } : {})
         },
-        body: body ? JSON.stringify(body) : undefined,
+        body: bodyText ?? (body ? JSON.stringify(body) : undefined),
         signal: AbortSignal.timeout(timeoutMs)
       });
     } catch (error) {
@@ -92,7 +93,7 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
     if (response.ok) return { status: response.status, body: parsed };
 
     const status = response.status;
-    const detail = parsed && typeof parsed === 'object' ? parsed.error || JSON.stringify(parsed) : parsed;
+    const detail = null; // Remote response bodies are not safe operational log messages.
     if (status === 401 || status === 403) {
       throw new CoreError(
         status === 401
@@ -124,7 +125,7 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
     async latestMaxSeq (types) {
       const { body } = await request('GET', '/events/latest', { query: { type: types } });
       const max = body?.max_seq;
-      return max == null ? null : Number(max);
+      return max == null ? null : sequenceValue(max);
     },
 
     /** Only the types this tool declares it consumes in the core's tools.json. */
@@ -141,6 +142,15 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
         query: { since_seq: sinceSeq, type: types, limit }
       });
       return { events: body?.events || [], nextSeq: body?.next_seq ?? null };
+    },
+
+    async publishText (envelopeText) {
+      const event = JSON.parse(envelopeText);
+      const { status, body } = await request('POST', '/events', { bodyText: envelopeText });
+      if (![200,201].includes(status) || (status===200 && body?.status!=='duplicate') || (body?.event_id && body.event_id!==event.event_id)) {
+        throw new CoreError('Unexpected publication acknowledgement', {status,kind:'invalid'});
+      }
+      return { status, outcome:status===200?'duplicate':'published', eventId:event.event_id, seq:body?.seq ?? null };
     },
 
     /** Publish. 201 accepted and 200 duplicate are both success. */

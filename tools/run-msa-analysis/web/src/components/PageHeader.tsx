@@ -30,12 +30,12 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="flex items-start gap-4 border-b border-border pb-4">
-      <div className="min-w-0 flex-1">
+    <header className="flex flex-col sm:flex-row items-start gap-4 border-b border-border pb-4">
+      <div className="min-w-0 w-full flex-1">
         {eyebrow && (
-          <p className="font-mono text-2xs uppercase tracking-wide text-faint">{eyebrow}</p>
+          <p className="font-mono text-2xs uppercase tracking-wide text-muted">{eyebrow}</p>
         )}
-        <h1 className="truncate text-lg font-medium leading-tight text-text">{title}</h1>
+        <h1 className="break-words text-lg font-medium leading-tight text-text">{title}</h1>
         {description && <p className="mt-0.5 text-2xs text-muted">{description}</p>}
       </div>
       {actions}

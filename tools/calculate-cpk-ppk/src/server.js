@@ -1,3 +1,4 @@
+import { createOutboxWorker } from './platform/outbox-worker.js';
 // src/server.js — entry point (`node src/server.js`)
 // -----------------------------------------------------------------------------
 // Builds the tool from its parts and starts two things:
@@ -17,7 +18,11 @@ import { TOOL, createCapabilityTool } from './tool.js';
 const log = console;
 const config = loadConfig(process.env, TOOL);
 
-const store = await createStore({ databaseUrl: config.databaseUrl, log });
+const store = await createStore({ databaseUrl: config.databaseUrl, databaseRequired: config.databaseRequired, failFast: true, log }).catch((error) => {
+  log.error(error.message);
+  process.exit(1);
+});
+await store.ensureRuntimeIdentity({tool:TOOL.id, publishMode:config.publishMode, environment:process.env.AJTOOL_ENVIRONMENT || 'production'});
 const core = createCoreClient({ baseUrl: config.coreUrl, apiKey: config.coreKey });
 const publisher = createPublisher({ core, mode: config.publishMode, log });
 const domain = createCapabilityTool({ store, core, publisher, log });
@@ -34,16 +39,19 @@ const poller = createPoller({
   log
 });
 
+const outboxWorker = createOutboxWorker({store,toolId:TOOL.id,core,mode:config.publishMode,log});
 const app = createApp({ tool: TOOL, config, core, store, poller, publisher, registerRoutes: domain.registerRoutes, log });
 
 const server = app.listen(config.port, () => {
   printBanner({ tool: TOOL, config, core, store, publisher, log });
   poller.start();
+  outboxWorker.start();
 });
 
 async function shutdown (signal) {
   log.info(`${signal} received — stopping poller, then HTTP`);
   await poller.stop();
+  await outboxWorker.stop();
   server.close(() => {
     store.close().finally(() => process.exit(0));
   });

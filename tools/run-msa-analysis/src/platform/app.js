@@ -1,3 +1,4 @@
+import { registerOutboxRoutes } from './outbox-worker.js';
 // src/platform/app.js
 // -----------------------------------------------------------------------------
 // HTTP surface of a federated tool, wired in the order the platform's SSO
@@ -127,6 +128,7 @@ export function createApp ({ tool, config, core, store, poller, publisher, regis
     (req.caller.roles || []).some((role) => QUALITY_ROLES.includes(role))
   );
 
+  registerOutboxRoutes(api, {store, toolId:tool.id, requireQuality:requireRole(...QUALITY_ROLES), actorOf});
   registerRoutes(api, { requireQuality: requireRole(...QUALITY_ROLES), actorOf, canEdit });
 
   app.use('/api', api);
@@ -144,7 +146,7 @@ export function createApp ({ tool, config, core, store, poller, publisher, regis
     app.use(express.static(uiDir, { index: false, maxAge: '1y', immutable: true }));
     app.get(/.*/, requireBrowserSession, (req, res) => {
       res.set('cache-control', 'no-store');
-      res.sendFile(path.join(uiDir, 'index.html'));
+      res.sendFile('index.html', { root: uiDir });
     });
   } else {
     app.get('/', (req, res) => res.json({
@@ -158,8 +160,13 @@ export function createApp ({ tool, config, core, store, poller, publisher, regis
   // Malformed JSON is the caller's error, not ours.
   // eslint-disable-next-line no-unused-vars
   app.use((error, req, res, next) => {
+    if (error?.code === 'persistence_unavailable') {
+      return res.status(503).json({ error: error.code, detail: error.message });
+    }
+    if (error?.type === 'entity.too.large') return res.status(413).json({ error: 'request_too_large' });
+    if (error?.kind === 'protocol' || error?.code === 'invalid_sequence') return res.status(422).json({error:'invalid_event_identity_or_sequence'});
     if (error?.type === 'entity.parse.failed') return res.status(400).json({ error: 'invalid_json' });
-    log.error?.(`[http] ${req.method} ${req.originalUrl}: ${error?.stack || error}`);
+    log.error?.(JSON.stringify({event:'http_error',method:req.method,path:req.path,code:/^[A-Z0-9_]{1,40}$/.test(error?.code || '')?error.code:'INTERNAL_ERROR'}));
     return res.status(500).json({ error: 'internal_error' });
   });
 

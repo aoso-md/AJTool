@@ -2,8 +2,8 @@
 # =============================================================================
 # PLANTILLA — VARIAS tools en un mismo repo.
 #
-# Cada tool es un PROYECTO Railway distinto (regla de la plataforma: un proyecto
-# por tool, todos en el mismo workspace). Por lo tanto cada tool tiene:
+# Cada tool usa el destino autorizado por su token de proyecto. No se requiere
+# acceso a la cuenta de Carlos ni se usa el proyecto personal como sustituto:
 #   · su propio token de proyecto  -> su propio secreto de repositorio
 #   · su propio servicio            -> su propio `--service`
 #   · su propio Dockerfile          -> ver README, sección "monorepo"
@@ -18,13 +18,12 @@
 #   2. Edita el bloque TOOLS. Es lo único que se toca.
 # =============================================================================
 # ── AJTool ───────────────────────────────────────────────────────────────────
-# This is the platform template (core repo:
-# plantillas/integracion/despliegue/deploy-railway-multi.yml) with two changes:
-#   1. the TOOLS block (the only part the template says to edit);
-#   2. a `test` job that `plan` waits for — nothing deploys if the tests fail.
-# `service` must match the service name inside each Railway project, and
-# `health` must answer 200 or the job goes red. Until the custom domains are
-# attached, put the *.up.railway.app URL there. See docs/DESPLIEGUE.md.
+# Based on the platform template (core repo:
+# plantillas/integracion/despliegue/deploy-railway-multi.yml), with tool targets,
+# prerequisite tests and official-domain persistence acceptance checks.
+# `service` must match the service name authorized by its project token.
+# Check the official domains, never the unrelated personal Railway project.
+# Liveness alone is insufficient: readiness must also prove durable storage.
 # ─────────────────────────────────────────────────────────────────────────────
 name: Deploy a Railway
 
@@ -54,19 +53,29 @@ env:
         "name":    "cpk-ppk",
         "service": "calculate-cpk-ppk",
         "secret":  "RAILWAY_TOKEN_CCP",
-        "health":  "https://calculate-cpk-ppk-production.up.railway.app/health",
+        "decisionVar": "AJTOOL_DATA_DECISION_CCP",
+        "health":  "https://ccp.orcalabs.mx/health",
+        "ready":   "https://ccp.orcalabs.mx/ready",
+        "toolId":  "calculate_cpk_ppk",
         "paths":   ["tools/calculate-cpk-ppk/",
                     "docker/calculate_cpk_ppk.Dockerfile",
-                    "railway.toml"]
+                    "railway.toml",
+                    ".github/workflows/deploy-railway.yml",
+                    "db/review/check-deployment-ready.mjs"]
       },
       {
         "name":    "msa",
         "service": "run-msa-analysis",
         "secret":  "RAILWAY_TOKEN_RMA",
-        "health":  "https://run-msa-analysis-production.up.railway.app/health",
+        "decisionVar": "AJTOOL_DATA_DECISION_RMA",
+        "health":  "https://rma.orcalabs.mx/health",
+        "ready":   "https://rma.orcalabs.mx/ready",
+        "toolId":  "run_msa_analysis",
         "paths":   ["tools/run-msa-analysis/",
                     "docker/run_msa_analysis.Dockerfile",
-                    "railway.toml"]
+                    "railway.toml",
+                    ".github/workflows/deploy-railway.yml",
+                    "db/review/check-deployment-ready.mjs"]
       }
     ]
   # ═════════════════════════════════════════════════════════════════════════
@@ -124,8 +133,7 @@ jobs:
     if: needs.plan.outputs.hay == 'true'
     runs-on: ubuntu-latest
     strategy:
-      # Que una tool falle NO debe cancelar el despliegue de las otras: son
-      # proyectos independientes y no comparten destino.
+      # Each tool reports its own result, even when tokens share a project.
       fail-fast: false
       matrix:
         tool: ${{ fromJson(needs.plan.outputs.matrix) }}
@@ -152,6 +160,13 @@ jobs:
         with:
           node-version: 22
 
+      # Data-owner disposition and deployment approval are checked BEFORE replacing RAM.
+      # Database tests run independently in the preceding test job.
+      - name: Verificar decision de historico y autorizacion del SHA
+        env:
+          AJTOOL_DATA_DECISION_JSON: ${{ vars[matrix.tool.decisionVar] }}
+        run: node deploy/official/check-transition-decision.mjs --tool "${{ matrix.tool.toolId }}" --revision "${{ github.sha }}"
+
       - name: Instalar el CLI de Railway
         run: npm i -g @railway/cli
 
@@ -176,3 +191,9 @@ jobs:
           done
           echo "::error::${{ matrix.tool.name }} no respondió 200 tras 5 minutos."
           exit 1
+
+      - name: Verificar almacenamiento durable y modo abierto en el dominio oficial
+        env:
+          AJTOOL_READY_URL: ${{ matrix.tool.ready }}
+          AJTOOL_EXPECTED_TOOL: ${{ matrix.tool.toolId }}
+        run: node db/review/check-deployment-ready.mjs --url "$AJTOOL_READY_URL" --tool "$AJTOOL_EXPECTED_TOOL" --attempts 12

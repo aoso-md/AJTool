@@ -1,3 +1,4 @@
+import { OutboxPanel } from '../components/OutboxPanel';
 /**
  * "¿Está recibiendo eventos de verdad?" — the screen that ends diagnosing by
  * screenshots. Everything here comes from GET /api/status; nothing is assumed.
@@ -20,7 +21,7 @@ const POLLER: Record<string, { label: string; tone: Tone }> = {
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[11rem_1fr] gap-3 border-b border-border/60 px-4 py-2 text-2xs last:border-0">
+    <div className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)] sm:grid-cols-[11rem_minmax(0,1fr)] gap-3 border-b border-border/60 px-4 py-2 text-2xs last:border-0">
       <dt className="text-faint">{label}</dt>
       <dd className="min-w-0 break-words text-text">{children}</dd>
     </div>
@@ -86,6 +87,7 @@ export function IntegrationPage({ extra }: { extra?: ReactNode }) {
         </Panel>
       </div>
 
+      {s.persistence.durable && <OutboxPanel actor={s.caller}/>}
       {extra}
     </div>
   );

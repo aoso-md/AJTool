@@ -1,3 +1,4 @@
+import { inboxEvent, transactionStore, outboxPublisher, compareSequence, manualRoute } from './platform/reliability.js';
 // src/tool.js — calculate_cpk_ppk on the ORCA platform
 // -----------------------------------------------------------------------------
 // Where this tool sits in the ISO chain (core communication-rules.json):
@@ -55,7 +56,7 @@ function num (value) {
 }
 
 function numbers (value) {
-  if (!Array.isArray(value)) return null;
+  if (!Array.isArray(value) || value.length>10000) return null;
   const out = value.map(num);
   return out.every((v) => v !== undefined) ? out : null;
 }
@@ -192,10 +193,26 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
       const { events } = await core.query({ sinceSeq: cursor, types: [SPEC_EVENT], limit: 500 });
       for (const raw of events) {
         const event = fromCore(raw);
-        for (const spec of specsFromEvent(event)) await store.upsertSpec(spec);
-        if (event.seq != null && event.seq > cursor) cursor = event.seq;
+        if (store.transactional) {
+          const result = await store.processEventTransaction({
+            tool: TOOL.id, consumer: SPEC_CURSOR, event: inboxEvent(event),
+            cursor: { name: SPEC_CURSOR, expectedSeq: (await store.getCursorState(SPEC_CURSOR))?.seq ?? null, targetSeq: String(event.seq) },
+            handler: async (tx) => {
+              if (event.type !== SPEC_EVENT || event.module?.id !== 'manage_product_specs') {
+                tx.reject({ code: 'invalid_spec_source', reason: 'Unexpected specification producer' }); return;
+              }
+              const specs = specsFromEvent(event);
+              if (!specs.length) tx.reject({ code: 'invalid_specification', reason: 'No valid specification limits' });
+              for (const spec of specs) await tx.upsertSpec(spec);
+            }
+          });
+          if (!result.ok) throw Object.assign(new Error(`Specification stopped: ${result.status}`), { kind: 'protocol' });
+        } else {
+          for (const spec of specsFromEvent(event)) await store.upsertSpec(spec);
+        }
+        if (event.seq != null && compareSequence(event.seq, cursor) > 0) cursor = event.seq;
       }
-      await store.setCursor(SPEC_CURSOR, cursor);
+      if (!store.transactional) await store.setCursor(SPEC_CURSOR, cursor);
       if (events.length < 500) break;
     }
   }
@@ -229,7 +246,24 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
   }
 
   // ── Platform path ──────────────────────────────────────────────────────────
-  async function processEvent (event) {
+  async function processEvent (event, context = {}) {
+    if (store.transactional) {
+      return store.processEventTransaction({
+        tool: TOOL.id, consumer: context.cursor?.name || `subscription:${TOOL.id}`,
+        event: inboxEvent(event), cursor: context.cursor,
+        handler: async (tx) => {
+          if (event.type !== 'MEASUREMENTS_CAPTURED' || event.module?.id !== 'collect_quality_measurements') {
+            tx.reject({ code: 'invalid_event_source', reason: 'Unexpected event type or producing module' });
+            return null;
+          }
+          const local = createCapabilityTool({ store: transactionStore(store, tx), core, publisher: outboxPublisher(tx, publisher.mode), log });
+          const study = await local.processEvent(event);
+          if (!study) tx.ignore({ reason: 'Event does not satisfy the documented registration predicate' });
+          else if (study.status === 'skipped') tx.reject({ code: 'invalid_business_input', reason: study.reason });
+          return { studyId: study?.id ?? null, study };
+        }
+      });
+    }
     const existing = await store.findStudyByInputEvent(TOOL.id, event.eventId);
     if (existing) {
       if (DONE_STATES.has(existing.publish?.state) || existing.status !== 'completed') return existing;
@@ -292,7 +326,7 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
         }
       }
     } catch (error) {
-      if (error?.kind === 'retryable' || error?.kind === 'auth') throw error;
+      if (store.transactionLocal || error?.kind === 'retryable' || error?.kind === 'auth') throw error;
       study.status = 'error';
       study.reason = error?.message || String(error);
       log.error?.(`[cpk] event ${event.eventId}: ${study.reason}`);
@@ -303,36 +337,9 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
     return study;
   }
 
-  // ── HTTP ───────────────────────────────────────────────────────────────────
-  function registerRoutes (api, { requireQuality, actorOf, canEdit }) {
-    api.get('/studies', async (req, res) => {
-      const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
-      let studies = (await store.listStudies(TOOL.id, limit)).map((s) => ({ ...s, priority: priorityOf(s) }));
-      if (req.query.sort === 'priority') studies = studies.sort(byPriority);
-      res.json({ studies });
-    });
-
-    // The header of the studies screen: counts by urgency and what to open first.
-    api.get('/summary', async (req, res) => {
-      res.json(summarize(await store.listStudies(TOOL.id, 200)));
-    });
-
-    settings.registerRoutes(api, { requireQuality, actorOf, canEdit });
-
-    api.get('/studies/:id', async (req, res) => {
-      const study = await store.getStudy(req.params.id);
-      if (!study || study.tool !== TOOL.id) return res.status(404).json({ error: 'not_found' });
-      return res.json({ study: { ...study, priority: priorityOf(study) } });
-    });
-
-    api.get('/specs', async (req, res) => {
-      res.json({ specs: await store.listSpecs() });
-    });
-
-    // A study entered by a person. The actor comes from the verified session,
-    // never from the body: nothing in req.body is read for identity.
-    api.post('/studies', requireQuality, async (req, res) => {
-      const body = req.body || {};
+  async function createManualStudy ({ studyId, body: input, actor }) {
+    const res = { code: 200, status(code) { this.code = code; return this; }, json(body) { return { status: this.code, body }; } };
+      const body = input;
       const partId = body.partId ? String(body.partId).trim() : null;
       const characteristicId = body.characteristicId ? String(body.characteristicId).trim() : null;
       const measurements = numbers(body.measurements);
@@ -367,27 +374,26 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
         criteria,
         warnings: analysis.warnings,
         verdict: analysis.result.status,
-        actor: actorOf(req.caller),
+        actor: actor,
         publish: { state: analysis.result.belowTarget ? 'awaiting_decision' : 'not_required' },
         notes: body.notes ? String(body.notes).slice(0, 2000) : null
       });
       await store.saveStudy(study);
       return res.status(201).json({ study: { ...study, priority: priorityOf(study) } });
-    });
+  }
 
-    // Escalate a below-target study to specification review. Explicit and
-    // signed: the person in session is written into the event's metadata.
-    api.post('/studies/:id/publish', requireQuality, async (req, res) => {
-      const study = await store.getStudy(req.params.id);
+  async function publishStudy ({ studyId, body: input, actor }) {
+    const res = { code: 200, status(code) { this.code = code; return this; }, json(body) { return { status: this.code, body }; } };
+      const study = await store.getStudy(studyId);
       if (!study || study.tool !== TOOL.id) return res.status(404).json({ error: 'not_found' });
       if (study.status !== 'completed' || !study.result?.belowTarget) {
         return res.status(409).json({ error: 'not_publishable', detail: 'Solo se escala un estudio completado con Cpk bajo el objetivo.' });
       }
-      if (['published', 'duplicate'].includes(study.publish?.state)) {
+      if (['published', 'duplicate', 'pending'].includes(study.publish?.state)) {
         return res.status(409).json({ error: 'already_published', study });
       }
 
-      const actor = actorOf(req.caller);
+
       const envelope = study.source === 'platform' && study.inputEventId && study.publish?.event
         ? study.publish.event
         : buildRoot({
@@ -405,13 +411,48 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
       try {
         study.publish = await publisher.publish(envelope);
       } catch (error) {
+        if (store.transactionLocal) throw error;
         return res.status(503).json({ error: 'core_unavailable', detail: error.message });
       }
       study.publishedBy = actor;
       study.updatedAt = new Date().toISOString();
       await store.saveStudy(study);
       return res.json({ study: { ...study, priority: priorityOf(study) } });
+  }
+
+  // ── HTTP ───────────────────────────────────────────────────────────────────
+  function registerRoutes (api, { requireQuality, actorOf, canEdit }) {
+    api.get('/studies', async (req, res) => {
+      const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
+      let studies = (await store.listStudies(TOOL.id, limit)).map((s) => ({ ...s, priority: priorityOf(s) }));
+      if (req.query.sort === 'priority') studies = studies.sort(byPriority);
+      res.json({ studies });
     });
+
+    // The header of the studies screen: counts by urgency and what to open first.
+    api.get('/summary', async (req, res) => {
+      res.json(summarize(await store.listStudies(TOOL.id, 200)));
+    });
+
+    settings.registerRoutes(api, { requireQuality, actorOf, canEdit });
+
+    api.get('/studies/:id', async (req, res) => {
+      const study = await store.getStudy(req.params.id);
+      if (!study || study.tool !== TOOL.id) return res.status(404).json({ error: 'not_found' });
+      return res.json({ study: { ...study, priority: priorityOf(study) } });
+    });
+
+    api.get('/specs', async (req, res) => {
+      res.json({ specs: await store.listSpecs() });
+    });
+
+    // A study entered by a person. The actor comes from the verified session,
+    // never from the body: nothing in req.body is read for identity.
+    api.post('/studies', requireQuality, manualRoute({ store, tool: TOOL.id, publisher, core, factory: createCapabilityTool, method: 'createManualStudy', actorOf, log }));
+
+    // Escalate a below-target study to specification review. Explicit and
+    // signed: the person in session is written into the event's metadata.
+    api.post('/studies/:id/publish', requireQuality, manualRoute({ store, tool: TOOL.id, publisher, core, factory: createCapabilityTool, method: 'publishStudy', actorOf, log }));
 
     // Machine plane: compute an IES event synchronously. No side effects —
     // nothing stored, nothing published. For integration checks by other
@@ -443,7 +484,7 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
     });
   }
 
-  return { processEvent, beforeTick: syncSpecs, syncSpecs, registerRoutes, settings };
+  return { createManualStudy, publishStudy, processEvent, beforeTick: syncSpecs, syncSpecs, registerRoutes, settings };
 }
 
 export default { TOOL, createCapabilityTool, specsFromEvent, belowTargetData, severityFor };

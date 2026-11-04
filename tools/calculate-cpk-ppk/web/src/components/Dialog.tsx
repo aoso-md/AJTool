@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 
 /**
@@ -13,6 +13,7 @@ export function Dialog({
   busy = false,
   children,
   footer,
+  returnFocusTo,
 }: {
   title: string;
   subtitle?: string;
@@ -20,45 +21,43 @@ export function Dialog({
   busy?: boolean;
   children: ReactNode;
   footer: ReactNode;
+  returnFocusTo?: string;
 }) {
   const panel = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const modal = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
+    const previous = (returnFocusTo ? document.querySelector<HTMLElement>(returnFocusTo) : null) ?? document.activeElement as HTMLElement | null;
+    modal.current?.showModal();
     panel.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !busy) onClose();
-    };
-    document.addEventListener('keydown', onKey);
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('keydown', onKey);
+
       document.body.style.overflow = overflow;
+      modal.current?.close();
       previous?.focus?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busy]);
+  }, []);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 sm:items-center"
+    <dialog ref={modal} aria-labelledby={`${id}-title`} aria-describedby={subtitle ? `${id}-description` : undefined} onCancel={(event) => { event.preventDefault(); if (!busy) onClose(); }}
+      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-0 text-text z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 sm:items-center"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !busy) onClose();
       }}
     >
       <div
         ref={panel}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
         tabIndex={-1}
         className="my-auto w-full max-w-2xl rounded-md border border-border bg-surface outline-none"
       >
         <header className="flex items-start gap-3 border-b border-border px-4 py-3">
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-medium text-text">{title}</h2>
-            {subtitle && <p className="mt-0.5 text-2xs text-faint">{subtitle}</p>}
+            <h2 id={`${id}-title`} className="text-sm font-medium text-text">{title}</h2>
+            {subtitle && <p id={`${id}-description`} className="mt-0.5 text-2xs text-muted">{subtitle}</p>}
           </div>
           <button
             type="button"
@@ -73,6 +72,6 @@ export function Dialog({
         <div className="max-h-[70vh] space-y-4 overflow-y-auto px-4 py-4">{children}</div>
         <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-border bg-surface2/40 px-4 py-3">{footer}</footer>
       </div>
-    </div>
+    </dialog>
   );
 }

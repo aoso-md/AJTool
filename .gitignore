@@ -6,3 +6,6 @@ coverage/
 !.env.example
 *.log
 .DS_Store
+
+# Private ORCA reference acceptance is not part of the public release.
+.private-tests/

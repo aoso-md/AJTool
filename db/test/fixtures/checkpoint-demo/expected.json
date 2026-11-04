@@ -1,0 +1,20 @@
+{
+  "method": "MR(2) individuals; Average & Range 3x10x3; independent Decimal(60)",
+  "cpk": {
+    "cp": 0.235,
+    "cpk": 0.22748,
+    "pp": 0.4085752815378834,
+    "ppk": 0.3955008725286711,
+    "sigmaWithin": 0.07092198581560284,
+    "sigmaOverall": 0.04079215610874228
+  },
+  "msa": {
+    "repeatability": 0.0011816,
+    "reproducibility": 0.002081249258178046,
+    "partVariation": 0.056628,
+    "grr": 0.0023932774671288465,
+    "totalVariation": 0.05667855115504159,
+    "gageRRPercent": 4.222545245699991,
+    "ndc": 33
+  }
+}

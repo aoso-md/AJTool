@@ -15,12 +15,12 @@ export type PublishState =
   | 'published'
   | 'duplicate'
   | 'failed'
-  | 'retrying';
+  | 'retrying' | 'pending' | 'delivered' | 'blocked_auth' | 'quarantined' | 'retry_wait' | 'shadow_recorded' | 'delivering';
 
 export interface PublishInfo {
   state: PublishState;
   eventId?: string;
-  seq?: number | null;
+  seq?: number | string | null;
   at?: string;
   error?: string;
   status?: number | null;
@@ -70,7 +70,7 @@ export interface StudyBase {
   actor: Actor | null;
   publishedBy?: Actor | null;
   inputEventId: string | null;
-  inputSeq?: number | null;
+  inputSeq?: number | string | null;
   correlationId?: string | null;
   notes?: string | null;
   createdAt: string;

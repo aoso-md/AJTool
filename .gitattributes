@@ -1,0 +1,3 @@
+# Preserve raw test diagnostics, including indentation-only assertion lines.
+artifacts/**/*.txt -whitespace
+db/review/certs/*.crt text eol=lf

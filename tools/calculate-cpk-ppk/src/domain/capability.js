@@ -123,11 +123,16 @@ export function analyzeCapability ({ measurements, usl, lsl, minimumCpk, target,
     };
   }
 
+  if (![avg,sigmaOverall,sigmaWithin].every(Number.isFinite) || !Number.isFinite(usl-lsl)) {
+    return { ok:false, errors:['La magnitud de las mediciones excede la precisión numérica admitida. Revise unidades y escala.'] };
+  }
   const tolerance = usl - lsl;
   const cp = tolerance / (6 * sigmaWithin);
   const cpk = Math.min(usl - avg, avg - lsl) / (3 * sigmaWithin);
   const pp = tolerance / (6 * sigmaOverall);
   const ppk = Math.min(usl - avg, avg - lsl) / (3 * sigmaOverall);
+
+  if (![cp,cpk,pp,ppk].every(Number.isFinite)) return { ok:false, errors:['Los índices exceden la precisión numérica admitida. Revise unidades y escala.'] };
 
   // Expected nonconforming parts per million, long term (overall sigma).
   const ppm = 1e6 * (upperTail((usl - avg) / sigmaOverall) + upperTail((avg - lsl) / sigmaOverall));

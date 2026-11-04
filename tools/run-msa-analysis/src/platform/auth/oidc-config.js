@@ -42,9 +42,9 @@ export function resolveAuthConfig (env = process.env) {
     redirectUri: required(env.OIDC_REDIRECT_URI, 'OIDC_REDIRECT_URI'),
     // Normalmente el dashboard: https://<dominio>/
     postLogoutRedirectUri: env.OIDC_POST_LOGOUT_REDIRECT_URI?.trim() || undefined,
-    // `roles` no es un scope OIDC estandar, pero es como los proveedores que usamos
-    // liberan el claim de roles.
-    scopes: env.OIDC_SCOPES?.trim() || 'openid profile email roles',
+    // Carlos confirmó `openid` para este IdP. Los roles se leen del token
+    // verificado; no se solicitan scopes adicionales sin acuerdo del proveedor.
+    scopes: resolveScopes(env.OIDC_SCOPES),
     rolesClaim: env.OIDC_ROLES_CLAIM?.trim() || 'roles',
     roleMappings: parseRoleMap(env.ROLE_MAP),
     sessionSecret,
@@ -58,11 +58,17 @@ export function resolveAuthConfig (env = process.env) {
   };
 }
 
+function resolveScopes (raw) {
+  const scopes = [...new Set((raw?.trim() || 'openid').split(/\s+/))];
+  if (!scopes.includes('openid')) throw new AuthConfigurationError('OIDC_SCOPES debe incluir openid');
+  return scopes.join(' ');
+}
+
 function parseIssuer (raw) {
   try {
     return new URL(raw);
   } catch {
-    throw new AuthConfigurationError(`OIDC_ISSUER no es una URL valida: ${raw}`);
+    throw new AuthConfigurationError('OIDC_ISSUER no es una URL valida');
   }
 }
 

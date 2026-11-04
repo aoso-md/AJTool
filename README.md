@@ -1,3 +1,5 @@
+Release PostgreSQL / Railway: [entrega y procedimiento vigente](docs/RELEASE-20261103.md).
+
 # AJTool — tools de calidad federadas en ORCA
 
 Dos tools de la plataforma ORCA (IsoTools), cada una con su propio servicio,

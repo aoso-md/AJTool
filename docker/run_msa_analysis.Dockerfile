@@ -41,6 +41,9 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 ENV NODE_ENV=production
 WORKDIR /app
 RUN corepack enable
+ARG AJTOOL_RELEASE_REVISION=uncommitted
+LABEL org.opencontainers.image.revision=${AJTOOL_RELEASE_REVISION}
+COPY db/review/certs/supabase-prod-ca-2021.crt /app/certs/supabase-prod-ca-2021.crt
 
 # Production dependencies only. Nothing in the container may depend on a
 # devDependency.

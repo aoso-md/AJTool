@@ -11,7 +11,14 @@ const PUBLISH: Record<string, { label: string; tone: Tone }> = {
   not_required: { label: 'no requiere publicación', tone: 'neutral' },
   awaiting_decision: { label: 'pendiente de decisión', tone: 'warn' },
   awaiting_capture: { label: 'esperando captura', tone: 'info' },
+  delivering: { label: 'envío en curso', tone: 'info' },
+  shadow_recorded: { label: 'modo sombra · no enviado', tone: 'info' },
   shadow: { label: 'modo sombra · no enviado', tone: 'info' },
+  retry_wait: { label: 'esperando próximo intento', tone: 'warn' },
+  pending: { label: 'en cola de envío', tone: 'info' },
+  delivered: { label: 'entrega confirmada', tone: 'ok' },
+  blocked_auth: { label: 'envío bloqueado por autorización', tone: 'danger' },
+  quarantined: { label: 'requiere revisión del envío', tone: 'warn' },
   published: { label: 'publicado', tone: 'ok' },
   duplicate: { label: 'publicado (repetido descartado)', tone: 'ok' },
   failed: { label: 'rechazado por el core', tone: 'danger' },
@@ -37,8 +44,8 @@ export function actorLabel(actor: Actor | null | undefined): string {
 /** One label/value line, same grid as the panels below. Exported so extra rows align. */
 export function MetaRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[10rem_1fr] gap-3 border-b border-border/60 px-4 py-2 text-2xs last:border-0">
-      <dt className="text-faint">{label}</dt>
+    <div className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)] sm:grid-cols-[10rem_minmax(0,1fr)] gap-3 border-b border-border/60 px-4 py-2 text-2xs last:border-0">
+      <dt className="text-muted">{label}</dt>
       <dd className="min-w-0 break-words text-text">{children}</dd>
     </div>
   );

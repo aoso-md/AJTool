@@ -24,12 +24,13 @@ export function NewStudyPage() {
   const [raw, setRaw] = useState('');
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
+  const [commandKey] = useState(()=>crypto.randomUUID());
   const [error, setError] = useState<string | null>(null);
 
   const criteria = useResource(() => api.get<CriteriaResponse>('/api/settings'), []);
   const parsed = useMemo(() => parseMeasurements(raw), [raw]);
   const known = useMemo(
-    () => (specs.data?.specs ?? []).find((s) => s.characteristicId === characteristicId.trim() && (!s.partId || !partId || s.partId === partId.trim())),
+    () => { const list=(specs.data?.specs ?? []).filter(s=>s.characteristicId===characteristicId.trim()); return (partId.trim()?list.find(s=>s.partId===partId.trim()):undefined) ?? list.find(s=>!s.partId); },
     [specs.data, characteristicId, partId],
   );
 
@@ -42,6 +43,12 @@ export function NewStudyPage() {
 
   // What the criteria in force say for this characteristic — shown, not sent,
   // unless the engineer types a value to override it for this one study.
+  const finite = (value: string) => value.trim() !== '' && Number.isFinite(Number(value));
+  const lslError = lsl && !finite(lsl) ? 'Escriba un LSL numérico finito.' : undefined;
+  const uslError = usl && !finite(usl) ? 'Escriba un USL numérico finito.' : finite(lsl) && finite(usl) && Number(lsl) >= Number(usl) ? 'USL debe ser mayor que LSL.' : undefined;
+  const targetError = target && !finite(target) ? 'Escriba un objetivo numérico finito o deje el campo vacío.' : undefined;
+  const minimumError = minimumCpk && (!finite(minimumCpk) || Number(minimumCpk) <= 0) ? 'El Cpk mínimo debe ser un número mayor que cero.' : undefined;
+  const canSave = parsed.values.length >= 2 && !parsed.invalid.length && finite(lsl) && finite(usl) && !lslError && !uslError && !targetError && !minimumError;
   const criteriaNow = criteria.data?.settings;
   const overrideFor = (criteriaNow?.overrides as Record<string, number> | undefined)?.[characteristicId.trim()];
   const effective = criteriaNow
@@ -58,6 +65,11 @@ export function NewStudyPage() {
       setError(`Valores no numéricos en las mediciones: ${parsed.invalid.slice(0, 5).join(', ')}`);
       return;
     }
+    if (!canSave) {
+      setError('Revise los límites LSL < USL y capture al menos dos mediciones numéricas finitas.');
+      document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      return;
+    }
     setBusy(true);
     try {
       const { study } = await api.post<{ study: CpkStudy }>('/api/studies', {
@@ -69,7 +81,7 @@ export function NewStudyPage() {
         minimumCpk: num(minimumCpk),
         measurements: parsed.values,
         notes: notes.trim() || undefined,
-      });
+      }, commandKey);
       navigate(`/estudios/${study.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -79,13 +91,13 @@ export function NewStudyPage() {
   }
 
   return (
-    <form className="space-y-5" onSubmit={submit}>
+    <form noValidate className="space-y-5" onSubmit={submit}>
       <PageHeader
         eyebrow="9.1.3 · captura"
         title="Nuevo estudio de capacidad"
         description="Mediciones individuales en orden de producción. El estudio se guarda; escalarlo a especificaciones es una decisión aparte y firmada."
         actions={
-          <Button type="submit" variant="primary" loading={busy} disabled={parsed.values.length < 2}>
+          <Button type="submit" variant="primary" loading={busy} disabled={!canSave}>
             <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
             Calcular y guardar
           </Button>
@@ -116,13 +128,13 @@ export function NewStudyPage() {
               ))}
             </datalist>
           </Field>
-          <Field label="USL — límite superior" required>
+          <Field label="USL — límite superior" required error={uslError}>
             <Input inputMode="decimal" value={usl} onChange={(e) => setUsl(e.target.value)} placeholder="10.05" className="font-mono" />
           </Field>
-          <Field label="LSL — límite inferior" required>
+          <Field label="LSL — límite inferior" required error={lslError}>
             <Input inputMode="decimal" value={lsl} onChange={(e) => setLsl(e.target.value)} placeholder="9.95" className="font-mono" />
           </Field>
-          <Field label="Cpk mínimo" hint={minimumHint}>
+          <Field label="Cpk mínimo" hint={minimumHint} error={minimumError}>
             <Input
               inputMode="decimal"
               value={minimumCpk}
@@ -131,7 +143,7 @@ export function NewStudyPage() {
               className="font-mono"
             />
           </Field>
-          <Field label="Valor objetivo" hint="Opcional, informativo">
+          <Field label="Valor objetivo" hint="Opcional, informativo" error={targetError}>
             <Input inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} className="font-mono" />
           </Field>
         </div>
@@ -152,11 +164,13 @@ export function NewStudyPage() {
         actions={<Mono className="text-2xs text-muted">{parsed.values.length} válidas{parsed.invalid.length ? ` · ${parsed.invalid.length} inválidas` : ''}</Mono>}
       >
         <div className="space-y-4 px-4 py-3">
-          <Textarea rows={8} value={raw} onChange={(e) => setRaw(e.target.value)} placeholder={'10.01\n9.98\n10.03\n…'} />
+          <Field label="Mediciones individuales" required hint="Conserve el orden de producción; se requieren al menos dos valores." error={parsed.invalid.length ? `Corrija valores no numéricos: ${parsed.invalid.slice(0, 5).join(', ')}` : undefined}>
+            <Textarea rows={8} value={raw} onChange={(e) => setRaw(e.target.value)} placeholder={'10.01\n9.98\n10.03\n…'} />
+          </Field>
           <Field label="Notas" hint="Contexto del estudio: lote, turno, condición del proceso">
             <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
           </Field>
-          <p className="text-2xs text-faint">
+          <p className="text-2xs text-muted">
             Quedará registrado a nombre de <Mono className="text-muted">{actorLabel(status.data?.caller)}</Mono>.
           </p>
         </div>
