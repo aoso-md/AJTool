@@ -9,3 +9,11 @@ coverage/
 
 # Private ORCA reference acceptance is not part of the public release.
 .private-tests/
+
+# Generated diagnostics and private database exports are never release source.
+artifacts/
+docs/durability-fix-evidence/
+*.dump
+*.dpapi
+*.pfx
+*.key
