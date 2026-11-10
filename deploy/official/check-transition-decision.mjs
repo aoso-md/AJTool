@@ -1,6 +1,9 @@
 // A data-retention decision is independent from certification of the new database.
 import {pathToFileURL} from 'node:url';
 const tools=new Set(['calculate_cpk_ppk','run_msa_analysis']);
+function validSequence(value) {
+ return typeof value==='string' && /^(0|[1-9]\d{0,18})$/.test(value) && BigInt(value)<=9223372036854775807n;
+}
 export function decisionErrors(d,{tool,revision,now=Date.now()}){
  const e=[];
  if(!tools.has(tool)||!/^([a-f0-9]{40})$/.test(revision||''))return ['invalid_release_identity'];
@@ -13,8 +16,8 @@ export function decisionErrors(d,{tool,revision,now=Date.now()}){
   if(d.explicitlyAcceptsHistoricalLoss!==true)e.push('historical_loss_not_explicitly_accepted');
   // An approved discard never requires an impossible exporter.
  }else if(d.action==='rebuild_from_core'){
-  if(d.historicalSourceVerified!==true || typeof d.sourceCutoff!=='string' ||
-     !/^(0|[1-9]\d{0,18})$/.test(d.sourceCutoff) || BigInt(d.sourceCutoff)>9223372036854775807n) e.push('historical_source_not_verified');
+  if(d.historicalSourceVerified!==true || !validSequence(d.sourceCutoff)) e.push('historical_source_not_verified');
+  if(tool==='calculate_cpk_ppk'&&!validSequence(d.specCutoff)) e.push('specification_cutoff_not_verified');
   if(d.acceptsReconstructionDifferences!==true) e.push('reconstruction_differences_not_accepted');
   if(typeof d.manualData?.evidenceReference!=='string'||d.manualData.evidenceReference.trim().length<8) e.push('manual_inventory_evidence_missing');
   if(d.manualData?.action==='discard'){

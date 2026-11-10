@@ -10,7 +10,7 @@ test('reconstruction approval is bound to the release and explicit manual-data d
   const decision = {
     ...scope, action: 'rebuild_from_core', approvedBy: 'Fixture owner',
     approvedAtUtc: new Date().toISOString(), evidenceReference: 'fixture-approval',
-    productionChangeApproved: true, historicalSourceVerified: true, sourceCutoff: '9',
+    productionChangeApproved: true, historicalSourceVerified: true, sourceCutoff: '9', specCutoff: '7',
     acceptsReconstructionDifferences: true, manualData: { action: 'discard', evidenceReference: 'fixture-inventory' }
   };
   assert.deepEqual(decisionErrors(decision, scope), ['manual_loss_not_accepted']);
@@ -85,11 +85,12 @@ for (const service of ['calculate-cpk-ppk', 'run-msa-analysis']) test(service + 
         },
         latestMaxSeq() { throw new Error('Replay unexpectedly used cold start'); }
       };
+      const fault = Object.assign(new Error('synthetic interruption'), { kind: 'retryable', retryAfterMs: 1250 });
       const interrupted = poller(f.store, client, handler => async (event, context) => {
-        if (event.eventId === second.event_id) throw new Error('synthetic interruption');
+        if (event.eventId === second.event_id) throw fault;
         return handler(event, context);
       });
-      await assert.rejects(interrupted.tick(), /synthetic interruption/);
+      await assert.rejects(interrupted.tick(), error => error === fault && error.retryAfterMs === 1250);
       assert.equal(interrupted.status().processedTotal, 1);
       assert.equal(String(await f.store.getCursor(name)), String(first.seq));
       await assert.rejects(f.store.initializeReplay(TOOL.id), /cursor has progressed/);

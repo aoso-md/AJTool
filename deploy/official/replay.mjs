@@ -74,7 +74,7 @@ export async function reconcile(args) {
 }
 
 async function main() {
-  const [command, tool, revision, specCutoff] = process.argv.slice(2);
+  const [command, tool, revision] = process.argv.slice(2);
   if (!['init', 'status', 'source', 'reconcile'].includes(command) || !supported.has(tool)) throw new Error('invalid_command');
   const { TOOL, SPEC_EVENT } = await supported.get(tool)();
   const path = `../../tools/${tool.replaceAll('_', '-')}/src/platform/`;
@@ -148,7 +148,7 @@ async function main() {
     for (const [index, lane] of lanes.entries()) {
       results.push(await reconcile({
         ...sourceArgs, store, tool, lane: lane.name,
-        cutoff: index === 0 ? decision.sourceCutoff : specCutoff, page: lane.page
+        cutoff: index === 0 ? decision.sourceCutoff : decision.specCutoff, page: lane.page
       }));
     }
     const status = await replayStatus(store, tool);

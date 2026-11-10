@@ -71,9 +71,14 @@ export function createPoller ({
   async function tick () {
     // Covers fetch, specification sync and commits so another replica cannot
     // fetch a competing page. The event transaction also fences stale cursors.
-    return store.withPollerLock
-      ? store.withPollerLock(cursorName, () => consume())
-      : consume();
+    if (!store.withPollerLock) return consume();
+    let failure;
+    await store.withPollerLock(cursorName, async () => {
+      // This outer transaction holds only the lock. Preserve Core errors
+      // (including Retry-After) outside the database error classifier.
+      try { await consume(); } catch (error) { failure = { error }; }
+    });
+    if (failure) throw failure.error;
   }
 
   async function consume () {
