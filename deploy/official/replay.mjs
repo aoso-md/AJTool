@@ -55,14 +55,14 @@ export async function reconcile(args) {
       // returning payloads, IDs or error messages from the database.
       const entry = await store.getInboxRecord(tool, event.eventId);
       if (!entry) counts.missing++;
-      else if (entry.input_hash !== event.inputHash || entry.consumer !== lane) counts.mismatched++;
+      else if (entry.inputHash !== event.inputHash || entry.consumer !== lane) counts.mismatched++;
       else if (['processed', 'ignored', 'rejected'].includes(entry.outcome)) {
         counts[entry.outcome]++;
-        if (entry.study_id) {
-          const study = await store.getStudy(entry.study_id);
+        if (entry.studyId) {
+          const study = await store.getStudy(entry.studyId);
           if (study?.tool !== tool || study.inputEventId !== event.eventId) counts.missingStudy++;
         }
-        if (lane.startsWith('subscription:') && entry.outcome === 'processed' && !entry.study_id) counts.missingStudy++;
+        if (lane.startsWith('subscription:') && entry.outcome === 'processed' && !entry.studyId) counts.missingStudy++;
       } else counts.unresolved++;
   });
   const cursor = await store.getCursorState(lane);

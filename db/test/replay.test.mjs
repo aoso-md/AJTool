@@ -19,6 +19,33 @@ test('reconstruction approval is bound to the release and explicit manual-data d
   assert.ok(decisionErrors(decision, { ...scope, revision: 'b'.repeat(40) }).includes('revision_not_approved'));
 });
 
+test('reconciliation checks a second page and reports an inbox hash mismatch', async () => {
+  const events = Array.from({ length: 101 }, (_, i) => ({
+    eventId: `fixture-${i + 1}`, sourceSeq: String(i + 1), inputHash: 'fixture-hash'
+  }));
+  const lane = 'subscription:calculate_cpk_ppk';
+  const calls = [];
+  const result = await reconcile({
+    store: {
+      getCursorState: async () => ({ seq: '101' }),
+      getInboxRecord: async (tool, id) => ({
+        consumer: lane, outcome: 'ignored', inputHash: id === 'fixture-101' ? 'changed-hash' : 'fixture-hash'
+      })
+    },
+    tool: 'calculate_cpk_ppk', lane, cutoff: '101',
+    page: async (core, after) => {
+      calls.push(after);
+      return { events: events.slice(Number(after), Number(after) + 100) };
+    },
+    normalize: event => event, sequence: String
+  });
+  assert.deepEqual(calls, ['0', '100']);
+  assert.equal(result.events, 101);
+  assert.equal(result.ignored, 100);
+  assert.equal(result.mismatched, 1);
+  assert.equal(result.complete, false);
+});
+
 for (const service of ['calculate-cpk-ppk', 'run-msa-analysis']) test(service + ' PostgreSQL replay', async t => {
   const f = await fixture(service, prepare());
   const { TOOL, createCapabilityTool, createMsaTool } = await import(`../../tools/${service}/src/tool.js`);
@@ -116,7 +143,7 @@ for (const service of ['calculate-cpk-ppk', 'run-msa-analysis']) test(service + 
         page: (client, after) => client.subscription(TOOL.id, after, 100),
         normalize: raw => inboxEvent(fromCore(raw)), sequence: sequenceText
       });
-      assert.equal(result.complete, true);
+      assert.equal(result.complete, true, JSON.stringify(result));
       assert.equal(result.events, 4);
       assert.equal(result.confirmedCursor, String(duplicate.seq));
       console.log(JSON.stringify({ synthetic: true, tool: TOOL.id, events: result.events, studies: 3,
