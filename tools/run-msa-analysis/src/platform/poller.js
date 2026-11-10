@@ -69,6 +69,14 @@ export function createPoller ({
   let running = null;
 
   async function tick () {
+    // Covers fetch, specification sync and commits so another replica cannot
+    // fetch a competing page. The event transaction also fences stale cursors.
+    return store.withPollerLock
+      ? store.withPollerLock(cursorName, () => consume())
+      : consume();
+  }
+
+  async function consume () {
     status.lastPollAt = new Date().toISOString();
     if (beforeTick) await beforeTick();
 
@@ -84,6 +92,7 @@ export function createPoller ({
         : `[poll] cold start: no saved cursor — starting at the tip (seq=${cursor}); the backlog is not replayed`);
     }
 
+    status.cursor = cursor;
     let processed = 0;
     for (let page = 0; page < MAX_PAGES_PER_TICK; page += 1) {
       const { events } = await core.subscription(toolId, cursor, PAGE);
@@ -100,6 +109,8 @@ export function createPoller ({
         cursor = event.seq;
         if (!store.transactional) await store.setCursor(cursorName, cursor);
         processed += 1;
+        status.cursor = cursor;
+        status.processedTotal += 1;
       }
 
       if (events.length < PAGE) break;
@@ -109,7 +120,6 @@ export function createPoller ({
     status.lastSuccessAt = new Date().toISOString();
     status.lastError = null;
     status.lastBatch = processed;
-    status.processedTotal += processed;
     if (processed) log.info?.(`[poll] processed ${processed} event(s), cursor=${cursor}`);
   }
 

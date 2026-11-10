@@ -1,4 +1,4 @@
-Release PostgreSQL / Railway: [entrega y procedimiento vigente](docs/RELEASE-20261103.md).
+Release PostgreSQL / Railway: [procedimiento vigente de corte y replay](docs/CUTOVER-20261110.md).
 
 # AJTool — tools de calidad federadas en ORCA
 

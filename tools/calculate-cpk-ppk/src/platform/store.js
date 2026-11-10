@@ -532,6 +532,49 @@ export async function createStore ({ databaseUrl, databaseRequired = Boolean(dat
 
   return {
     transactional: state.required,
+    async withPollerLock (name, run) {
+      if (!state.required) return run();
+      return this.executeTransaction(async (client) => {
+        const { rows: [lock] } = await client.query(
+          "SELECT pg_try_advisory_xact_lock(hashtext('ajtool-poller'), hashtext($1)) AS acquired", [name]
+        );
+        if (!lock.acquired) {
+          throw Object.assign(new Error('Subscription already active'), { code: 'subscription_busy', isApplicationError: true });
+        }
+        return run(client);
+      });
+    },
+
+    async initializeReplay (tool, environment = 'production') {
+      if (!state.required) throw new Error('Replay requires PostgreSQL');
+      const name = `subscription:${tool}`;
+      return this.withPollerLock(name, async (client) => {
+        // Use the same lane lock as event transactions, including older builds.
+        await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`cursor:${name}`]);
+        const refuse = (message) => { throw Object.assign(new Error(message), { isApplicationError: true }); };
+        const { rows: [cursor] } = await client.query(
+          'SELECT seq::text, generation::text FROM public.consumer_cursors WHERE name=$1 FOR UPDATE', [name]
+        );
+        if (cursor && (cursor.seq !== '0' || cursor.generation !== '1')) refuse('Existing cursor has progressed');
+        const { rows: [prior] } = await client.query(
+          'SELECT EXISTS (SELECT 1 FROM public.event_inbox WHERE tool=$1 AND consumer=$2) AS present', [tool,name]
+        );
+        if (prior.present) refuse('Subscription inbox already contains receipts');
+        await client.query(
+          "INSERT INTO public.runtime_identity(tool,environment,publish_mode,schema_version) VALUES ($1,$2,'shadow','003') ON CONFLICT(tool) DO NOTHING",
+          [tool, environment]
+        );
+        const { rows: [identity] } = await client.query(
+          'SELECT environment,publish_mode,schema_version FROM public.runtime_identity WHERE tool=$1 FOR SHARE', [tool]
+        );
+        if (identity.publish_mode !== 'shadow' || identity.environment !== environment || identity.schema_version !== '003') {
+          refuse('Replay requires a matching shadow runtime identity');
+        }
+        if (!cursor) await client.query('INSERT INTO public.consumer_cursors(name,seq) VALUES ($1,0)', [name]);
+        return { tool, cursor: name, sequence: '0', generation: '1', inserted: !cursor };
+      });
+    },
+
     async initializeCursor (name, seq) {
       seq = sequenceText(seq);
       if (!state.required) {

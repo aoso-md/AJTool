@@ -124,7 +124,10 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
     /** Highest `seq` among these types, or null if none exist yet. Cold start. */
     async latestMaxSeq (types) {
       const { body } = await request('GET', '/events/latest', { query: { type: types } });
-      const max = body?.max_seq;
+      if (!body || !Object.hasOwn(body, 'max_seq')) {
+        throw new CoreError('Missing latest event sequence', { kind: 'protocol' });
+      }
+      const max = body.max_seq;
       return max == null ? null : sequenceValue(max);
     },
 
@@ -133,7 +136,8 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
       const { body } = await request('GET', `/events/subscriptions/${encodeURIComponent(toolId)}`, {
         query: { since_seq: sinceSeq, limit }
       });
-      return { events: body?.events || [], nextSeq: body?.next_seq ?? null };
+      if (!Array.isArray(body?.events)) throw new CoreError('Missing event page', { kind: 'protocol' });
+      return { events: body.events, nextSeq: body.next_seq ?? null };
     },
 
     /** Keyset query by type, for reference data outside our subscription. */
@@ -141,7 +145,8 @@ export function createCoreClient ({ baseUrl, apiKey, fetchImpl = globalThis.fetc
       const { body } = await request('GET', '/events', {
         query: { since_seq: sinceSeq, type: types, limit }
       });
-      return { events: body?.events || [], nextSeq: body?.next_seq ?? null };
+      if (!Array.isArray(body?.events)) throw new CoreError('Missing event page', { kind: 'protocol' });
+      return { events: body.events, nextSeq: body.next_seq ?? null };
     },
 
     async publishText (envelopeText) {

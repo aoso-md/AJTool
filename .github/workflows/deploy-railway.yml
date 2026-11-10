@@ -28,17 +28,18 @@
 name: Deploy a Railway
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
-      desplegar_todo:
-        description: "Desplegar TODAS las tools, ignorando qué cambió"
-        type: boolean
-        default: false
+      revision:
+        description: "SHA completo aprobado para este corte"
+        type: string
+        required: true
+
+permissions:
+  contents: read
 
 concurrency:
-  group: deploy-railway-${{ github.ref }}
+  group: ajtool-official-railway
   cancel-in-progress: false
 
 env:
@@ -81,60 +82,44 @@ env:
   # ═════════════════════════════════════════════════════════════════════════
 
 jobs:
-  # ── 0. Pruebas: backend + frontend de ambas tools ──────────────────────────
-  test:
-    uses: ./.github/workflows/tests.yml
-
-  # ── 1. Decidir qué se redespliega ──────────────────────────────────────────
   plan:
-    needs: test
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.pick.outputs.matrix }}
-      hay: ${{ steps.pick.outputs.hay }}
+      matrix: ${{ steps.approvals.outputs.matrix }}
     steps:
-      # `fetch-depth: 0` hace falta para poder comparar contra el commit anterior.
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          fetch-depth: 0
-
-      - id: pick
+          node-version: 22
+      - name: Instalar CLI de Railway para verificación de sólo lectura
+        run: npm i -g @railway/cli
+      - id: approvals
         env:
-          ANTES: ${{ github.event.before }}
-          TODO: ${{ inputs.desplegar_todo }}
+          APPROVED_REVISION: ${{ inputs.revision }}
+          CCP_DECISION: ${{ vars.AJTOOL_DATA_DECISION_CCP }}
+          RMA_DECISION: ${{ vars.AJTOOL_DATA_DECISION_RMA }}
+          CCP_TOKEN: ${{ secrets.RAILWAY_TOKEN_CCP }}
+          RMA_TOKEN: ${{ secrets.RAILWAY_TOKEN_RMA }}
         run: |
           set -euo pipefail
+          test "$GITHUB_SHA" = "$APPROVED_REVISION"
+          test -n "$CCP_TOKEN" && test -n "$RMA_TOKEN"
+          AJTOOL_DATA_DECISION_JSON="$CCP_DECISION" node deploy/official/check-transition-decision.mjs --tool calculate_cpk_ppk --revision "$GITHUB_SHA"
+          AJTOOL_DATA_DECISION_JSON="$RMA_DECISION" node deploy/official/check-transition-decision.mjs --tool run_msa_analysis --revision "$GITHUB_SHA"
+          RAILWAY_TOKEN="$CCP_TOKEN" railway variable list --service calculate-cpk-ppk --json 2>/dev/null | node deploy/official/check-railway-cutover.mjs calculate-cpk-ppk "$GITHUB_SHA"
+          RAILWAY_TOKEN="$RMA_TOKEN" railway variable list --service run-msa-analysis --json 2>/dev/null | node deploy/official/check-railway-cutover.mjs run-msa-analysis "$GITHUB_SHA"
+          echo "matrix=$(jq -c . <<< "$TOOLS")" >> "$GITHUB_OUTPUT"
 
-          # En el primer push a una rama, `before` son puros ceros y no hay contra
-          # qué comparar. Ante la duda se despliega todo: dejar una tool sin
-          # actualizar en silencio es peor que un build de más.
-          if [ "$TODO" = "true" ] || [ -z "$ANTES" ] || [ "$ANTES" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$ANTES^{commit}" 2>/dev/null; then
-            echo "Sin base de comparación fiable (o despliegue forzado): se despliega todo."
-            MATRIX=$(jq -c '.' <<< "$TOOLS")
-          else
-            CAMBIADOS=$(git diff --name-only "$ANTES" "${{ github.sha }}" | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            echo "Archivos cambiados: $(jq -r 'length' <<< "$CAMBIADOS")"
-            MATRIX=$(jq -c -n --argjson tools "$TOOLS" --argjson cambiados "$CAMBIADOS" '
-              [ $tools[]
-                | select( .paths | any( . as $p | $cambiados | any(startswith($p)) ) )
-              ]')
-          fi
-
-          # Nota: en jq la cadena vacía es "truthy", así que `join(...) // "ninguna"`
-          # NO caería al valor por defecto. Se comprueba la longitud explícitamente.
-          echo "A desplegar: $(jq -r 'if length == 0 then "ninguna" else [.[].name] | join(", ") end' <<< "$MATRIX")"
-          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
-          # Una matriz vacía hace fallar el job hijo, así que se salta explícitamente.
-          echo "hay=$(jq -r 'length > 0' <<< "$MATRIX")" >> "$GITHUB_OUTPUT"
-
-  # ── 2. Desplegar cada tool seleccionada ────────────────────────────────────
-  deploy:
+  test:
     needs: plan
-    if: needs.plan.outputs.hay == 'true'
+    uses: ./.github/workflows/tests.yml
+
+  deploy:
+    needs: [plan, test]
     runs-on: ubuntu-latest
     strategy:
-      # Each tool reports its own result, even when tokens share a project.
-      fail-fast: false
+      fail-fast: true
+      max-parallel: 1
       matrix:
         tool: ${{ fromJson(needs.plan.outputs.matrix) }}
 
@@ -196,4 +181,4 @@ jobs:
         env:
           AJTOOL_READY_URL: ${{ matrix.tool.ready }}
           AJTOOL_EXPECTED_TOOL: ${{ matrix.tool.toolId }}
-        run: node db/review/check-deployment-ready.mjs --url "$AJTOOL_READY_URL" --tool "$AJTOOL_EXPECTED_TOOL" --attempts 12
+        run: node db/review/check-deployment-ready.mjs --url "$AJTOOL_READY_URL" --tool "$AJTOOL_EXPECTED_TOOL" --attempts 12 --cutover

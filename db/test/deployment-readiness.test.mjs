@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readinessErrors,validateTarget} from '../review/check-deployment-ready.mjs';
+import { configurationErrors } from '../../deploy/official/check-railway-cutover.mjs';
 const good={status:'ready',tool:'calculate_cpk_ppk',auth:'open',persistence:{tier:'postgres',durable:true}};
 test('accepts only the matching official domain and tool',()=>{
   validateTarget('https://ccp.orcalabs.mx/ready','calculate_cpk_ppk');
@@ -26,4 +27,22 @@ test('rejects unavailable and malformed responses',()=>{
 });
 test('accepts durable postgres in the agreed open mode',()=>{
   assert.deepEqual(readinessErrors(good,good.tool),[]);
+});
+
+test('cutover requires durable shadow with polling disabled',()=>{
+  const cutover={...good,publish:'shadow',poller:{enabled:false}};
+  assert.deepEqual(readinessErrors(cutover,good.tool,{cutover:true}),[]);
+  assert.deepEqual(readinessErrors({...cutover,publish:'live',poller:{enabled:true}},good.tool,{cutover:true}),
+    ['expected_shadow','expected_polling_disabled']);
+});
+test('Railway preflight verifies the approved SHA and the dedicated runtime without returning values',()=>{
+  const revision='a'.repeat(40);
+  const vars={DATABASE_REQUIRED:'true',NODE_EXTRA_CA_CERTS:'/app/certs/supabase-prod-ca-2021.crt',NODE_ENV:'production',
+    AJTOOL_ENVIRONMENT:'production',CORE_PUBLISH:'shadow',POLL_ENABLED:'false',
+    RAILWAY_DOCKERFILE_PATH:'docker/calculate_cpk_ppk.Dockerfile',AJTOOL_RELEASE_REVISION:revision,
+    ISOTOOLS_API_URL:'https://example.invalid',ISOTOOLS_API_KEY:'synthetic-test-only',
+    DATABASE_URL:'postgresql://ajtool_service.lcteryhtsynrxgfpvryt:synthetic-test-only@aws-1-us-west-2.pooler.supabase.com:5432/postgres'};
+  assert.deepEqual(configurationErrors(vars,'calculate-cpk-ppk',revision),[]);
+  assert.deepEqual(configurationErrors({...vars,POLL_ENABLED:'true',DATABASE_URL:vars.DATABASE_URL.replace('ajtool_service','postgres')},'calculate-cpk-ppk',revision),
+    ['POLL_ENABLED','DATABASE_URL']);
 });

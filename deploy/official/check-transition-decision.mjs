@@ -12,6 +12,16 @@ export function decisionErrors(d,{tool,revision,now=Date.now()}){
  if(d.action==='discard_current_ram'){
   if(d.explicitlyAcceptsHistoricalLoss!==true)e.push('historical_loss_not_explicitly_accepted');
   // An approved discard never requires an impossible exporter.
+ }else if(d.action==='rebuild_from_core'){
+  if(d.historicalSourceVerified!==true || typeof d.sourceCutoff!=='string' ||
+     !/^(0|[1-9]\d{0,18})$/.test(d.sourceCutoff) || BigInt(d.sourceCutoff)>9223372036854775807n) e.push('historical_source_not_verified');
+  if(d.acceptsReconstructionDifferences!==true) e.push('reconstruction_differences_not_accepted');
+  if(typeof d.manualData?.evidenceReference!=='string'||d.manualData.evidenceReference.trim().length<8) e.push('manual_inventory_evidence_missing');
+  if(d.manualData?.action==='discard'){
+   if(d.manualData.explicitlyAcceptsLoss!==true) e.push('manual_loss_not_accepted');
+  }else if(d.manualData?.action==='preserve'){
+   if(d.manualData.restoreVerified!==true||!(/^[a-f0-9]{64}$/).test(d.manualData.manifestSha256||'')) e.push('manual_restore_not_verified');
+  }else if(d.manualData?.action!=='none_verified') e.push('manual_disposition_missing');
  }else if(d.action==='preserve_current_ram'){
   if(!d.protection?.allActiveInstancesCovered||!d.protection?.consistentCut||!d.protection?.restoreVerified)e.push('history_protection_not_verified');
   if(!/^[a-f0-9]{64}$/.test(d.protection?.manifestSha256||''))e.push('protection_manifest_hash_missing');

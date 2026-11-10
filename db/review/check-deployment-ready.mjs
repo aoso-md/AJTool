@@ -5,13 +5,15 @@ const targets=new Map([
   ['https://ccp.orcalabs.mx/ready','calculate_cpk_ppk'],
   ['https://rma.orcalabs.mx/ready','run_msa_analysis']
 ]);
-export function readinessErrors(doc,tool){
+export function readinessErrors(doc,tool,{cutover=false}={}){
   const errors=[];
   if(doc?.status!=='ready')errors.push('service_not_ready');
   if(doc?.tool!==tool)errors.push('wrong_tool');
   if(doc?.auth!=='open')errors.push('expected_open_authentication');
   if(doc?.persistence?.tier!=='postgres')errors.push('expected_postgres');
   if(doc?.persistence?.durable!==true)errors.push('storage_not_durable');
+  if(cutover&&doc?.publish!=='shadow')errors.push('expected_shadow');
+  if(cutover&&doc?.poller?.enabled!==false)errors.push('expected_polling_disabled');
   return errors;
 }
 export function validateTarget(url,tool){
@@ -28,7 +30,7 @@ async function main(){
       const response=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(5000),headers:{accept:'application/json'}});
       if(!response.ok)last=['http_'+response.status];
       else if(!(response.headers.get('content-type')||'').includes('application/json'))last=['expected_json'];
-      else last=readinessErrors(await response.json(),tool);
+      else last=readinessErrors(await response.json(),tool,{cutover:args.includes('--cutover')});
     }catch{last=['endpoint_unavailable'];}
     console.log(JSON.stringify({tool,attempt:i,accepted:last.length===0,reasons:last}));
     if(!last.length)return;
