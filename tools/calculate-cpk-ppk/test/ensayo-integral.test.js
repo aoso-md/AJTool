@@ -1,5 +1,5 @@
-// test/ensayo-integral.test.js — Verificación de Escenario 2 del Ensayo Integral IsoTools v1.3
-// Documento de referencia: PR-ORCA-ENS-001 (Versión 1.3, 22 de octubre de 2026)
+// test/ensayo-integral.test.js — Verificación de Escenario 2 del Ensayo Integral IsoTools v1.1
+// Documento de referencia: PR-ORCA-ENS-001 (Versión 1.1, 21 de octubre de 2026)
 // Escenario 2: Alta de artículo en ERP -> Ciclo de Calidad Completo (Cláusulas ISO: 7.5, 8.5.1, 9.1.3, 8.7, 10.2)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,7 +16,7 @@ const quiet = { info () {}, warn () {}, error () {} };
 // Fixtures del Escenario 2 según Sección 4.1 y 5 (Escenario 2):
 // Característica CTQ: Diámetro 25.00 mm ± 0.05 mm -> LSL = 24.95, USL = 25.05
 const SPEC_CTQ = {
-  partId: 'ENS-SKU-001',
+  partId: 'ENS-PZA-001',
   characteristicId: 'CTQ-DIAM-001',
   lsl: 24.95,
   usl: 25.05,
@@ -88,7 +88,7 @@ async function setupCpk () {
   return { core, store, client, tool, poller };
 }
 
-test('PV-2.6: Escenario 2 completo — PRODUCT_SPEC_UPDATED -> MEASUREMENTS_CAPTURED -> CAPABILITY_BELOW_TARGET', async () => {
+test('PV-2.6: tramo CPK con Core simulado — PRODUCT_SPEC_UPDATED -> MEASUREMENTS_CAPTURED -> CAPABILITY_BELOW_TARGET', async () => {
   const { core, store, poller } = await setupCpk();
   try {
     await poller.tick(); // Cold start
@@ -117,7 +117,7 @@ test('PV-2.6: Escenario 2 completo — PRODUCT_SPEC_UPDATED -> MEASUREMENTS_CAPT
     assert.equal(cpkEvt.correlation_id, measEvt.correlation_id, 'PV-2.7: Mismo correlation_id en la cadena');
 
     // Datos de calidad y trazabilidad
-    assert.equal(cpkEvt.data.partId, 'ENS-SKU-001');
+    assert.equal(cpkEvt.data.partId, 'ENS-PZA-001');
     assert.equal(cpkEvt.data.characteristicId, 'CTQ-DIAM-001');
     assert.equal(cpkEvt.data.specVersion, '1', 'Trazabilidad a la versión 1 de la especificación');
     assert.equal(cpkEvt.data.usl, 25.05);

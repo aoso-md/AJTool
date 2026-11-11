@@ -23,7 +23,7 @@ const only = process.argv.find(arg=>arg.startsWith('--only='))?.split('=')[1];
 const from = process.argv.find(arg=>arg.startsWith('--from='))?.split('=')[1];
 if (from && from !== 'supabase-adoption') throw new Error('Only the reviewed reconciliation tail can be selected');
 let reached = !from;
-const publicSuites=new Set(['durability','durability-hardening','inbox-outbox-migration','inbox-outbox-transaction','inbox-outbox-cursor','program-integration','replay','checkpoint-restart','backup-restore','supabase-adoption','supabase-compatibility','carlos-contract','startup','postgres-tls']);
+const publicSuites=new Set(['durability','durability-hardening','inbox-outbox-migration','inbox-outbox-transaction','inbox-outbox-cursor','program-integration','ensayo-v11','replay','checkpoint-restart','backup-restore','supabase-adoption','supabase-compatibility','carlos-contract','startup','postgres-tls']);
 if(only&&!publicSuites.has(only))throw new Error('Unknown or private selected suite; ORCA reference acceptance remains local/private in the original candidate.');
 if (negative && !Object.hasOwn(mutations, negative)) throw new Error('Unknown negative test fixture');
 const name = `ajtool-durability-ci-${randomBytes(8).toString('hex')}`;
@@ -85,6 +85,7 @@ try {
     ['db/test/inbox-outbox-cursor.test.mjs', 'closure-inbox-outbox-cursor.txt'],
     ['db/test/program-integration.test.mjs', 'program-integration.txt'],
     ['db/test/replay.test.mjs', 'replay.txt'],
+    ['db/test/ensayo-v11.test.mjs', 'ensayo-v11.txt'],
     ['db/test/checkpoint-restart.test.mjs', 'checkpoint-restart.txt'],
     ['db/test/backup-restore.test.mjs', 'backup-restore.txt'],
     ['db/test/supabase-adoption.test.mjs', 'supabase-adoption.txt'],

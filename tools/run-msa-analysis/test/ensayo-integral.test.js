@@ -1,5 +1,5 @@
-// test/ensayo-integral.test.js — Verificación de Escenario 1 del Ensayo Integral IsoTools v1.3
-// Documento de referencia: PR-ORCA-ENS-001 (Versión 1.3, 22 de octubre de 2026)
+// test/ensayo-integral.test.js — Verificación de Escenario 1 del Ensayo Integral IsoTools v1.1
+// Documento de referencia: PR-ORCA-ENS-001 (Versión 1.1, 21 de octubre de 2026)
 // Escenario 1: Nuevo instrumento de medición (Cláusulas ISO 9001: 7.1.5, 7.1.5.2, 9.1.3)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -107,7 +107,7 @@ test('PV-1.1 & PV-1.2: NEW_DEVICE_REGISTERED (ENS-CAL-001) -> pending study -> c
     const captureResult = await post(`/api/studies/${pending.id}/capture`, {
       studyType: 'gage_rr',
       observations: ACCEPTABLE_OBSERVATIONS,
-      notes: 'Ensayo Integral IsoTools v1.3 - Instrumento ENS-CAL-001'
+      notes: 'Ensayo Integral IsoTools v1.1 - Instrumento ENS-CAL-001'
     });
 
     assert.equal(captureResult.status, 200);
@@ -140,7 +140,7 @@ test('PV-1.1 & PV-1.2: NEW_DEVICE_REGISTERED (ENS-CAL-001) -> pending study -> c
   }
 });
 
-test('PV-1.4: Instrumento ENS-CAL-002 no aceptable publica MSA_VALIDATED con verdict=unacceptable; router rule-pkg-005 no coincide', async () => {
+test('PV-1.4: Instrumento ENS-CAL-002 no aceptable publica MSA_VALIDATED con verdict=unacceptable; predicado rule-pkg-005 no coincide', async () => {
   const { core, store, poller, post, close } = await setupMsaServer();
   try {
     await poller.tick();
@@ -156,7 +156,7 @@ test('PV-1.4: Instrumento ENS-CAL-002 no aceptable publica MSA_VALIDATED con ver
     const captureResult = await post(`/api/studies/${pending.id}/capture`, {
       studyType: 'gage_rr',
       observations: UNACCEPTABLE_OBSERVATIONS,
-      notes: 'Ensayo Integral IsoTools v1.3 - Instrumento defectuoso ENS-CAL-002'
+      notes: 'Ensayo Integral IsoTools v1.1 - Instrumento defectuoso ENS-CAL-002'
     });
 
     assert.equal(captureResult.status, 200);
@@ -186,6 +186,9 @@ test('Operaciones que no sean "register" son ignoradas (rule-pkg-004 operation==
     await poller.tick();
     core.seed(deviceEvent('ENS-CAL-003', 'update'));
     core.seed(deviceEvent('ENS-CAL-004', 'delete'));
+    const missingOperation = deviceEvent('ENS-CAL-005');
+    delete missingOperation.data.operation;
+    core.seed(missingOperation);
     await poller.tick();
 
     const studies = await store.listStudies(TOOL.id, 10);

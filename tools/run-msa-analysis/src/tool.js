@@ -201,7 +201,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
       });
     }
     const data = event.data || {};
-    if (data.operation && data.operation !== 'register') return null; // rule-pkg-004 only fires on 'register'
+    if (data.operation !== 'register') return null; // rule-pkg-004 only fires on 'register'
 
     const existing = await store.findStudyByInputEvent(TOOL.id, event.eventId);
     if (existing) return existing;
