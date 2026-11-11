@@ -223,6 +223,14 @@ export function createMsaTool ({ store, publisher, log = console }) {
       publish: { state: 'awaiting_capture' }
     });
 
+    if (!event.asset?.asset_id?.trim()) {
+      study.status = 'skipped';
+      study.reason = 'El evento no trae un asset.asset_id utilizable.';
+      study.publish = { state: 'not_required' };
+      await store.saveStudy(study);
+      return study;
+    }
+
     const embedded = normalizeObservations(data.observations ?? (Array.isArray(data.measurements) && typeof data.measurements[0] === 'object' ? data.measurements : null));
     if (embedded && embedded.length) {
       const analysis = await computeInto(study, embedded);

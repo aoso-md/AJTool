@@ -109,10 +109,14 @@ test('v1.1 MSA: capture, shadow routing evidence, reopen and reconstruction', as
   const good = event('ENS-CAL-001', 'register');
   const bad = event('ENS-CAL-002', 'register');
   const missing = event('ENS-CAL-003');
-  for (const item of [good, bad, missing]) s.fake.seed(item);
+  const unusable = event('ENS-CAL-004', 'register');
+  unusable.asset.asset_id = '';
+  for (const item of [unusable, good, bad, missing]) s.fake.seed(item);
   await db.poller.tick();
+  assert.equal((await db.store.getInboxRecord(s.id, unusable.event_id)).outcome, 'rejected');
+  assert.equal((await s.studyFor(db, unusable)).status, 'skipped');
   assert.equal((await db.store.getInboxRecord(s.id, missing.event_id)).outcome, 'ignored');
-  assert.equal((await db.store.listStudies(s.id, 20)).length, 2);
+  assert.equal((await db.store.listStudies(s.id, 20)).length, 3);
   const first = await s.studyFor(db, good);
   assert.equal(first.status, 'pending');
   const saved = await capture(db, first, acceptable, 'ENS-captura manual');
@@ -123,15 +127,15 @@ test('v1.1 MSA: capture, shadow routing evidence, reopen and reconstruction', as
   const before = [await s.evidence(db, good, saved), await s.evidence(db, bad, negative)];
 
   const reopened = await db.reopen();
-  s.fake.rows.push({ ...s.fake.rows[0], seq: 4 });
+  s.fake.rows.push({ ...s.fake.rows[1], seq: 5 });
   await reopened.poller.tick();
   const response = await fetch(`${reopened.base}/api/studies/${saved.id}`);
   assert.equal(response.status, 200);
   assert.equal((await response.json()).study.id, saved.id);
   assert.deepEqual(await reopened.store.getStudy(saved.id), saved);
   assert.deepEqual(await reopened.store.getStudy(negative.id), negative);
-  assert.equal((await reopened.store.listStudies(s.id, 20)).length, 2);
-  assert.equal(String(await reopened.store.getCursor(s.lane)), '4');
+  assert.equal((await reopened.store.listStudies(s.id, 20)).length, 3);
+  assert.equal(String(await reopened.store.getCursor(s.lane)), '5');
 
   const fresh = await s.database();
   await fresh.poller.tick();
@@ -144,7 +148,7 @@ test('v1.1 MSA: capture, shadow routing evidence, reopen and reconstruction', as
   assert.equal(recovered.outputEventId, before[0].outputEventId);
   assert.equal(s.fake.posted.length, 0);
   console.log(JSON.stringify({
-    ensayoV11: true, tool: s.id, before, reopenedCursor: '4', captures: [saved, negative].map(study => ({
+    ensayoV11: true, tool: s.id, before, reopenedCursor: '5', rejectedAsset: true, captures: [saved, negative].map(study => ({
       studyId: study.id, verdict: study.verdict, grr: study.result.gageRRPercent, ndc: study.result.ndc
     })), freshReplayPending: true, recaptured: recovered, corePosts: 0
   }));
@@ -200,11 +204,18 @@ test('v1.1 CPK: capability, spec revisions, outage, dedupe and new-event feedbac
   assert.notEqual(second.outputEventId, first.outputEventId);
   assert.equal(second.correlationId, first.correlationId);
 
+  const unusable = measurements(characteristicId, input.correlation_id, revision.event_id);
+  unusable.asset.asset_id = ' ';
+  s.fake.seed(unusable).seq = 7;
+  await db.poller.tick();
+  assert.equal((await db.store.getInboxRecord(s.id, unusable.event_id)).outcome, 'rejected');
+  assert.equal((await s.studyFor(db, unusable)).status, 'skipped');
+
   const reopened = await db.reopen();
   assert.deepEqual(await reopened.store.getStudy(saved.id), saved);
-  assert.equal(String(await reopened.store.getCursor(s.lane)), '6');
+  assert.equal(String(await reopened.store.getCursor(s.lane)), '7');
   assert.equal(s.fake.posted.length, 0);
   console.log(JSON.stringify({ ensayoV11: true, tool: s.id, first, second, reference,
     limits: { lsl: saved.spec.lsl, usl: saved.spec.usl, versions: ['1', '2'] },
-    missingSpec: 'rejected', reopenedCursor: '6', corePosts: 0 }));
+    missingSpec: 'rejected', rejectedAsset: true, reopenedCursor: '7', corePosts: 0 }));
 });

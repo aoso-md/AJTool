@@ -294,7 +294,10 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
       const measurements = numbers(data.measurements);
       const spec = await resolveSpec({ partId, characteristicId, usl: num(data.usl), lsl: num(data.lsl) });
 
-      if (!measurements) {
+      if (!event.asset?.asset_id?.trim()) {
+        study.status = 'skipped';
+        study.reason = 'El evento no trae un asset.asset_id utilizable.';
+      } else if (!measurements) {
         study.status = 'skipped';
         study.reason = 'El evento no trae un arreglo numérico `measurements`.';
       } else if (!spec) {

@@ -1,0 +1,65 @@
+{
+  "event_id": "8a000000-0000-4000-8000-000000000002",
+  "timestamp": "2026-11-11T17:00:00.000Z",
+  "platform_version": "1.0",
+  "module": {
+    "id": "collect_quality_measurements",
+    "version": "1.0.0"
+  },
+  "asset": {
+    "asset_id": "ENS-MACHINE-001",
+    "plant_id": "ENS-PLANT"
+  },
+  "event": {
+    "type": "MEASUREMENTS_CAPTURED",
+    "category": "quality",
+    "severity": "low"
+  },
+  "data": {
+    "partId": "ENS-PZA-001",
+    "characteristicId": "CTQ-DIAM-001",
+    "measurements": [
+      25,
+      25.01,
+      24.99,
+      25.02,
+      24.98,
+      25,
+      25.01,
+      24.99,
+      25.02,
+      24.98,
+      25,
+      25.01,
+      24.99,
+      25.02,
+      24.98,
+      25,
+      25.01,
+      24.99,
+      25.02,
+      24.98,
+      25,
+      25.01,
+      24.99,
+      25.02,
+      24.98,
+      25.03,
+      25.03,
+      25.04,
+      25.03,
+      25.04,
+      25.03,
+      25.04,
+      25.04,
+      25.09
+    ],
+    "passFailResult": "fail",
+    "defectsFound": 1
+  },
+  "metadata": {
+    "batch_id": "ENS-BATCH-001"
+  },
+  "correlation_id": "8a000000-0000-4000-8000-000000000003",
+  "causation_id": "8a000000-0000-4000-8000-000000000003"
+}

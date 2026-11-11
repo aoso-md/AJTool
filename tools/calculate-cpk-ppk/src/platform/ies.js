@@ -22,7 +22,7 @@ import { sequenceValue } from './reliability.js';
 // publishes anything else breaks the causal chain the ISO evidence log shows.
 //
 // The core validates with `additionalProperties: false` at the envelope level,
-// in `module`, in `asset` and in `event`. Any extra key there is a 400.
+// in `module`, in `asset` and in `event`. The reviewed Core removes those extra keys.
 // -----------------------------------------------------------------------------
 import { createHash } from 'node:crypto';
 

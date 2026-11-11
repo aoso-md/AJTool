@@ -61,7 +61,7 @@ jobs:
       - name: Migrate, validate and test PostgreSQL from scratch
         run: node db/test/run-postgres-tests.mjs
       - name: Verify deployment acceptance checks offline
-        run: node --test db/test/deployment-readiness.test.mjs db/test/postgres-transport.test.mjs db/test/migration-transition.test.mjs db/test/runtime-fingerprint.test.mjs
+        run: node --test db/test/deployment-readiness.test.mjs db/test/postgres-transport.test.mjs db/test/migration-transition.test.mjs db/test/runtime-fingerprint.test.mjs db/test/event-contracts.test.mjs
 
   tool:
     name: test ${{ matrix.tool }}

@@ -1,0 +1,45 @@
+{
+  "event_id": "1dac913f-8f15-5e1e-b4f2-0edf942b15c2",
+  "timestamp": "2026-11-11T17:05:00.000Z",
+  "platform_version": "1.0",
+  "module": {
+    "id": "calculate_cpk_ppk",
+    "version": "2.0.0"
+  },
+  "asset": {
+    "asset_id": "ENS-MACHINE-001",
+    "plant_id": "ENS-PLANT"
+  },
+  "event": {
+    "type": "CAPABILITY_BELOW_TARGET",
+    "category": "quality",
+    "severity": "high"
+  },
+  "data": {
+    "partId": "ENS-PZA-001",
+    "characteristicId": "CTQ-DIAM-001",
+    "cp": 0.8499,
+    "cpk": 0.6649,
+    "pp": 0.6933,
+    "ppk": 0.5424,
+    "sigmaLevel": 1.995,
+    "ppmDefects": 57522.1,
+    "status": "not_capable",
+    "minimumCpk": 1.33,
+    "minimumCpkSource": "default",
+    "criteriaVersion": 0,
+    "usl": 25.05,
+    "lsl": 24.95,
+    "specVersion": "1",
+    "sampleSize": 34,
+    "mean": 25.010882,
+    "sigmaWithin": 0.019611,
+    "sigmaOverall": 0.024041,
+    "studyId": "8a000000-0000-4000-8000-000000000005"
+  },
+  "metadata": {
+    "batch_id": "ENS-BATCH-001"
+  },
+  "correlation_id": "8a000000-0000-4000-8000-000000000003",
+  "causation_id": "8a000000-0000-4000-8000-000000000002"
+}
