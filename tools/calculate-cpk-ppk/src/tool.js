@@ -8,14 +8,9 @@ import { inboxEvent, transactionStore, outboxPublisher, compareSequence, manualR
 //   calculate_cpk_ppk ──CAPABILITY_BELOW_TARGET──▶ manage_product_specs          (rule-qual-005,
 //                                                   "cpk < 1.33 OR status == 'not_capable'")
 //
-// The catch: MEASUREMENTS_CAPTURED as the platform actually publishes it
-// carries `partId`, `characteristicId` and `measurements` — but NOT the spec
-// limits. Those live in PRODUCT_SPEC_UPDATED (`characteristics[].usl/lsl`), which
-// this tool does not receive through its subscription. So it keeps a spec
-// cache, filled by querying PRODUCT_SPEC_UPDATED on every poll. If a measurement
-// arrives for a characteristic with no known spec, the study is recorded as
-// SKIPPED with the reason, and nothing is published — computing capability
-// against made-up limits would be worse than computing nothing.
+// Legacy captures can omit limits and use the specification cache, which is
+// populated by querying PRODUCT_SPEC_UPDATED. CQM 1.0.0 structured captures use
+// their own specification snapshot. Captures without usable limits are skipped.
 //
 // Two ways in:
 //   platform  the poller hands us MEASUREMENTS_CAPTURED events.
@@ -59,6 +54,15 @@ function numbers (value) {
   if (!Array.isArray(value) || value.length>10000) return null;
   const out = value.map(num);
   return out.every((v) => v !== undefined) ? out : null;
+}
+
+function cqmMeasurements (observations) {
+  if (!Array.isArray(observations) || observations.length > 10000) return null;
+  const sequences = observations.map(observation => observation?.sequence);
+  if (!sequences.every(sequence => Number.isSafeInteger(sequence) && sequence >= 0)
+    || new Set(sequences).size !== sequences.length) return null;
+  const ordered = [...observations].sort((a, b) => a.sequence - b.sequence);
+  return numbers(ordered.map(observation => observation.value));
 }
 
 /** Spec limits carried by a PRODUCT_SPEC_UPDATED event (core reference shape). */
@@ -217,11 +221,11 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
     }
   }
 
-  async function resolveSpec ({ partId, characteristicId, usl, lsl }) {
+  async function resolveSpec ({ partId, characteristicId, usl, lsl, eventSnapshotOnly = false }) {
     if (usl !== undefined && lsl !== undefined) {
       return { usl, lsl, version: null, source: 'event' };
     }
-    if (!characteristicId) return null;
+    if (eventSnapshotOnly || !characteristicId) return null;
     const cached = await store.findSpec(partId, characteristicId);
     if (!cached) return null;
     return {
@@ -278,8 +282,11 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
     }
 
     const data = event.data || {};
-    const partId = data.partId == null ? null : String(data.partId);
-    const characteristicId = data.characteristicId == null ? null : String(data.characteristicId);
+    const cqmObservationPayload = data.schema_version === '1.0.0' && !Object.hasOwn(data, 'measurements');
+    const part = cqmObservationPayload ? data.part_id : data.partId;
+    const characteristic = cqmObservationPayload ? data.characteristic_id : data.characteristicId;
+    const partId = part == null ? null : String(part);
+    const characteristicId = characteristic == null ? null : String(characteristic);
     const study = newStudy({
       source: 'platform',
       inputEventId: event.eventId,
@@ -294,18 +301,27 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
     });
 
     try {
-      const measurements = numbers(data.measurements);
-      const spec = await resolveSpec({ partId, characteristicId, usl: num(data.usl), lsl: num(data.lsl) });
+      const measurements = cqmObservationPayload ? cqmMeasurements(data.observations) : numbers(data.measurements);
+      if (cqmObservationPayload && measurements) study.input = { ...data, measurements };
+      const limits = cqmObservationPayload ? data.specification : data;
+      const spec = await resolveSpec({
+        partId, characteristicId, usl: num(limits?.usl), lsl: num(limits?.lsl),
+        eventSnapshotOnly: cqmObservationPayload
+      });
 
       if (!event.asset?.asset_id?.trim()) {
         study.status = 'skipped';
         study.reason = 'El evento no trae un asset.asset_id utilizable.';
       } else if (!measurements) {
         study.status = 'skipped';
-        study.reason = 'El evento no trae un arreglo numérico `measurements`.';
+        study.reason = cqmObservationPayload
+          ? 'El evento requiere `observations` con valores numéricos y secuencias únicas válidas.'
+          : 'El evento no trae un arreglo numérico `measurements`.';
       } else if (!spec) {
         study.status = 'skipped';
-        study.reason = `No hay especificación (USL/LSL) conocida para la característica ${characteristicId ?? '(sin id)'}${partId ? ` de la pieza ${partId}` : ''}. Debe publicarse en ${SPEC_EVENT} (manage_product_specs).`;
+        study.reason = cqmObservationPayload
+          ? 'El evento requiere los límites USL y LSL en la especificación de la captura.'
+          : `No hay especificación (USL/LSL) conocida para la característica ${characteristicId ?? '(sin id)'}${partId ? ` de la pieza ${partId}` : ''}. Debe publicarse en ${SPEC_EVENT} (manage_product_specs).`;
       } else {
         study.spec = spec;
         const { analysis, criteria } = await analyzeUnderCriteria({ measurements, spec, characteristicId, explicit: num(data.minimumCpk) });
