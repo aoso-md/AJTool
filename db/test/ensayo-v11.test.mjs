@@ -119,11 +119,27 @@ test('v1.1 MSA: capture, shadow routing evidence, reopen and reconstruction', as
   assert.equal((await db.store.listStudies(s.id, 20)).length, 3);
   const first = await s.studyFor(db, good);
   assert.equal(first.status, 'pending');
+  const preview = observations => fetch(`${db.base}/api/studies/preview`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ observations })
+  });
+  assert.equal((await preview(acceptable.slice(1))).status, 422);
+  const reviewed = await preview(acceptable);
+  assert.equal(reviewed.status, 200);
+  const previewResult = (await reviewed.json()).result;
+  assert.deepEqual(await db.store.getStudy(first.id), first);
+  assert.equal(s.fake.posted.length, 0);
   const saved = await capture(db, first, acceptable, 'ENS-captura manual');
+  assert.deepEqual(saved.result, previewResult);
   const negative = await capture(db, await s.studyFor(db, bad), unacceptable, 'ENS-caso negativo');
   assert.equal(saved.verdict, 'acceptable');
   assert.ok(saved.result.gageRRPercent < 10 && saved.result.ndc >= 5);
   assert.equal(negative.verdict, 'unacceptable');
+  // The test models the intended downstream effect, not the deployed CCC.
+  // Both envelopes remain valid and could be delivered by type.
+  const validSpc = [saved, negative].map(study => study.publish.event)
+    .filter(event => event.data.verdict === 'acceptable');
+  assert.deepEqual(validSpc.map(event => event.data.gaugeId), ['ENS-CAL-001']);
   const before = [await s.evidence(db, good, saved), await s.evidence(db, bad, negative)];
 
   const reopened = await db.reopen();
@@ -211,11 +227,43 @@ test('v1.1 CPK: capability, spec revisions, outage, dedupe and new-event feedbac
   assert.equal((await db.store.getInboxRecord(s.id, unusable.event_id)).outcome, 'rejected');
   assert.equal((await s.studyFor(db, unusable)).status, 'skipped');
 
+  const feedbackOutputs = [first.outputEventId, second.outputEventId];
+  for (let round = 0; round < 3; round += 1) {
+    const seq = 8 + round * 3;
+    const change = spec(String(round + 3), input.correlation_id, feedbackOutputs.at(-1));
+    const count = (await db.store.listStudies(s.id, 20)).length;
+    s.fake.seed(change).seq = seq;
+    await db.poller.tick();
+    assert.equal((await db.store.listStudies(s.id, 20)).length, count, 'spec alone never produces an alert');
+    const fresh = measurements(characteristicId, input.correlation_id, change.event_id);
+    const row = s.fake.seed(fresh);
+    row.seq = seq + 1;
+    s.fake.rows.push({ ...row, seq: seq + 2 });
+    await db.poller.tick();
+    assert.equal((await db.store.listStudies(s.id, 20)).length, count + 1, 'fresh identity can re-trigger; retry cannot');
+    const receipt = await s.evidence(db, fresh, await s.studyFor(db, fresh));
+    assert.equal(receipt.correlationId, first.correlationId);
+    assert.ok(!feedbackOutputs.includes(receipt.outputEventId));
+    feedbackOutputs.push(receipt.outputEventId);
+  }
+
+  const capable = measurements(characteristicId, input.correlation_id, revision.event_id);
+  capable.data.measurements = [24.999, 25, 25.001, 25, 24.999, 25.001];
+  capable.data.defectsFound = 0;
+  s.fake.seed(capable).seq = 17;
+  await db.poller.tick();
+  const noAlert = await s.studyFor(db, capable);
+  assert.equal(noAlert.result.status, 'capable');
+  assert.equal(noAlert.publish.state, 'not_required');
+  assert.ok(!noAlert.publish.eventId);
+
   const reopened = await db.reopen();
   assert.deepEqual(await reopened.store.getStudy(saved.id), saved);
-  assert.equal(String(await reopened.store.getCursor(s.lane)), '7');
+  assert.deepEqual(await reopened.store.getStudy(noAlert.id), noAlert);
+  assert.equal(String(await reopened.store.getCursor(s.lane)), '17');
   assert.equal(s.fake.posted.length, 0);
   console.log(JSON.stringify({ ensayoV11: true, tool: s.id, first, second, reference,
     limits: { lsl: saved.spec.lsl, usl: saved.spec.usl, versions: ['1', '2'] },
-    missingSpec: 'rejected', rejectedAsset: true, reopenedCursor: '7', corePosts: 0 }));
+    missingSpec: 'rejected', rejectedAsset: true, reopenedCursor: '17', corePosts: 0,
+    feedbackOutputs, capable: { studyId: noAlert.id, inputEventId: capable.event_id, cpk: noAlert.result.cpk, alert: false } }));
 });

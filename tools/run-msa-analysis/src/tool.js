@@ -183,12 +183,13 @@ export function createMsaTool ({ store, publisher, log = console }) {
 
   // ── Platform path ──────────────────────────────────────────────────────────
   async function processEvent (event, context = {}) {
+    const expectedSource = event.type === 'NEW_DEVICE_REGISTERED' && event.module?.id === 'manage_device_registry';
     if (store.transactional) {
       return store.processEventTransaction({
         tool: TOOL.id, consumer: context.cursor?.name || `subscription:${TOOL.id}`,
         event: inboxEvent(event), cursor: context.cursor,
         handler: async (tx) => {
-          if (event.type !== 'NEW_DEVICE_REGISTERED' || event.module?.id !== 'manage_device_registry') {
+          if (!expectedSource) {
             tx.reject({ code: 'invalid_event_source', reason: 'Unexpected event type or producing module' });
             return null;
           }
@@ -200,6 +201,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
         }
       });
     }
+    if (!expectedSource) return null;
     const data = event.data || {};
     if (data.operation !== 'register') return null; // rule-pkg-004 only fires on 'register'
 
@@ -212,6 +214,7 @@ export function createMsaTool ({ store, publisher, log = console }) {
       status: 'pending',
       reason: 'Equipo registrado: falta capturar el estudio Gage R&R.',
       inputEventId: event.eventId,
+      inputModuleId: event.module.id,
       inputSeq: event.seq,
       correlationId: event.correlationId,
       gaugeId,
@@ -352,15 +355,21 @@ export function createMsaTool ({ store, publisher, log = console }) {
     // whose publish failed. Signed by the person in session.
     api.post('/studies/:id/publish', requireQuality, manualRoute({ store, tool: TOOL.id, publisher, factory: createMsaTool, method: 'publishStudy', actorOf, log }));
 
-    // Machine plane: compute synchronously, no side effects.
-    api.post('/invoke', async (req, res) => {
-      const event = fromCore(req.body || {});
-      const observations = normalizeObservations(event.data?.observations ?? event.data?.measurements);
+    async function sendPreview (res, rawObservations) {
+      const observations = normalizeObservations(rawObservations);
       if (!observations) return res.status(422).json({ error: 'invalid_input', detail: 'observations' });
       const now = await settings.current();
       const analysis = analyzeGageRR(observations, now.value);
       if (!analysis.ok) return res.status(422).json({ error: 'invalid_input', errors: analysis.errors });
       return res.json({ result: analysis.result, criteria: { version: now.version, ...now.value }, warnings: analysis.warnings, wouldPublish: 'MSA_VALIDATED' });
+    }
+
+    api.post('/studies/preview', requireQuality, (req, res) => sendPreview(res, req.body?.observations));
+
+    // Machine plane: compute synchronously, no side effects.
+    api.post('/invoke', (req, res) => {
+      const event = fromCore(req.body || {});
+      return sendPreview(res, event.data?.observations ?? event.data?.measurements);
     });
   }
 

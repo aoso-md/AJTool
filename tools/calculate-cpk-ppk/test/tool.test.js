@@ -19,6 +19,7 @@ const spec = (characteristicId, usl, lsl, version, partId = 'PART-001') => produ
 });
 const measured = (characteristicId, measurements, partId = 'PART-001') => producedEvent({
   type: 'MEASUREMENTS_CAPTURED',
+  moduleId: 'collect_quality_measurements',
   data: { partId, characteristicId, measurements, passFailResult: 'pass', defectsFound: 0 },
   asset: { asset_id: 'LINE-2-ST-4', plant_id: 'plant_01', line_id: 'line_2' }
 });
@@ -116,7 +117,7 @@ test('limits carried inside the measurement event take precedence over the cache
   try {
     await poller.tick();
     core.seed(spec('CHAR-X', 100, 0, 1));
-    core.seed(producedEvent({ type: 'MEASUREMENTS_CAPTURED', data: { characteristicId: 'CHAR-X', measurements: [10, 12, 10, 12], usl: 14, lsl: 8 } }));
+    core.seed(producedEvent({ type: 'MEASUREMENTS_CAPTURED', moduleId: 'collect_quality_measurements', data: { characteristicId: 'CHAR-X', measurements: [10, 12, 10, 12], usl: 14, lsl: 8 } }));
     await poller.tick();
     const [study] = await store.listStudies(TOOL.id, 1);
     assert.equal(study.spec.source, 'event');

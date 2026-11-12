@@ -19,7 +19,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-const ESCALATABLE = new Set(['awaiting_decision', 'failed', 'shadow', 'retrying']);
+const ESCALATABLE = new Set(['awaiting_decision', 'failed', 'retrying']);
 
 export function StudyPage({ id }: { id: string }) {
   const { data, error, loading, reload } = useResource(() => api.get<{ study: CpkStudy }>(`/api/studies/${id}`), [id]);

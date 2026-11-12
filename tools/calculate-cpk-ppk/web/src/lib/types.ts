@@ -24,7 +24,7 @@ export interface PublishInfo {
   at?: string;
   error?: string;
   status?: number | null;
-  event?: unknown;
+  event?: { event?: { type?: string }; correlation_id?: string; causation_id?: string | null };
 }
 
 export type PriorityLevel = 'critical' | 'high' | 'medium' | 'low';
@@ -70,6 +70,7 @@ export interface StudyBase {
   actor: Actor | null;
   publishedBy?: Actor | null;
   inputEventId: string | null;
+  inputModuleId?: string;
   inputSeq?: number | string | null;
   correlationId?: string | null;
   notes?: string | null;
@@ -88,7 +89,7 @@ export interface PollerStatus {
   reason: string | null;
   state: 'stopped' | 'disabled' | 'polling' | 'idle' | 'backoff' | 'error';
   consumes: string[];
-  cursor: number | null;
+  cursor: number | string | null;
   coldStart: { at: string; seq: number } | null;
   lastPollAt: string | null;
   lastSuccessAt: string | null;

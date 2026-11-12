@@ -2,11 +2,11 @@ import { useMemo, useState, type ClipboardEvent, type FormEvent } from 'react';
 import { Calculator } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { Button, ErrorState, Field, Input, Loading, Mono, Panel, Select } from '../components/primitives';
-import { actorLabel } from '../components/StudyMeta';
+import { Warnings, actorLabel } from '../components/StudyMeta';
 import { useResource } from '../lib/useResource';
 import { api } from '../lib/api';
 import { navigate } from '../lib/router';
-import type { MsaStudy, Observation } from '../lib/domain';
+import { fmt, type GageResult, type MsaStudy, type Observation } from '../lib/domain';
 
 const key = (part: number, op: string, trial: number) => `${part}|${op}|${trial}`;
 
@@ -29,6 +29,8 @@ export function CapturePage({ pendingId }: { pendingId?: string }) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [preview, setPreview] = useState<{ signature: string; result: GageResult; warnings: string[] } | null>(null);
   const [commandKey] = useState(()=>crypto.randomUUID());
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -93,25 +95,33 @@ export function CapturePage({ pendingId }: { pendingId?: string }) {
     if (next) {event.preventDefault();next.focus();next.select();}
   }
 
+  const observations: Observation[] = partIndexes.flatMap((part) => columns.map(({ op, trial }) => {
+    const raw = (values[key(part, op, trial)] ?? '').trim();
+    return { partId: `P${part}`, operatorId: op, trial, value: raw === '' ? NaN : Number(raw) };
+  }));
+  const ready = designOk && Boolean(effectiveGauge) && filled === total;
+  const signature = JSON.stringify({ gaugeId: effectiveGauge, observations });
+  const reviewed = ready && preview?.signature === signature ? preview : null;
+
+  async function calculatePreview() {
+    if (!ready || busy || previewing) return;
+    setErrors([]);
+    setPreview(null);
+    setPreviewing(true);
+    try {
+      const result = await api.post<{ result: GageResult; warnings: string[] }>('/api/studies/preview', { observations });
+      setPreview({ ...result, signature });
+    } catch (error) {
+      setErrors([error instanceof Error ? error.message : String(error)]);
+    } finally {
+      setPreviewing(false);
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (!reviewed || busy || previewing) return;
     setErrors([]);
-    if (!designOk || !effectiveGauge) {
-      setErrors(['Identifique el equipo y use 2 o 3 operadores distintos, 2–3 ensayos y 2–10 piezas.']);
-      document.getElementById('msa-operators')?.focus();
-      return;
-    }
-    const observations: Observation[] = [];
-    for (const p of partIndexes) {
-      for (const c of columns) {
-        const raw = (values[key(p, c.op, c.trial)] ?? '').trim();
-        observations.push({ partId: `P${p}`, operatorId: c.op, trial: c.trial, value: raw === '' ? NaN : Number(raw) });
-      }
-    }
-    if (observations.some(o=>!Number.isFinite(o.value))) {
-      setErrors(['Complete todas las celdas con números finitos antes de guardar.']);
-      document.querySelector<HTMLInputElement>('input[data-invalid="true"]')?.focus();return;
-    }
     setBusy(true);
     try {
       const body = { studyType: 'gage_rr', observations, notes: notes.trim() || undefined };
@@ -134,18 +144,35 @@ export function CapturePage({ pendingId }: { pendingId?: string }) {
         title={study ? `Estudio Gage R&R · ${study.gaugeId}` : 'Estudio Gage R&R'}
         description={
           study
-            ? 'Al guardar se calcula y se registra la intención de envío MSA_VALIDATED. En modo sombra no se transmite al Core.'
-            : 'Para un equipo que no llegó por la plataforma (por ejemplo, un re-estudio periódico). Se guarda; publicarlo es un paso aparte.'
+            ? 'Revise el cálculo antes de guardar. El estudio guardado registra MSA_VALIDATED según el modo de publicación.'
+            : 'Revise el cálculo antes de guardar. Para un estudio manual, publicar es un paso aparte.'
         }
         actions={
-          <Button type="submit" variant="primary" loading={busy} disabled={!designOk || filled !== total || !effectiveGauge}>
-            <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
-            {study ? 'Calcular y registrar envío' : 'Calcular y guardar'}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={() => void calculatePreview()} loading={previewing} disabled={!ready || busy}>
+              <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
+              Revisar cálculo
+            </Button>
+            <Button type="submit" variant="primary" loading={busy} disabled={!reviewed || previewing}>
+              Guardar estudio
+            </Button>
+          </div>
         }
       />
 
-      {errors.length > 0 && <ErrorState title="El estudio no se pudo calcular" detail={errors.join(' · ')} />}
+      {errors.length > 0 && <ErrorState title="No se pudo completar la acción" detail={errors.join(' · ')} />}
+
+      {reviewed && (
+        <Panel title="Resultado previo">
+          <div role="status" className="space-y-2 px-4 py-3 text-2xs">
+            <p>%GRR <Mono>{fmt(reviewed.result.gageRRPercent, 2)}</Mono> · ndc <Mono>{reviewed.result.ndc}</Mono> · {{
+              acceptable: 'Aceptable', marginal: 'Marginal', unacceptable: 'No aceptable',
+            }[reviewed.result.verdict]}</p>
+            <Warnings items={reviewed.warnings} />
+            <p className="text-muted">Al guardar se recalcula con los criterios vigentes.</p>
+          </div>
+        </Panel>
+      )}
 
       <Panel title="Diseño del estudio" subtitle="Método AIAG de promedios y rangos: 2–3 operadores, 2–3 ensayos, 2–10 piezas">
         <div className="grid gap-4 px-4 py-3 md:grid-cols-4">

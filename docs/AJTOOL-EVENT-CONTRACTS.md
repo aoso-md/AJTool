@@ -2,6 +2,12 @@
 
 **Referencia:** PR-ORCA-ENS-001, *Ensayo Integral IsoTools v1.1*, 21 de octubre de 2026. Se revisó el código autorizado de Core `feature/filter` en `564d78f41389aedafb47695849ec12f5af2a8197` y se comparó con [AJTool PR 4](https://github.com/aoso-md/AJTool/pull/4). El SHA identifica el Core de referencia. La revisión desplegada y los DTO de los servicios federados de terceros no se certificaron.
 
+## Evidencia funcional del 11/11
+
+Carlos reportó que el registro MDR aparece en Core y que el instrumento llegó a MSA. César reportó que CQM generó MEASUREMENTS_CAPTURED. Faltan los JSON saneados para comprobar la entrega real por ID, productor y causalidad. El [estado funcional](AJTOOL-INTEGRATION-STATUS.md) registra estos avances y el procedimiento conjunto.
+
+AJTool ahora valida el productor y el tipo también en RAM. MSA ofrece un cálculo previo sin escritura con el mismo motor y el guardado conserva la traza. Se probaron el caso CPK capaz sin alerta y tres rondas simuladas de realimentación con IDs nuevos y duplicados. La conclusión sobre CCC y el corte federado sigue pendiente de evidencia desplegada.
+
 ## Matriz de compatibilidad
 
 **PASS** significa que el tramo de AJTool se reprodujo con el validador de referencia o el Core simulado, según se indica. **FAIL** es un comportamiento incompatible observado. **BLOCKED** indica que falta evidencia del servicio federado real.

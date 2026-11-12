@@ -19,7 +19,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-const PUBLISHABLE = new Set(['awaiting_decision', 'failed', 'retrying', 'shadow']);
+const PUBLISHABLE = new Set(['awaiting_decision', 'failed', 'retrying']);
 
 /** The captured readings, read-only: part of the retained evidence of the study. */
 function Readings({ study }: { study: MsaStudy }) {

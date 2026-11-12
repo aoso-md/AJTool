@@ -247,12 +247,13 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
 
   // ── Platform path ──────────────────────────────────────────────────────────
   async function processEvent (event, context = {}) {
+    const expectedSource = event.type === 'MEASUREMENTS_CAPTURED' && event.module?.id === 'collect_quality_measurements';
     if (store.transactional) {
       return store.processEventTransaction({
         tool: TOOL.id, consumer: context.cursor?.name || `subscription:${TOOL.id}`,
         event: inboxEvent(event), cursor: context.cursor,
         handler: async (tx) => {
-          if (event.type !== 'MEASUREMENTS_CAPTURED' || event.module?.id !== 'collect_quality_measurements') {
+          if (!expectedSource) {
             tx.reject({ code: 'invalid_event_source', reason: 'Unexpected event type or producing module' });
             return null;
           }
@@ -264,6 +265,7 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
         }
       });
     }
+    if (!expectedSource) return null;
     const existing = await store.findStudyByInputEvent(TOOL.id, event.eventId);
     if (existing) {
       if (DONE_STATES.has(existing.publish?.state) || existing.status !== 'completed') return existing;
@@ -281,6 +283,7 @@ export function createCapabilityTool ({ store, core, publisher, log = console })
     const study = newStudy({
       source: 'platform',
       inputEventId: event.eventId,
+      inputModuleId: event.module.id,
       inputSeq: event.seq,
       correlationId: event.correlationId,
       asset: event.asset,

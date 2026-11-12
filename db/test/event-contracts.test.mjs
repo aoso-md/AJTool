@@ -83,8 +83,16 @@ for (const [service, inputType, outputType] of [
     malformedData.event_id = '8a000000-0000-4000-8000-000000000007';
     if (createMsaTool) delete malformedData.data.operation;
     else malformedData.data.measurements[0] = { value: 25 };
+    const wrongProducer = structuredClone(input);
+    wrongProducer.event_id = '8a000000-0000-4000-8000-000000000008';
+    wrongProducer.module.id = 'wrong-producer';
+    const wrongType = structuredClone(input);
+    wrongType.event_id = '8a000000-0000-4000-8000-000000000009';
+    wrongType.event.type = inputType + '_TYPO';
     fake.seed(blankAsset);
     fake.seed(malformedData);
+    fake.seed(wrongProducer);
+    fake.seed(wrongType);
     const row = fake.seed(input);
     await poller.tick();
     const rejected = await store.findStudyByInputEvent(TOOL.id, blankAsset.event_id);
@@ -98,6 +106,8 @@ for (const [service, inputType, outputType] of [
       assert.equal(other.publish.state, 'not_required');
     }
 
+    assert.ok(!await store.findStudyByInputEvent(TOOL.id, wrongProducer.event_id));
+    assert.ok(!await store.findStudyByInputEvent(TOOL.id, wrongType.event_id));
     const study = await store.findStudyByInputEvent(TOOL.id, input.event_id);
     assert.equal(study.status, 'completed');
     assert.equal(study.publish.state, 'shadow');
