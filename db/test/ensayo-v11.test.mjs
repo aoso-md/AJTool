@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture, prepare, quiet } from './helpers/isolated-postgres.mjs';
+import { container, docker, fixture, prepare, quiet } from './helpers/isolated-postgres.mjs';
 import { startFakeCore, producedEvent, validateCoreEvent } from '../../tools/calculate-cpk-ppk/test/helpers/fake-core.js';
 
 const readings = [
@@ -47,12 +47,18 @@ async function setup(t, service) {
   }
 
   async function database() {
-    const f = await fixture(service, prepare());
+    const remote = prepare();
+    const f = await fixture(service, remote);
     cleanup.push(() => f.close());
     await f.store.initializeReplay(TOOL.id);
     const app = await connect(f.store);
     return {
       ...app,
+      trace(eventId) {
+        const { stdout } = docker(['exec', container, 'psql', '-XqAt', '-U', f.role, '-d', f.db,
+          '-v', `tool=${TOOL.id}`, '-v', `event_id=${eventId}`, '-f', `${remote}/review/trace-orca-event.sql`]);
+        return JSON.parse(stdout);
+      },
       async reopen() {
         await app.stopHttp();
         const reopened = await f.createStore({ databaseUrl: f.url, log: quiet });
@@ -119,6 +125,20 @@ test('v1.1 MSA: capture, shadow routing evidence, reopen and reconstruction', as
   assert.equal((await db.store.listStudies(s.id, 20)).length, 3);
   const first = await s.studyFor(db, good);
   assert.equal(first.status, 'pending');
+  const pendingTrace = db.trace(good.event_id);
+  assert.equal(pendingTrace.input.producer, 'manage_device_registry');
+  assert.equal(pendingTrace.input.seq, '2');
+  assert.equal(pendingTrace.input.outcome, 'processed');
+  assert.equal(pendingTrace.study.gauge_id, 'ENS-CAL-001');
+  assert.equal(pendingTrace.study.status, 'pending');
+  assert.deepEqual(pendingTrace.outputs, []);
+  const rejectedTrace = db.trace(unusable.event_id);
+  assert.equal(rejectedTrace.input.outcome, 'rejected');
+  assert.equal(rejectedTrace.input.rejection_code, 'invalid_business_input');
+  assert.deepEqual(rejectedTrace.outputs, []);
+  const missingTrace = db.trace("missing'event");
+  assert.equal(missingTrace.input.received, null);
+  assert.equal(missingTrace.study, null);
   const preview = observations => fetch(`${db.base}/api/studies/preview`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ observations })
@@ -141,6 +161,17 @@ test('v1.1 MSA: capture, shadow routing evidence, reopen and reconstruction', as
     .filter(event => event.data.verdict === 'acceptable');
   assert.deepEqual(validSpc.map(event => event.data.gaugeId), ['ENS-CAL-001']);
   const before = [await s.evidence(db, good, saved), await s.evidence(db, bad, negative)];
+  const outputTrace = db.trace(before[0].outputEventId);
+  assert.equal(outputTrace.input.event_id, good.event_id);
+  assert.equal(outputTrace.study.status, 'completed');
+  assert.equal(outputTrace.runtime_mode, 'shadow');
+  assert.equal(outputTrace.subscription_cursor, '4');
+  assert.deepEqual(outputTrace.outputs, [{
+    event_id: before[0].outputEventId, type: 'MSA_VALIDATED',
+    correlation_id: good.correlation_id, causation_id: good.event_id,
+    mode: 'shadow', state: 'shadow_recorded', attempts: 0, error_class: null
+  }]);
+  assert.ok(!JSON.stringify(outputTrace).includes('observations'));
 
   const reopened = await db.reopen();
   s.fake.rows.push({ ...s.fake.rows[1], seq: 5 });
@@ -256,6 +287,11 @@ test('v1.1 CPK: capability, spec revisions, outage, dedupe and new-event feedbac
   assert.equal(noAlert.result.status, 'capable');
   assert.equal(noAlert.publish.state, 'not_required');
   assert.ok(!noAlert.publish.eventId);
+  const capableTrace = db.trace(capable.event_id);
+  assert.equal(capableTrace.input.producer, 'collect_quality_measurements');
+  assert.equal(capableTrace.input.outcome, 'processed');
+  assert.equal(capableTrace.study.publication_state, 'not_required');
+  assert.deepEqual(capableTrace.outputs, []);
 
   const reopened = await db.reopen();
   assert.deepEqual(await reopened.store.getStudy(saved.id), saved);
