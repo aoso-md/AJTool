@@ -337,7 +337,7 @@ export function CriteriaEditor(props: CriteriaEditorProps) {
             Descartar cambios
           </Button>
         )}
-        <Button variant="primary" disabled={readOnly || !dirty || !valid} loading={previewing} onClick={() => void review()}>
+        <Button data-criteria-preview variant="primary" disabled={readOnly || !dirty || !valid} loading={previewing} onClick={() => void review()}>
           Revisar cambios…
         </Button>
       </div>
@@ -369,6 +369,7 @@ export function CriteriaEditor(props: CriteriaEditorProps) {
       {preview && (
         <Dialog
           title="Confirmar cambio de criterios"
+          returnFocusTo="[data-criteria-preview]"
           subtitle="Revise el efecto antes de aplicarlo. Quedará registrado a su nombre."
           busy={applying}
           onClose={() => setPreview(null)}

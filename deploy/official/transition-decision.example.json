@@ -1,0 +1,11 @@
+{
+  "tool": "calculate_cpk_ppk",
+  "revision": "REPLACE_WITH_REVIEWED_40_HEX_SHA",
+  "action": "pending",
+  "approvedBy": null,
+  "approvedAtUtc": null,
+  "evidenceReference": null,
+  "productionChangeApproved": false,
+  "explicitlyAcceptsHistoricalLoss": false,
+  "protection": {"allActiveInstancesCovered": false, "consistentCut": false, "restoreVerified": false, "manifestSha256": null, "evidenceReference": null}
+}

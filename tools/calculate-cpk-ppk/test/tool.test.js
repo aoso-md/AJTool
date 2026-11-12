@@ -19,6 +19,7 @@ const spec = (characteristicId, usl, lsl, version, partId = 'PART-001') => produ
 });
 const measured = (characteristicId, measurements, partId = 'PART-001') => producedEvent({
   type: 'MEASUREMENTS_CAPTURED',
+  moduleId: 'collect_quality_measurements',
   data: { partId, characteristicId, measurements, passFailResult: 'pass', defectsFound: 0 },
   asset: { asset_id: 'LINE-2-ST-4', plant_id: 'plant_01', line_id: 'line_2' }
 });
@@ -95,6 +96,66 @@ test('a capable process is recorded but NOT published (core rule only routes bel
   }
 });
 
+test('CQM 1.0.0 uses ordered observations and the captured specification in shadow', async () => {
+  const { core, store, poller } = await setup({ mode: 'shadow' });
+  try {
+    await poller.tick();
+    core.seed(spec('CHAR-DIAM', 20, 0, 99));
+    const observations = [
+      { sequence: 3, value: 11 }, { sequence: 1, value: 9 },
+      { sequence: 4, value: 10 }, { sequence: 2, value: 10 }
+    ];
+    const input = data => producedEvent({
+      type: 'MEASUREMENTS_CAPTURED',
+      moduleId: 'collect_quality_measurements',
+      data: {
+        schema_version: '1.0.0', part_id: 'PART-001', characteristic_id: 'CHAR-DIAM',
+        specification: { lsl: 9, usl: 11, unit: 'mm', nominal: 10 },
+        inspection_plan_version: 7, ...data
+      }
+    });
+    const sufficient = input({ observations });
+    const single = input({ observations: [observations[0]] });
+    const ambiguous = input({ observations: [observations[0], { sequence: 3, value: 9 }] });
+    const incompleteSpec = input({ observations, specification: { usl: 11 } });
+    for (const event of [sufficient, single, ambiguous, incompleteSpec]) core.seed(event);
+    await poller.tick();
+
+    const saved = await store.findStudyByInputEvent(TOOL.id, sufficient.event_id);
+    assert.equal(saved.status, 'completed');
+    assert.equal(saved.partId, 'PART-001');
+    assert.equal(saved.characteristicId, 'CHAR-DIAM');
+    assert.deepEqual(saved.input.observations, observations);
+    assert.deepEqual(saved.input.measurements, [9, 10, 11, 10]);
+    assert.deepEqual(saved.spec, { usl: 11, lsl: 9, version: null, source: 'event' });
+    assert.deepEqual(
+      [saved.result.cp, saved.result.cpk, saved.result.pp, saved.result.ppk],
+      [0.376, 0.376, 0.4082, 0.4082]
+    );
+    assert.equal(saved.publish.state, 'shadow');
+    assert.equal(saved.publish.event.data.specVersion, null);
+    assert.equal(saved.publish.event.causation_id, sufficient.event_id);
+    assert.equal(saved.publish.event.correlation_id, sufficient.correlation_id);
+
+    const tooSmall = await store.findStudyByInputEvent(TOOL.id, single.event_id);
+    assert.equal(tooSmall.status, 'skipped');
+    assert.match(tooSmall.reason, /al menos 2 mediciones/);
+    assert.equal(tooSmall.publish.state, 'not_required');
+    const duplicateSequence = await store.findStudyByInputEvent(TOOL.id, ambiguous.event_id);
+    assert.equal(duplicateSequence.status, 'skipped');
+    assert.match(duplicateSequence.reason, /observations/);
+    assert.equal(duplicateSequence.publish.state, 'not_required');
+    const missingLimit = await store.findStudyByInputEvent(TOOL.id, incompleteSpec.event_id);
+    assert.equal(missingLimit.status, 'skipped');
+    assert.match(missingLimit.reason, /especificación de la captura/);
+    assert.equal(missingLimit.publish.state, 'not_required');
+    assert.equal(core.posted.length, 0);
+  } finally {
+    await store.close();
+    await core.close();
+  }
+});
+
 test('no known spec: the study is SKIPPED with the reason, and nothing is published', async () => {
   const { core, store, poller } = await setup();
   try {
@@ -116,7 +177,7 @@ test('limits carried inside the measurement event take precedence over the cache
   try {
     await poller.tick();
     core.seed(spec('CHAR-X', 100, 0, 1));
-    core.seed(producedEvent({ type: 'MEASUREMENTS_CAPTURED', data: { characteristicId: 'CHAR-X', measurements: [10, 12, 10, 12], usl: 14, lsl: 8 } }));
+    core.seed(producedEvent({ type: 'MEASUREMENTS_CAPTURED', moduleId: 'collect_quality_measurements', data: { characteristicId: 'CHAR-X', measurements: [10, 12, 10, 12], usl: 14, lsl: 8 } }));
     await poller.tick();
     const [study] = await store.listStudies(TOOL.id, 1);
     assert.equal(study.spec.source, 'event');

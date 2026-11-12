@@ -21,6 +21,16 @@ npm-debug.log*
 docker-compose*.yml
 archive
 docs
-db
+db/**
+!db/review/
+db/review/**
+!db/review/certs/
+db/review/certs/**
+!db/review/certs/supabase-prod-ca-2021.crt
+artifacts
+deploy
 
 # Do NOT add tools/*/web, tools/*/src or the lockfiles: they ARE build input.
+
+# Private ORCA reference acceptance is not part of the public release.
+.private-tests/

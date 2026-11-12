@@ -1,0 +1,22 @@
+name: ajtool-analytics-local-20261028
+services:
+  dashboard:
+    build:
+      context: ../..
+      dockerfile: analytics/deploy/Dockerfile
+    image: ajtool-private-analytics:20261028
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp]
+    env_file: ../../.env.quality-intelligence/reader.env
+    environment:
+      ANALYTICS_MODE: local-synthetic
+    ports: ["127.0.0.1:30110:30110"]
+    volumes: ["../../.env.quality-intelligence:/private"]
+    networks: [staging,access]
+networks:
+  staging:
+    external: true
+    name: ajtool-polish-local-20261027_data
+  access: {}

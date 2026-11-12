@@ -1,0 +1,484 @@
+{
+  "scope": "synthetic data, loopback Core simulator, RAM, shadow",
+  "cases": {
+    "run_msa_analysis": {
+      "acceptable": {
+        "input": {
+          "event_id": "23ff4808-41a4-4cad-b6c3-1b0cb6552a8c",
+          "timestamp": "2026-11-12T16:29:29.596Z",
+          "platform_version": "1.0",
+          "module": {
+            "id": "manage_device_registry",
+            "version": "1.0.0"
+          },
+          "asset": {
+            "asset_id": "ENS-UI-CAL"
+          },
+          "event": {
+            "type": "NEW_DEVICE_REGISTERED",
+            "category": "quality",
+            "severity": "low"
+          },
+          "data": {
+            "operation": "register",
+            "gaugeId": "ENS-UI-CAL"
+          },
+          "metadata": {
+            "shift": "A"
+          },
+          "correlation_id": "23ff4808-41a4-4cad-b6c3-1b0cb6552a8c",
+          "causation_id": null
+        },
+        "seq": "1",
+        "studyId": "13a114ef-1443-433b-9337-390401dd57e7",
+        "studyStatus": "completed",
+        "publicationState": "shadow",
+        "output": {
+          "event_id": "d95a54f4-2273-5a7f-864b-29380ecaacbd",
+          "timestamp": "2026-11-12T16:29:30.571Z",
+          "platform_version": "1.0",
+          "module": {
+            "id": "run_msa_analysis",
+            "version": "2.0.0"
+          },
+          "asset": {
+            "asset_id": "ENS-UI-CAL"
+          },
+          "event": {
+            "type": "MSA_VALIDATED",
+            "category": "quality",
+            "severity": "low"
+          },
+          "data": {
+            "gaugeId": "ENS-UI-CAL",
+            "studyType": "gage_rr",
+            "gageRRPercent": 0.94,
+            "repeatability": 0.001329,
+            "reproducibility": 0,
+            "ndc": 149,
+            "verdict": "acceptable",
+            "method": "AIAG average & range",
+            "parts": 2,
+            "appraisers": 2,
+            "trials": 2,
+            "partVariation": 0.140713,
+            "totalVariation": 0.140719,
+            "contributionPercent": 0.01,
+            "acceptanceCriteria": {
+              "grrAcceptable": 10,
+              "grrMarginal": 30,
+              "minNdc": 5
+            },
+            "criteriaVersion": 0,
+            "studyId": "13a114ef-1443-433b-9337-390401dd57e7"
+          },
+          "metadata": {
+            "shift": "A",
+            "operator_id": "local-dev"
+          },
+          "correlation_id": "23ff4808-41a4-4cad-b6c3-1b0cb6552a8c",
+          "causation_id": "23ff4808-41a4-4cad-b6c3-1b0cb6552a8c"
+        }
+      },
+      "unacceptable": {
+        "input": {
+          "event_id": "19a99437-5737-45aa-ae08-3d612da64907",
+          "timestamp": "2026-11-12T16:29:30.797Z",
+          "platform_version": "1.0",
+          "module": {
+            "id": "manage_device_registry",
+            "version": "1.0.0"
+          },
+          "asset": {
+            "asset_id": "ENS-UI-CAL-RUIDOSO"
+          },
+          "event": {
+            "type": "NEW_DEVICE_REGISTERED",
+            "category": "quality",
+            "severity": "low"
+          },
+          "data": {
+            "operation": "register",
+            "gaugeId": "ENS-UI-CAL-RUIDOSO"
+          },
+          "metadata": {
+            "shift": "A"
+          },
+          "correlation_id": "19a99437-5737-45aa-ae08-3d612da64907",
+          "causation_id": null
+        },
+        "seq": "2",
+        "studyId": "bcf4fa76-7a51-4d83-8e89-c0e828f50d70",
+        "studyStatus": "completed",
+        "publicationState": "shadow",
+        "output": {
+          "event_id": "06d8831f-2092-5cde-92a7-118deb19bafc",
+          "timestamp": "2026-11-12T16:29:30.801Z",
+          "platform_version": "1.0",
+          "module": {
+            "id": "run_msa_analysis",
+            "version": "2.0.0"
+          },
+          "asset": {
+            "asset_id": "ENS-UI-CAL-RUIDOSO"
+          },
+          "event": {
+            "type": "MSA_VALIDATED",
+            "category": "quality",
+            "severity": "high"
+          },
+          "data": {
+            "gaugeId": "ENS-UI-CAL-RUIDOSO",
+            "studyType": "gage_rr",
+            "gageRRPercent": 99.91,
+            "repeatability": 0.420945,
+            "reproducibility": 0,
+            "ndc": 0,
+            "verdict": "unacceptable",
+            "method": "AIAG average & range",
+            "parts": 2,
+            "appraisers": 2,
+            "trials": 2,
+            "partVariation": 0.017677,
+            "totalVariation": 0.421316,
+            "contributionPercent": 99.82,
+            "acceptanceCriteria": {
+              "grrAcceptable": 10,
+              "grrMarginal": 30,
+              "minNdc": 5
+            },
+            "criteriaVersion": 0,
+            "studyId": "bcf4fa76-7a51-4d83-8e89-c0e828f50d70"
+          },
+          "metadata": {
+            "shift": "A",
+            "operator_id": "local-dev"
+          },
+          "correlation_id": "19a99437-5737-45aa-ae08-3d612da64907",
+          "causation_id": "19a99437-5737-45aa-ae08-3d612da64907"
+        },
+        "observations": [
+          {
+            "partId": "P1",
+            "operatorId": "A",
+            "trial": 1,
+            "value": 24.8
+          },
+          {
+            "partId": "P1",
+            "operatorId": "A",
+            "trial": 2,
+            "value": 25.3
+          },
+          {
+            "partId": "P1",
+            "operatorId": "B",
+            "trial": 1,
+            "value": 24.7
+          },
+          {
+            "partId": "P1",
+            "operatorId": "B",
+            "trial": 2,
+            "value": 25.4
+          },
+          {
+            "partId": "P2",
+            "operatorId": "A",
+            "trial": 1,
+            "value": 25.1
+          },
+          {
+            "partId": "P2",
+            "operatorId": "A",
+            "trial": 2,
+            "value": 24.9
+          },
+          {
+            "partId": "P2",
+            "operatorId": "B",
+            "trial": 1,
+            "value": 25.3
+          },
+          {
+            "partId": "P2",
+            "operatorId": "B",
+            "trial": 2,
+            "value": 24.8
+          }
+        ]
+      },
+      "acceptableObservations": [
+        {
+          "partId": "P1",
+          "operatorId": "A",
+          "trial": 1,
+          "value": 25.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "A",
+          "trial": 2,
+          "value": 25.002
+        },
+        {
+          "partId": "P1",
+          "operatorId": "B",
+          "trial": 1,
+          "value": 25.001
+        },
+        {
+          "partId": "P1",
+          "operatorId": "B",
+          "trial": 2,
+          "value": 25.003
+        },
+        {
+          "partId": "P2",
+          "operatorId": "A",
+          "trial": 1,
+          "value": 25.2
+        },
+        {
+          "partId": "P2",
+          "operatorId": "A",
+          "trial": 2,
+          "value": 25.201
+        },
+        {
+          "partId": "P2",
+          "operatorId": "B",
+          "trial": 1,
+          "value": 25.202
+        },
+        {
+          "partId": "P2",
+          "operatorId": "B",
+          "trial": 2,
+          "value": 25.203
+        }
+      ],
+      "invalidPreviewStatus": 422,
+      "invalidPreviewErrors": [
+        "El estudio no tiene observaciones."
+      ],
+      "previewNoWrite": true,
+      "stalePreviewBlocked": true,
+      "dedupe": true,
+      "corePosts": 0
+    },
+    "calculate_cpk_ppk": {
+      "spec": {
+        "event_id": "8a000000-0000-4000-8000-000000000003",
+        "timestamp": "2026-11-12T16:29:31.688Z",
+        "platform_version": "1.0",
+        "module": {
+          "id": "manage_product_specs",
+          "version": "1.0.0"
+        },
+        "asset": {
+          "asset_id": "LINE-2-ST-4",
+          "plant_id": "plant_01"
+        },
+        "event": {
+          "type": "PRODUCT_SPEC_UPDATED",
+          "category": "quality",
+          "severity": "low"
+        },
+        "data": {
+          "partId": "ENS-PZA-001",
+          "characteristics": [
+            {
+              "id": "CTQ-DIAM-001",
+              "lsl": 24.95,
+              "usl": 25.05,
+              "version": "1"
+            }
+          ]
+        },
+        "metadata": {
+          "shift": "A"
+        },
+        "correlation_id": "8a000000-0000-4000-8000-000000000003",
+        "causation_id": null
+      },
+      "belowTarget": {
+        "input": {
+          "event_id": "8a000000-0000-4000-8000-000000000002",
+          "timestamp": "2026-11-11T17:00:00.000Z",
+          "platform_version": "1.0",
+          "module": {
+            "id": "collect_quality_measurements",
+            "version": "1.0.0"
+          },
+          "asset": {
+            "asset_id": "ENS-MACHINE-001",
+            "plant_id": "ENS-PLANT"
+          },
+          "event": {
+            "type": "MEASUREMENTS_CAPTURED",
+            "category": "quality",
+            "severity": "low"
+          },
+          "data": {
+            "partId": "ENS-PZA-001",
+            "characteristicId": "CTQ-DIAM-001",
+            "measurements": [
+              25,
+              25.01,
+              24.99,
+              25.02,
+              24.98,
+              25,
+              25.01,
+              24.99,
+              25.02,
+              24.98,
+              25,
+              25.01,
+              24.99,
+              25.02,
+              24.98,
+              25,
+              25.01,
+              24.99,
+              25.02,
+              24.98,
+              25,
+              25.01,
+              24.99,
+              25.02,
+              24.98,
+              25.03,
+              25.03,
+              25.04,
+              25.03,
+              25.04,
+              25.03,
+              25.04,
+              25.04,
+              25.09
+            ],
+            "passFailResult": "fail",
+            "defectsFound": 1
+          },
+          "metadata": {
+            "batch_id": "ENS-BATCH-001"
+          },
+          "correlation_id": "8a000000-0000-4000-8000-000000000003",
+          "causation_id": "8a000000-0000-4000-8000-000000000003"
+        },
+        "seq": "2",
+        "studyId": "788f0ef5-a027-4a05-b1ef-3193c0cc1688",
+        "studyStatus": "completed",
+        "publicationState": "shadow",
+        "output": {
+          "event_id": "1dac913f-8f15-5e1e-b4f2-0edf942b15c2",
+          "timestamp": "2026-11-12T16:29:31.690Z",
+          "platform_version": "1.0",
+          "module": {
+            "id": "calculate_cpk_ppk",
+            "version": "2.0.0"
+          },
+          "asset": {
+            "asset_id": "ENS-MACHINE-001",
+            "plant_id": "ENS-PLANT"
+          },
+          "event": {
+            "type": "CAPABILITY_BELOW_TARGET",
+            "category": "quality",
+            "severity": "high"
+          },
+          "data": {
+            "partId": "ENS-PZA-001",
+            "characteristicId": "CTQ-DIAM-001",
+            "cp": 0.8499,
+            "cpk": 0.6649,
+            "pp": 0.6933,
+            "ppk": 0.5424,
+            "sigmaLevel": 1.995,
+            "ppmDefects": 57522.1,
+            "status": "not_capable",
+            "minimumCpk": 1.33,
+            "minimumCpkSource": "default",
+            "criteriaVersion": 0,
+            "usl": 25.05,
+            "lsl": 24.95,
+            "specVersion": "1",
+            "sampleSize": 34,
+            "mean": 25.010882,
+            "sigmaWithin": 0.019611,
+            "sigmaOverall": 0.024041,
+            "studyId": "788f0ef5-a027-4a05-b1ef-3193c0cc1688"
+          },
+          "metadata": {
+            "batch_id": "ENS-BATCH-001"
+          },
+          "correlation_id": "8a000000-0000-4000-8000-000000000003",
+          "causation_id": "8a000000-0000-4000-8000-000000000002"
+        }
+      },
+      "capable": {
+        "input": {
+          "event_id": "5ac1abf6-e136-42c7-b435-1923f9af3043",
+          "timestamp": "2026-11-12T16:29:32.169Z",
+          "platform_version": "1.0",
+          "module": {
+            "id": "collect_quality_measurements",
+            "version": "1.0.0"
+          },
+          "asset": {
+            "asset_id": "LINE-2-ST-4",
+            "plant_id": "plant_01"
+          },
+          "event": {
+            "type": "MEASUREMENTS_CAPTURED",
+            "category": "quality",
+            "severity": "low"
+          },
+          "data": {
+            "partId": "ENS-PZA-001",
+            "characteristicId": "CTQ-DIAM-001",
+            "measurements": [
+              24.999,
+              25,
+              25.001,
+              25,
+              24.999,
+              25.001
+            ],
+            "defectsFound": 0
+          },
+          "metadata": {
+            "shift": "A"
+          },
+          "correlation_id": "5ac1abf6-e136-42c7-b435-1923f9af3043",
+          "causation_id": null
+        },
+        "seq": "3",
+        "studyId": "2a2fcdea-5d3f-4afc-ae73-442193330d29",
+        "studyStatus": "completed",
+        "publicationState": "not_required",
+        "output": null,
+        "spec": {
+          "usl": 25.05,
+          "lsl": 24.95,
+          "version": "1",
+          "source": "spec_cache",
+          "sourceEventId": "8a000000-0000-4000-8000-000000000003",
+          "partId": "ENS-PZA-001"
+        },
+        "result": {
+          "cp": 15.6667,
+          "cpk": 15.6667,
+          "pp": 18.6339,
+          "ppk": 18.6339,
+          "minimumCpk": 1.33,
+          "sampleSize": 6,
+          "status": "capable"
+        }
+      },
+      "corePosts": 0
+    }
+  }
+}

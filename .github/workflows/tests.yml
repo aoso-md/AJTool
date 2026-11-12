@@ -1,5 +1,5 @@
 # .github/workflows/tests.yml
-# Backend tests + frontend typecheck/build for both tools. Runs on every pull
+# Backend/PostgreSQL tests + frontend typecheck/build. Runs on every pull
 # request, and is called by deploy-railway.yml so nothing deploys on red.
 name: Tests
 
@@ -8,6 +8,61 @@ on:
   workflow_call:
 
 jobs:
+  analytics:
+    name: Private analytics (Node 22)
+    runs-on: ubuntu-latest
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: corepack enable
+      - name: Analytics server authorization and query contracts
+        working-directory: analytics
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm test
+      - name: Analytics frontend typecheck and build
+        working-directory: analytics/web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+  postgres:
+    name: PostgreSQL ${{ matrix.postgres }} durability (Node 22)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: [16, 17]
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+      AJTOOL_TEST_EVIDENCE: artifacts/postgres-${{ matrix.postgres }}
+      AJTOOL_TEST_POSTGRES_IMAGE: postgres:${{ matrix.postgres }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: corepack enable
+      - name: Install locked backend dependencies
+        run: |
+          (cd tools/calculate-cpk-ppk && pnpm install --frozen-lockfile)
+          (cd tools/run-msa-analysis && pnpm install --frozen-lockfile)
+      # PostgreSQL acceptance includes real UI routes; jobs do not share dist/.
+      - name: Build the UI served by PostgreSQL acceptance
+        run: |
+          (cd tools/calculate-cpk-ppk/web && pnpm install --frozen-lockfile && pnpm run build)
+          (cd tools/run-msa-analysis/web && pnpm install --frozen-lockfile && pnpm run build)
+      # Docker is available on ubuntu-latest; the runner creates and removes
+      # its own loopback-only PostgreSQL 16/17 container, including outage tests.
+      - name: Migrate, validate and test PostgreSQL from scratch
+        run: node db/test/run-postgres-tests.mjs
+      - name: Verify deployment acceptance checks offline
+        run: node --test db/test/deployment-readiness.test.mjs db/test/postgres-transport.test.mjs db/test/migration-transition.test.mjs db/test/runtime-fingerprint.test.mjs db/test/event-contracts.test.mjs
+
   tool:
     name: test ${{ matrix.tool }}
     runs-on: ubuntu-latest
@@ -25,13 +80,13 @@ jobs:
       # pnpm at the exact version of `packageManager` in each package.json.
       - run: corepack enable
 
-      - name: Backend — install and test
+      - name: Backend â€” install and test
         working-directory: tools/${{ matrix.tool }}
         run: |
           pnpm install --frozen-lockfile
           pnpm test
 
-      - name: Frontend — typecheck and build
+      - name: Frontend â€” typecheck and build
         working-directory: tools/${{ matrix.tool }}/web
         run: |
           pnpm install --frozen-lockfile

@@ -1,0 +1,545 @@
+{
+  "gaugeId": "DEMO-MICROMETER",
+  "observations": [
+    {
+      "partId": "P1",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.0
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.001
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.002
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.002
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.003
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.004
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.004
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.005
+    },
+    {
+      "partId": "P1",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.006
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.02
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.021
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.022
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.022
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.023
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.024
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.024
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.025
+    },
+    {
+      "partId": "P2",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.026
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.04
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.041
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.042
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.042
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.043
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.044
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.044
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.045
+    },
+    {
+      "partId": "P3",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.046
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.06
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.061
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.062
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.062
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.063
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.064
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.064
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.065
+    },
+    {
+      "partId": "P4",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.066
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.08
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.081
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.082
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.082
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.083
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.084
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.084
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.085
+    },
+    {
+      "partId": "P5",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.086
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.1
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.101
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.102
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.102
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.103
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.104
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.104
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.105
+    },
+    {
+      "partId": "P6",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.106
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.12
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.121
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.122
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.122
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.123
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.124
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.124
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.125
+    },
+    {
+      "partId": "P7",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.126
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.14
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.141
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.142
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.142
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.143
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.144
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.144
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.145
+    },
+    {
+      "partId": "P8",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.146
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.16
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.161
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.162
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.162
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.163
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.164
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.164
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.165
+    },
+    {
+      "partId": "P9",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.166
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O1",
+      "trial": 1,
+      "value": 10.18
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O1",
+      "trial": 2,
+      "value": 10.181
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O1",
+      "trial": 3,
+      "value": 10.182
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O2",
+      "trial": 1,
+      "value": 10.182
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O2",
+      "trial": 2,
+      "value": 10.183
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O2",
+      "trial": 3,
+      "value": 10.184
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O3",
+      "trial": 1,
+      "value": 10.184
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O3",
+      "trial": 2,
+      "value": 10.185
+    },
+    {
+      "partId": "P10",
+      "operatorId": "O3",
+      "trial": 3,
+      "value": 10.186
+    }
+  ]
+}

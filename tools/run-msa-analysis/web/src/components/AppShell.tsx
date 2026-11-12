@@ -79,7 +79,7 @@ export function AppShell({
   return (
     <div className="flex min-h-full flex-col bg-bg text-text">
       <header className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-3">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-6 py-3">
           {dashboardUrl && (
             <a
               href={dashboardUrl}
@@ -91,10 +91,10 @@ export function AppShell({
             </a>
           )}
           {icon && <span className="shrink-0 text-brass">{icon}</span>}
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-sm font-medium leading-tight text-text">{tool}</h1>
+          <div className="min-w-0 basis-[calc(100%-3rem)] sm:basis-auto sm:flex-1">
+            <h1 className="break-words text-sm font-medium leading-snug text-text">{tool}</h1>
             {/* Mono para la clausula: es una referencia normativa, se cita literal. */}
-            <p className="truncate font-mono text-2xs text-faint">ISO 9001:2015 · {clause}</p>
+            <p className="mt-0.5 break-words font-mono text-2xs text-muted">ISO 9001:2015 · {clause}</p>
           </div>
           <HealthChip online={online} />
           <SessionChip session={session} />
@@ -114,7 +114,7 @@ export function AppShell({
       {/* max-w-6xl: el ancho de lectura de la plataforma. Una tabla a 2560px de
           ancho separa tanto la primera columna de la ultima que deja de leerse
           como una fila. */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl min-w-0 flex-1 px-4 sm:px-6 py-6">{children}</main>
     </div>
   );
 }
@@ -174,7 +174,7 @@ function SessionChip({ session }: { session: SessionInfo | null }) {
     if (session.mode !== 'open') return null;
     return (
       <span className="inline-flex shrink-0 items-center rounded-md border border-warn/40 bg-warn/10 px-2.5 py-1 text-2xs text-warn">
-        SSO desactivado · desarrollo
+        Autenticación abierta
       </span>
     );
   }

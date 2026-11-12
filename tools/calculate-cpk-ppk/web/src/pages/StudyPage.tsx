@@ -1,3 +1,4 @@
+import { CapabilityPlots } from '../components/CapabilityPlots';
 import { useState, type ReactNode } from 'react';
 import { ArrowLeft, Send } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
@@ -11,14 +12,14 @@ import { fmt, metricTone, verdictChip, type CpkStudy } from '../lib/domain';
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[12rem_1fr] gap-3 border-b border-border/60 px-4 py-2 text-2xs last:border-0">
-      <dt className="text-faint">{label}</dt>
-      <dd className="min-w-0 text-text">{children}</dd>
+    <div className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)] sm:grid-cols-[12rem_minmax(0,1fr)] gap-3 border-b border-border/60 px-4 py-2 text-2xs last:border-0">
+      <dt className="text-muted">{label}</dt>
+      <dd className="min-w-0 break-words text-text">{children}</dd>
     </div>
   );
 }
 
-const ESCALATABLE = new Set(['awaiting_decision', 'failed', 'shadow', 'retrying']);
+const ESCALATABLE = new Set(['awaiting_decision', 'failed', 'retrying']);
 
 export function StudyPage({ id }: { id: string }) {
   const { data, error, loading, reload } = useResource(() => api.get<{ study: CpkStudy }>(`/api/studies/${id}`), [id]);
@@ -86,6 +87,7 @@ export function StudyPage({ id }: { id: string }) {
             <Metric label="Pp" value={fmt(r.pp, 3)} hint="potencial de largo plazo" />
           </div>
           <Warnings items={s.warnings} />
+          <CapabilityPlots values={s.input?.measurements ?? []} lsl={r.lsl} usl={r.usl} />
         </>
       )}
 
@@ -126,7 +128,7 @@ export function StudyPage({ id }: { id: string }) {
         )}
         <Panel
           title="Criterios aplicados"
-          subtitle="Con los que se juzgó este estudio; no cambian aunque los criterios se modifiquen después"
+          subtitle={r ? "Con los que se juzgó este estudio; no cambian aunque los criterios se modifiquen después" : "No se aplicaron criterios: este estudio no tiene un resultado calculado."}
           actions={<Link to="/criterios">Ver criterios vigentes</Link>}
         >
           <dl>
@@ -139,10 +141,10 @@ export function StudyPage({ id }: { id: string }) {
                     ? 'excepción de esta característica'
                     : s.criteria?.minimumCpkSource === 'default'
                       ? 'valor general vigente'
-                      : 'registro anterior a los criterios configurables'}
+                      : r ? 'registro anterior a los criterios configurables' : 'no evaluado; sin resultado calculado'}
               </span>
             </Row>
-            <Row label="Límite de «marginal»"><Mono>{r?.marginalFloor ?? (s.criteria?.marginalFloor as number | undefined) ?? 1}</Mono></Row>
+            <Row label="Límite de «marginal»"><Mono>{r?.marginalFloor ?? (s.criteria?.marginalFloor as number | undefined) ?? (r ? 1 : '—')}</Mono></Row>
             <Row label="Versión de criterios"><Mono>{s.criteria?.version != null ? `v${s.criteria.version}` : '—'}</Mono></Row>
           </dl>
         </Panel>

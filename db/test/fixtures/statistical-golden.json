@@ -1,0 +1,8744 @@
+{
+  "method": "Existing MR(2)/sample-SD capability and AIAG Average & Range; 60-digit independent Decimal arithmetic",
+  "cpk": [
+    {
+      "name": "centered-individuals",
+      "input": {
+        "measurements": [
+          10,
+          10.02,
+          9.99,
+          10.01,
+          10,
+          9.98,
+          10.01,
+          10.02
+        ],
+        "lsl": 9.9,
+        "usl": 10.1
+      },
+      "expected": {
+        "mean": 10.00375,
+        "sigmaOverall": 0.014078859531733589,
+        "sigmaWithin": 0.01773049645390071,
+        "cp": 1.88,
+        "cpk": 1.8095,
+        "pp": 2.3676160173485914,
+        "ppk": 2.2788304166980193
+      }
+    },
+    {
+      "name": "drifting-individuals",
+      "input": {
+        "measurements": [
+          10.0,
+          10.01,
+          10.02,
+          10.03,
+          10.04,
+          10.05,
+          10.06,
+          10.07,
+          10.08,
+          10.09,
+          10.1,
+          10.11,
+          10.12,
+          10.13,
+          10.14,
+          10.15,
+          10.16,
+          10.17,
+          10.18,
+          10.19,
+          10.2,
+          10.21,
+          10.22,
+          10.23,
+          10.24,
+          10.25,
+          10.26,
+          10.27,
+          10.28,
+          10.29
+        ],
+        "lsl": 9.9,
+        "usl": 10.4
+      },
+      "expected": {
+        "mean": 10.145,
+        "sigmaOverall": 0.08803408430829504,
+        "sigmaWithin": 0.008865248226950355,
+        "cp": 9.4,
+        "cpk": 9.212,
+        "pp": 0.9466030570784414,
+        "ppk": 0.9276709959368725
+      }
+    },
+    {
+      "name": "off-center-out-of-spec",
+      "input": {
+        "measurements": [
+          9.8,
+          10,
+          10.2,
+          10.1,
+          10.3
+        ],
+        "lsl": 9.95,
+        "usl": 10.05
+      },
+      "expected": {
+        "mean": 10.08,
+        "sigmaOverall": 0.19235384061671346,
+        "sigmaWithin": 0.1551418439716312,
+        "cp": 0.10742857142857143,
+        "cpk": -0.06445714285714285,
+        "pp": 0.08664587415167273,
+        "ppk": -0.051987524491003634
+      }
+    }
+  ],
+  "msa": [
+    {
+      "name": "2x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0013429907036163727,
+        "partVariation": 0.14142,
+        "grr": 0.0016090290457291317,
+        "totalVariation": 0.14142915319858915,
+        "gageRRPercent": 1.1376926251335164,
+        "contributionPercent": 0.01294344509283192,
+        "ndc": 123
+      }
+    },
+    {
+      "name": "2x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0013293852764843356,
+        "partVariation": 0.14142,
+        "grr": 0.0017786072566289988,
+        "totalVariation": 0.1414311841277352,
+        "gageRRPercent": 1.2575778585171353,
+        "contributionPercent": 0.015815020702325443,
+        "ndc": 112
+      }
+    },
+    {
+      "name": "2x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0020449450237109063,
+        "partVariation": 0.14142,
+        "grr": 0.002228710521804032,
+        "totalVariation": 0.14143756060746382,
+        "gageRRPercent": 1.5757557697063536,
+        "contributionPercent": 0.02483006245762863,
+        "ndc": 89
+      }
+    },
+    {
+      "name": "2x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0020360356905843604,
+        "partVariation": 0.14142,
+        "grr": 0.0023540645474016495,
+        "totalVariation": 0.141439591415888,
+        "gageRRPercent": 1.6643603985533122,
+        "contributionPercent": 0.0277009553627254,
+        "ndc": 84
+      }
+    },
+    {
+      "name": "3x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0013671393125793728,
+        "partVariation": 0.20924,
+        "grr": 0.0016292391905426288,
+        "totalVariation": 0.20924634290792277,
+        "gageRRPercent": 0.778622540256086,
+        "contributionPercent": 0.006062530601948403,
+        "ndc": 181
+      }
+    },
+    {
+      "name": "3x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.001358245445009439,
+        "partVariation": 0.20924,
+        "grr": 0.0018002803250852042,
+        "totalVariation": 0.20924774457386366,
+        "gageRRPercent": 0.8603582938260594,
+        "contributionPercent": 0.007402163937552881,
+        "ndc": 163
+      }
+    },
+    {
+      "name": "3x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.002060884766307908,
+        "partVariation": 0.20924,
+        "grr": 0.0022433449266664276,
+        "totalVariation": 0.2092520255492405,
+        "gageRRPercent": 1.0720779981833586,
+        "contributionPercent": 0.011493512341888374,
+        "ndc": 131
+      }
+    },
+    {
+      "name": "3x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.002054995573934136,
+        "partVariation": 0.20924,
+        "grr": 0.002370482096302119,
+        "totalVariation": 0.20925342717711673,
+        "gageRRPercent": 1.1328283260544596,
+        "contributionPercent": 0.012833000163113492,
+        "ndc": 124
+      }
+    },
+    {
+      "name": "4x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.001379055051475466,
+        "partVariation": 0.26802,
+        "grr": 0.0016392508273598645,
+        "totalVariation": 0.26802501290602526,
+        "gageRRPercent": 0.6116036744431078,
+        "contributionPercent": 0.0037405905459231103,
+        "ndc": 230
+      }
+    },
+    {
+      "name": "4x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0013724479686555212,
+        "partVariation": 0.26802,
+        "grr": 0.0018110195986423413,
+        "totalVariation": 0.26802611848845376,
+        "gageRRPercent": 0.6756877310523592,
+        "contributionPercent": 0.004565539098946853,
+        "ndc": 208
+      }
+    },
+    {
+      "name": "4x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0020688085834605387,
+        "partVariation": 0.26802,
+        "grr": 0.0022506264450148097,
+        "totalVariation": 0.26802944935099016,
+        "gageRRPercent": 0.8396937166660248,
+        "contributionPercent": 0.007050855378084022,
+        "ndc": 167
+      }
+    },
+    {
+      "name": "4x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.606
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0020644102176327907,
+        "partVariation": 0.26802,
+        "grr": 0.002378648378106076,
+        "totalVariation": 0.26803055491511907,
+        "gageRRPercent": 0.8874541855346886,
+        "contributionPercent": 0.007875749314230374,
+        "ndc": 158
+      }
+    },
+    {
+      "name": "5x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0013861553289584829,
+        "partVariation": 0.3224,
+        "grr": 0.0016452285664915985,
+        "totalVariation": 0.32240419782787566,
+        "gageRRPercent": 0.5102999829332089,
+        "contributionPercent": 0.0026040607258163324,
+        "ndc": 276
+      }
+    },
+    {
+      "name": "5x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0013808993697345703,
+        "partVariation": 0.3224,
+        "grr": 0.0018174327028347799,
+        "totalVariation": 0.32240512257349346,
+        "gageRRPercent": 0.5637108642467333,
+        "contributionPercent": 0.0031776993846979905,
+        "ndc": 250
+      }
+    },
+    {
+      "name": "5x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.002073548339441355,
+        "partVariation": 0.3224,
+        "grr": 0.0022549840700102517,
+        "totalVariation": 0.3224078859971573,
+        "gageRRPercent": 0.6994196382746463,
+        "contributionPercent": 0.00489187830404237,
+        "ndc": 201
+      }
+    },
+    {
+      "name": "5x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.606
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.806
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0020700384511726667,
+        "partVariation": 0.3224,
+        "grr": 0.0023835347174592054,
+        "totalVariation": 0.32240881073219657,
+        "gageRRPercent": 0.7392895721572101,
+        "contributionPercent": 0.0054654907150039084,
+        "ndc": 190
+      }
+    },
+    {
+      "name": "6x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0013908687105546663,
+        "partVariation": 0.3742,
+        "grr": 0.0016492016886966857,
+        "totalVariation": 0.3742036342236804,
+        "gageRRPercent": 0.4407230550066958,
+        "contributionPercent": 0.00194236811214435,
+        "ndc": 319
+      }
+    },
+    {
+      "name": "6x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.001386505017821589,
+        "partVariation": 0.3742,
+        "grr": 0.0018216955630523022,
+        "totalVariation": 0.3742044341997091,
+        "gageRRPercent": 0.48681827273059025,
+        "contributionPercent": 0.002369920306643954,
+        "ndc": 289
+      }
+    },
+    {
+      "name": "6x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.002076702166898277,
+        "partVariation": 0.3742,
+        "grr": 0.0022578844811017235,
+        "totalVariation": 0.3742068118598725,
+        "gageRRPercent": 0.60337877599813,
+        "contributionPercent": 0.003640659473250015,
+        "ndc": 233
+      }
+    },
+    {
+      "name": "6x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.606
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.806
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.006
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0020737821207746114,
+        "partVariation": 0.3742,
+        "grr": 0.002386786719513171,
+        "totalVariation": 0.3742076118291081,
+        "gageRRPercent": 0.6378242034807033,
+        "contributionPercent": 0.0040681971454579365,
+        "ndc": 221
+      }
+    },
+    {
+      "name": "7x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0013942256560542845,
+        "partVariation": 0.42408,
+        "grr": 0.0016520337829475523,
+        "totalVariation": 0.4240832177953049,
+        "gageRRPercent": 0.38955415202139654,
+        "contributionPercent": 0.0015175243735710932,
+        "ndc": 361
+      }
+    },
+    {
+      "name": "7x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0013904952163408067,
+        "partVariation": 0.42408,
+        "grr": 0.0018247343660562395,
+        "totalVariation": 0.4240839257216744,
+        "gageRRPercent": 0.4302767106654756,
+        "contributionPercent": 0.0018513804774110143,
+        "ndc": 327
+      }
+    },
+    {
+      "name": "7x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0020789519715472024,
+        "partVariation": 0.42408,
+        "grr": 0.0022599539243090775,
+        "totalVariation": 0.42408602168869,
+        "gageRRPercent": 0.532899885572755,
+        "contributionPercent": 0.0028398228804345535,
+        "ndc": 264
+      }
+    },
+    {
+      "name": "7x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.606
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.806
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.006
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.206
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0020764520381329945,
+        "partVariation": 0.42408,
+        "grr": 0.0023891068679878402,
+        "totalVariation": 0.42408672961037897,
+        "gageRRPercent": 0.5633533664641625,
+        "contributionPercent": 0.0031736701550650497,
+        "ndc": 250
+      }
+    },
+    {
+      "name": "8x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0013967380704699075,
+        "partVariation": 0.4725,
+        "grr": 0.0016541546715769962,
+        "totalVariation": 0.4725028954701521,
+        "gageRRPercent": 0.35008349947381195,
+        "contributionPercent": 0.0012255845660383048,
+        "ndc": 402
+      }
+    },
+    {
+      "name": "8x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.404
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0013934803670426553,
+        "partVariation": 0.4725,
+        "grr": 0.0018270101514040182,
+        "totalVariation": 0.4725035322260494,
+        "gageRRPercent": 0.3866659245480438,
+        "contributionPercent": 0.001495105372065935,
+        "ndc": 364
+      }
+    },
+    {
+      "name": "8x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.405
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0020806377285582417,
+        "partVariation": 0.4725,
+        "grr": 0.0022615047639790637,
+        "totalVariation": 0.47250541203651575,
+        "gageRRPercent": 0.4786198647401508,
+        "contributionPercent": 0.002290769749238802,
+        "ndc": 294
+      }
+    },
+    {
+      "name": "8x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.606
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.806
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.006
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.206
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.405
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.406
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0020784522254151845,
+        "partVariation": 0.4725,
+        "grr": 0.0023908455017698934,
+        "totalVariation": 0.4725060487890217,
+        "gageRRPercent": 0.5059925704437761,
+        "contributionPercent": 0.002560284813442997,
+        "ndc": 278
+      }
+    },
+    {
+      "name": "9x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0013986890505040782,
+        "partVariation": 0.51984,
+        "grr": 0.0016558023734733562,
+        "totalVariation": 0.519842637036921,
+        "gageRRPercent": 0.3185199242046311,
+        "contributionPercent": 0.0010145494211532392,
+        "ndc": 442
+      }
+    },
+    {
+      "name": "9x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.404
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.604
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0013957977371248898,
+        "partVariation": 0.51984,
+        "grr": 0.0018287782487122278,
+        "totalVariation": 0.5198432167777925,
+        "gageRRPercent": 0.35179419288141656,
+        "contributionPercent": 0.0012375915414508732,
+        "ndc": 400
+      }
+    },
+    {
+      "name": "9x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.405
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.604
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.605
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0020819479292239758,
+        "partVariation": 0.51984,
+        "grr": 0.002262710237745876,
+        "totalVariation": 0.5198449244319117,
+        "gageRRPercent": 0.4352663903025645,
+        "contributionPercent": 0.001894568305270244,
+        "ndc": 323
+      }
+    },
+    {
+      "name": "9x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.606
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.806
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.006
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.206
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.405
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.406
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.604
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.604
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.605
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.606
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.002080006596855636,
+        "partVariation": 0.51984,
+        "grr": 0.0023921968988699412,
+        "totalVariation": 0.5198455041702322,
+        "gageRRPercent": 0.46017458642608083,
+        "contributionPercent": 0.0021176064999241452,
+        "ndc": 306
+      }
+    },
+    {
+      "name": "10x2x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.8
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.801
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.802
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.803
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0014002478773417226,
+        "partVariation": 0.56628,
+        "grr": 0.0016571193553875352,
+        "totalVariation": 0.5662824246297584,
+        "gageRRPercent": 0.2926312531191442,
+        "contributionPercent": 0.0008563305030208063,
+        "ndc": 481
+      }
+    },
+    {
+      "name": "10x2x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.404
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.604
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.8
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.801
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.802
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.802
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.803
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.804
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.0013976488667282161,
+        "partVariation": 0.56628,
+        "grr": 0.0018301914967201291,
+        "totalVariation": 0.5662829575405873,
+        "gageRRPercent": 0.3231938154502828,
+        "contributionPercent": 0.0010445424234531145,
+        "ndc": 436
+      }
+    },
+    {
+      "name": "10x3x2",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.405
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.604
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.605
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.8
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.801
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.802
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.803
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.804
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.805
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0008862,
+        "reproducibility": 0.0020829954963945555,
+        "partVariation": 0.56628,
+        "grr": 0.002263674154554935,
+        "totalVariation": 0.5662845244403895,
+        "gageRRPercent": 0.3997414827452561,
+        "contributionPercent": 0.0015979325302737592,
+        "ndc": 352
+      }
+    },
+    {
+      "name": "10x3x3",
+      "input": [
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.0
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.001
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.002
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.003
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.004
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.005
+        },
+        {
+          "partId": "P0",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.006
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.2
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.201
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.202
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.203
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.204
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.205
+        },
+        {
+          "partId": "P1",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.206
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.4
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.401
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.402
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.403
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.404
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.405
+        },
+        {
+          "partId": "P2",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.406
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.6
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.601
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.602
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.603
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.604
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.605
+        },
+        {
+          "partId": "P3",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.606
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 10.8
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 10.801
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 10.802
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 10.803
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 10.804
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 10.805
+        },
+        {
+          "partId": "P4",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 10.806
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.0
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.001
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.002
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.003
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.004
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.005
+        },
+        {
+          "partId": "P5",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.006
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.2
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.201
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.202
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.203
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.204
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.205
+        },
+        {
+          "partId": "P6",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.206
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.4
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.401
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.402
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.403
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.404
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.405
+        },
+        {
+          "partId": "P7",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.406
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.6
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.601
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.602
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.603
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.604
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.604
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.605
+        },
+        {
+          "partId": "P8",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.606
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 1,
+          "value": 11.8
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 2,
+          "value": 11.801
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O0",
+          "trial": 3,
+          "value": 11.802
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 1,
+          "value": 11.802
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 2,
+          "value": 11.803
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O1",
+          "trial": 3,
+          "value": 11.804
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O2",
+          "trial": 1,
+          "value": 11.804
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O2",
+          "trial": 2,
+          "value": 11.805
+        },
+        {
+          "partId": "P9",
+          "operatorId": "O2",
+          "trial": 3,
+          "value": 11.806
+        }
+      ],
+      "expected": {
+        "repeatability": 0.0011816,
+        "reproducibility": 0.002081249258178046,
+        "partVariation": 0.56628,
+        "grr": 0.0023932774671288465,
+        "totalVariation": 0.5662850573492423,
+        "gageRRPercent": 0.42262769184334165,
+        "contributionPercent": 0.0017861416591283055,
+        "ndc": 333
+      }
+    }
+  ]
+}

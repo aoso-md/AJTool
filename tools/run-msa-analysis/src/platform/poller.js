@@ -1,3 +1,4 @@
+import { compareSequence } from './reliability.js';
 // src/platform/poller.js
 // -----------------------------------------------------------------------------
 // How a FEDERATED tool receives work on the ORCA platform.
@@ -68,6 +69,19 @@ export function createPoller ({
   let running = null;
 
   async function tick () {
+    // Covers fetch, specification sync and commits so another replica cannot
+    // fetch a competing page. The event transaction also fences stale cursors.
+    if (!store.withPollerLock) return consume();
+    let failure;
+    await store.withPollerLock(cursorName, async () => {
+      // This outer transaction holds only the lock. Preserve Core errors
+      // (including Retry-After) outside the database error classifier.
+      try { await consume(); } catch (error) { failure = { error }; }
+    });
+    if (failure) throw failure.error;
+  }
+
+  async function consume () {
     status.lastPollAt = new Date().toISOString();
     if (beforeTick) await beforeTick();
 
@@ -75,36 +89,33 @@ export function createPoller ({
     if (cursor == null) {
       const max = await core.latestMaxSeq(consumes);
       cursor = max ?? 0;
-      await store.setCursor(cursorName, cursor);
+      if (store.transactional) cursor = (await store.initializeCursor(cursorName, cursor)).seq;
+      else await store.setCursor(cursorName, cursor);
       status.coldStart = { at: new Date().toISOString(), seq: cursor };
       log.info?.(max == null
         ? '[poll] cold start: no saved cursor and no events of these types yet — starting from the beginning'
         : `[poll] cold start: no saved cursor — starting at the tip (seq=${cursor}); the backlog is not replayed`);
     }
 
+    status.cursor = cursor;
     let processed = 0;
     for (let page = 0; page < MAX_PAGES_PER_TICK; page += 1) {
       const { events } = await core.subscription(toolId, cursor, PAGE);
       const ordered = events
         .map(fromCore)
-        .filter((e) => e.seq != null && e.seq > cursor)
-        .sort((a, b) => a.seq - b.seq);
+        .filter((e) => { if (e.seq == null) throw Object.assign(new Error('Event sequence missing'), { kind: 'protocol' }); return compareSequence(e.seq, cursor) > 0; })
+        .sort((a, b) => compareSequence(a.seq, b.seq));
 
       for (const event of ordered) {
-        try {
-          await processEvent(event);
-        } catch (error) {
-          // Platform unreachable or auth problem: stop HERE, keep the cursor on
-          // the last event that finished. It will be retried next tick.
-          if (error?.kind === 'retryable' || error?.kind === 'auth') throw error;
-          // Anything else is a defect in our own processing. processEvent is
-          // expected to have recorded the failure as a study; blocking the whole
-          // subscription forever on one bad event would be worse.
-          log.error?.(`[poll] event ${event.eventId} (seq ${event.seq}) failed and was skipped: ${error?.message || error}`);
+        const result = await processEvent(event, { cursor: { name: cursorName, expectedSeq: String(cursor), targetSeq: String(event.seq) } });
+        if (store.transactional && !result?.ok) {
+          throw Object.assign(new Error(`Event processing stopped: ${result?.status || 'unconfirmed'}`), { kind: result?.status === 'conflict' ? 'protocol' : 'retryable' });
         }
         cursor = event.seq;
-        await store.setCursor(cursorName, cursor);
+        if (!store.transactional) await store.setCursor(cursorName, cursor);
         processed += 1;
+        status.cursor = cursor;
+        status.processedTotal += 1;
       }
 
       if (events.length < PAGE) break;
@@ -114,7 +125,6 @@ export function createPoller ({
     status.lastSuccessAt = new Date().toISOString();
     status.lastError = null;
     status.lastBatch = processed;
-    status.processedTotal += processed;
     if (processed) log.info?.(`[poll] processed ${processed} event(s), cursor=${cursor}`);
   }
 
@@ -198,7 +208,7 @@ export function createPublisher ({ core, mode = 'shadow', log = console }) {
         // Retryable: let the caller decide (the poller keeps its cursor and
         // retries; a human action reports it). Invalid: recorded, not retried —
         // the same envelope would be rejected the same way.
-        if (error?.kind === 'retryable') throw error;
+        if (error?.kind === 'retryable' || error?.kind === 'auth') throw error;
         return { state: 'failed', eventId: envelope.event_id, at, event: envelope, error: error?.message || String(error), status: error?.status ?? null };
       }
     }

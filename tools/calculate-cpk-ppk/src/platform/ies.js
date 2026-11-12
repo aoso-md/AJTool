@@ -1,3 +1,4 @@
+import { sequenceValue } from './reliability.js';
 // src/platform/ies.js
 // -----------------------------------------------------------------------------
 // Industrial Event Standard (IES) — the envelope the ORCA core accepts and
@@ -21,7 +22,7 @@
 // publishes anything else breaks the causal chain the ISO evidence log shows.
 //
 // The core validates with `additionalProperties: false` at the envelope level,
-// in `module`, in `asset` and in `event`. Any extra key there is a 400.
+// in `module`, in `asset` and in `event`. The reviewed Core removes those extra keys.
 // -----------------------------------------------------------------------------
 import { createHash } from 'node:crypto';
 
@@ -95,11 +96,11 @@ export function fromCore (raw) {
       location: r.location
     });
 
-  const seq = r.seq == null ? null : Number(r.seq);
+  const seq = r.seq == null ? null : sequenceValue(r.seq);
 
-  return {
+  const normalized = {
     eventId: r.event_id ?? null,
-    seq: Number.isFinite(seq) ? seq : null,
+    seq,
     type: nested ? r.event.type : r.event_type,
     category: nested ? r.event.category ?? null : r.category ?? null,
     severity: nested ? r.event.severity ?? null : r.severity ?? null,
@@ -114,6 +115,7 @@ export function fromCore (raw) {
     correlationId: r.correlation_id || r.event_id || null,
     causationId: r.causation_id ?? null
   };
+  return Object.defineProperty(normalized,'rawReceipt',{value:raw,enumerable:false});
 }
 
 function envelope ({ eventId, platformVersion, toolId, toolVersion, asset, type, category, severity, data, metadata, correlationId, causationId }) {

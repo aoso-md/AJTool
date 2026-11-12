@@ -1,0 +1,36 @@
+{
+  "event_id": "8a000000-0000-4000-8000-000000000001",
+  "timestamp": "2026-11-11T17:00:00.000Z",
+  "platform_version": "1.0",
+  "module": {
+    "id": "manage_device_registry",
+    "version": "1.0.0"
+  },
+  "asset": {
+    "asset_id": "ENS-CAL-001",
+    "plant_id": "ENS-PLANT"
+  },
+  "event": {
+    "type": "NEW_DEVICE_REGISTERED",
+    "category": "configuration",
+    "severity": "low"
+  },
+  "data": {
+    "operation": "register",
+    "gaugeId": "ENS-CAL-001",
+    "devices": [
+      {
+        "id": "ENS-CAL-001",
+        "type": "micrometer",
+        "nextCalibration": "2027-11-11"
+      }
+    ],
+    "totalDevices": 1,
+    "operationResult": "registered"
+  },
+  "metadata": {
+    "batch_id": "ENS-BATCH-001"
+  },
+  "correlation_id": "8a000000-0000-4000-8000-000000000001",
+  "causation_id": null
+}

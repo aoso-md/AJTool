@@ -1,0 +1,46 @@
+{
+  "event_id": "c5609b8c-6a48-5921-845d-af0bc751f04b",
+  "timestamp": "2026-11-11T17:05:00.000Z",
+  "platform_version": "1.0",
+  "module": {
+    "id": "run_msa_analysis",
+    "version": "2.0.0"
+  },
+  "asset": {
+    "asset_id": "ENS-CAL-001",
+    "plant_id": "ENS-PLANT"
+  },
+  "event": {
+    "type": "MSA_VALIDATED",
+    "category": "quality",
+    "severity": "low"
+  },
+  "data": {
+    "gaugeId": "ENS-CAL-001",
+    "studyType": "gage_rr",
+    "gageRRPercent": 0.92,
+    "repeatability": 0.001108,
+    "reproducibility": 0.000689,
+    "ndc": 152,
+    "verdict": "acceptable",
+    "method": "AIAG average & range",
+    "parts": 2,
+    "appraisers": 2,
+    "trials": 2,
+    "partVariation": 0.141243,
+    "totalVariation": 0.141249,
+    "contributionPercent": 0.01,
+    "acceptanceCriteria": {
+      "grrAcceptable": 10,
+      "grrMarginal": 30,
+      "minNdc": 5
+    },
+    "criteriaVersion": 0,
+    "studyId": "8a000000-0000-4000-8000-000000000005"
+  },
+  "metadata": {
+    "batch_id": "ENS-BATCH-001"
+  },
+  "correlation_id": "8a000000-0000-4000-8000-000000000001",
+  "causation_id": "8a000000-0000-4000-8000-000000000001"
+}

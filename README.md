@@ -1,3 +1,5 @@
+Release PostgreSQL / Railway: [procedimiento vigente de corte y replay](docs/CUTOVER-20261110.md).
+
 # AJTool — tools de calidad federadas en ORCA
 
 Dos tools de la plataforma ORCA (IsoTools), cada una con su propio servicio,

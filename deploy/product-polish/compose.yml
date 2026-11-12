@@ -1,0 +1,41 @@
+name: ajtool-polish-local-20261027
+services:
+  cpk:
+    image: ajtool-cpk-polish:20261027
+    build:
+      context: ../..
+      dockerfile: docker/calculate_cpk_ppk.Dockerfile
+    env_file: ../../.env.product-polish/cpk.env
+    ports: ["127.0.0.1:30108:8108"]
+    depends_on:
+      db: {condition: service_healthy}
+    networks: [data, access]
+  msa:
+    image: ajtool-msa-polish:20261027
+    build:
+      context: ../..
+      dockerfile: docker/run_msa_analysis.Dockerfile
+    env_file: ../../.env.product-polish/msa.env
+    ports: ["127.0.0.1:30109:8109"]
+    depends_on:
+      db: {condition: service_healthy}
+    networks: [data, access]
+  db:
+    image: postgres:16
+    env_file: ../../.env.product-polish/postgres.env
+    volumes:
+      - carlos_pg:/var/lib/postgresql/data
+      - ../../.env.product-polish/bootstrap.sql:/docker-entrypoint-initdb.d/10-ajtool.sql:ro
+      - ../../db:/ajtool-db:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ajtool_carlos_local_admin -d ajtool_msa"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks: [data]
+volumes:
+  carlos_pg:
+networks:
+  data:
+    internal: true
+  access: {}

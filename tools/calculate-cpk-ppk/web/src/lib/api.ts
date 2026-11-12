@@ -76,5 +76,10 @@ export const api = {
   request,
   status: () => request<ToolStatus>('/api/status'),
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body: JSON.stringify(body ?? {}) }),
+  post: async <T>(path: string, body: unknown, key?: string) => {
+    const text=JSON.stringify(body ?? {});
+    const bytes=key ? await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)) : null;
+    const scoped=bytes ? `${key}:${Array.from(new Uint8Array(bytes)).map(x=>x.toString(16).padStart(2,'0')).join('')}` : null;
+    return request<T>(path,{method:'POST',body:text,headers:scoped?{'idempotency-key':scoped}:{}});
+  },
 };

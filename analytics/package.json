@@ -1,0 +1,6 @@
+{
+ "name":"ajtool-private-analytics","private":true,"type":"module","version":"0.1.0",
+ "packageManager":"pnpm@11.7.0","engines":{"node":">=22"},
+ "scripts":{"start":"node src/server.mjs","test":"node --test test/*.test.mjs"},
+ "dependencies":{"express":"^5.2.1","pg":"^8.18.0"}
+}

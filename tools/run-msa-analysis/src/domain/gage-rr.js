@@ -66,6 +66,8 @@ export function analyzeGageRR (observations, criteria = AIAG_CRITERIA) {
     return { ok: false, errors: ['El estudio no tiene observaciones.'] };
   }
 
+  if (observations.length>90) return {ok:false,errors:['El diseño soportado admite como máximo 90 lecturas (10 piezas × 3 operadores × 3 ensayos).']};
+
   observations.forEach((o, i) => {
     if (o?.partId === undefined || o?.partId === null || o?.partId === '') errors.push(`Fila ${i + 1}: falta la pieza.`);
     if (o?.operatorId === undefined || o?.operatorId === null || o?.operatorId === '') errors.push(`Fila ${i + 1}: falta el operador.`);
@@ -81,7 +83,7 @@ export function analyzeGageRR (observations, criteria = AIAG_CRITERIA) {
   const cell = new Map(appraisers.map((a) => [a, new Map(parts.map((p) => [p, []]))]));
   const seen = new Set();
   for (const o of observations) {
-    const key = `${o.operatorId}|${o.partId}|${o.trial}`;
+    const key = JSON.stringify([String(o.operatorId),String(o.partId),String(o.trial)]);
     if (seen.has(key)) {
       errors.push(`Lectura duplicada: operador ${o.operatorId}, pieza ${o.partId}, ensayo ${o.trial}.`);
       continue;
@@ -130,6 +132,9 @@ export function analyzeGageRR (observations, criteria = AIAG_CRITERIA) {
   const pv = rp * K3[n];
   const tv = Math.sqrt(grr ** 2 + pv ** 2);
 
+  if (![ev,av,grr,pv,tv].every(Number.isFinite)) {
+    return { ok:false, errors:['La magnitud de las mediciones excede la precisión numérica admitida. Revise unidades y escala.'] };
+  }
   if (tv === 0) {
     return { ok: false, errors: ['Todas las lecturas son idénticas: no hay variación que analizar.'] };
   }

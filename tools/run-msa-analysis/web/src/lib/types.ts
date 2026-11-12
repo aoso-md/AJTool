@@ -15,16 +15,16 @@ export type PublishState =
   | 'published'
   | 'duplicate'
   | 'failed'
-  | 'retrying';
+  | 'retrying' | 'pending' | 'delivered' | 'blocked_auth' | 'quarantined' | 'retry_wait' | 'shadow_recorded' | 'delivering';
 
 export interface PublishInfo {
   state: PublishState;
   eventId?: string;
-  seq?: number | null;
+  seq?: number | string | null;
   at?: string;
   error?: string;
   status?: number | null;
-  event?: unknown;
+  event?: { event?: { type?: string }; correlation_id?: string; causation_id?: string | null };
 }
 
 export type PriorityLevel = 'critical' | 'high' | 'medium' | 'low';
@@ -70,7 +70,8 @@ export interface StudyBase {
   actor: Actor | null;
   publishedBy?: Actor | null;
   inputEventId: string | null;
-  inputSeq?: number | null;
+  inputModuleId?: string;
+  inputSeq?: number | string | null;
   correlationId?: string | null;
   notes?: string | null;
   createdAt: string;
@@ -88,7 +89,7 @@ export interface PollerStatus {
   reason: string | null;
   state: 'stopped' | 'disabled' | 'polling' | 'idle' | 'backoff' | 'error';
   consumes: string[];
-  cursor: number | null;
+  cursor: number | string | null;
   coldStart: { at: string; seq: number } | null;
   lastPollAt: string | null;
   lastSuccessAt: string | null;

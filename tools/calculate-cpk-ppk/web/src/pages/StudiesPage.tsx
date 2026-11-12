@@ -6,7 +6,7 @@ import { PublishChip, SourceBadge } from '../components/StudyMeta';
 import { AttentionPanel, PriorityBadge } from '../components/Priority';
 import { useResource } from '../lib/useResource';
 import { api } from '../lib/api';
-import { navigate } from '../lib/router';
+import { Link, navigate } from '../lib/router';
 import { fmt, verdictChip, type CpkStudy } from '../lib/domain';
 import type { Summary } from '../lib/types';
 
@@ -17,7 +17,7 @@ const columns: Column<CpkStudy>[] = [
   {
     key: 'what',
     header: 'Pieza · característica',
-    render: (s) => <Mono>{[s.partId, s.characteristicId].filter(Boolean).join(' · ') || '—'}</Mono>,
+    render: (s) => <Link to={`/estudios/${s.id}`}><Mono>{[s.partId, s.characteristicId].filter(Boolean).join(' · ') || 'Estudio sin identificar'}</Mono></Link>,
   },
   { key: 'n', header: 'n', render: (s) => <Mono>{s.result?.sampleSize ?? '—'}</Mono>, className: 'text-right' },
   { key: 'cpk', header: 'Cpk', render: (s) => <Mono>{fmt(s.result?.cpk, 2)}</Mono>, className: 'text-right' },
